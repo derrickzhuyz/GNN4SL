@@ -1,0 +1,5 @@
+*/pycache/*
+**/*.sqlite
+**/*.json
+**/*.log
+**/*.sql

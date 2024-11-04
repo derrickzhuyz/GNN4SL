@@ -1,0 +1,1 @@
+The schema of each example (NL, SQL) pair is extracted from gold SQL and store in this dir.
