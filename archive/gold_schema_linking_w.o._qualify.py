@@ -1,9 +1,8 @@
-import re
-import json
+from typing import Tuple, List, Dict
 import sqlglot
 import sqlglot.expressions as exp
-import sqlglot.optimizer.qualify as qualify
-from typing import Tuple, List, Dict
+import json
+import re
 
 
 """
@@ -18,7 +17,6 @@ def extract_tables_and_columns(
 ) -> Dict:
     
     original_sql_query = sql_query
-    remarks = ""
 
     # Extract the database name from the SQL query (in the end of sql)
     sql_query_parts = sql_query.rsplit(maxsplit=1)
@@ -34,21 +32,13 @@ def extract_tables_and_columns(
     # Use try-except to catch potential parsing error
     try:
         expression = sqlglot.parse_one(sql_query, read=dialect)
-        try:
-            # Apply qualify to ensure all column names are fully qualified
-            expression = qualify.qualify(expression, schema=schema)
-        except sqlglot.errors.OptimizeError as qualification_e:
-            print(f"[* Warning] Qualification failed on line {curr_line_no}: {qualification_e}")
-            remarks = f"Qualification failed: {qualification_e}."
-    except sqlglot.errors.ParseError as parse_sql_e:
+    except sqlglot.errors.ParseError:
         print(f"[! Error] Failed to parse on line {curr_line_no}. SQL query: {original_sql_query}")
         return {
             "database": database,
             "tables": [{"table": "extract_gold_schema_error", "columns": ["extract_schema_error"]}],
-            "gold_sql": original_sql_query,
-            "remarks": f"Failed to parse SQL: {parse_sql_e}."
+            "gold_sql": original_sql_query
         }
-    
     
     cte_aliases = [cte.alias for cte in expression.find_all(exp.CTE)]
     sub_queries = list(expression.find_all((exp.Subquery, exp.CTE), bfs=False))
@@ -74,8 +64,7 @@ def extract_tables_and_columns(
     result = {
         "database": database,
         "tables": [{"table": table, "columns": columns} for table, columns in all_tables.items()],
-        "gold_sql": original_sql_query,
-        "remarks": remarks
+        "gold_sql": original_sql_query
     }
 
     return result
@@ -108,8 +97,7 @@ Extract tables and columns from a subquery when CTEs are involved
 :param expression: The SQL expression
 :param cte_aliases: The CTE aliases
 :param schema: The schema information of the database
-:return: A tuple of tables and columns
-"""
+:return: A tuple of tables and columns"""
 def get_subquery_tables_and_columns(expression, cte_aliases, schema):
     tables = [
         t.name.lower()
@@ -171,7 +159,8 @@ def process_sql_file(input_file: str, output_file: str):
             sql_query = sql_query.strip()
             if sql_query:
                 try:
-                    result = extract_tables_and_columns(sql_query, curr_line_no=idx + 1)
+                    # Extract the tables and columns from the SQL query
+                    result = extract_tables_and_columns(sql_query, curr_line_no = idx + 1)
                     result["id"] = idx + 1
                     results.append(result)
                 except ValueError as e:
@@ -180,30 +169,17 @@ def process_sql_file(input_file: str, output_file: str):
 
     with open(output_file, 'w') as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
-        print("--------------------------------------------------------------------------------------------")
         print(f"[i] Gold schema linking has been saved to {output_file}")
-        print("--------------------------------------------------------------------------------------------")
 
 
 
 if __name__ == "__main__":
+    with open('config.json') as config_file:
+        config = json.load(config_file)
 
-    spider_train_gold_sql_path = '/data/zhuyizhang/dataset/spider/train_gold.sql'
-    spider_dev_gold_sql_path = '/data/zhuyizhang/dataset/spider/dev_gold.sql'
-    bird_train_gold_sql_path = '/data/zhuyizhang/dataset/bird/train/train_gold.sql'
-    bird_dev_gold_sql_path = '/data/zhuyizhang/dataset/bird/dev/dev.sql'
+    process_sql_file(config['spider_paths']['train_gold_sql'], config['gold_schema_linking_paths']['spider_train'])
+    process_sql_file(config['spider_paths']['dev_gold_sql'], config['gold_schema_linking_paths']['spider_dev'])
+    process_sql_file(config['bird_paths']['train_gold_sql'], config['gold_schema_linking_paths']['bird_train'])
+    process_sql_file(config['bird_paths']['dev_gold_sql'], config['gold_schema_linking_paths']['bird_dev'])
 
-    spider_train_gold_schema_linking_json = 'gold_schema_linking/spider_train_gold_schema_linking.json'
-    spider_dev_gold_schema_linking_json = 'gold_schema_linking/spider_dev_gold_schema_linking.json'
-    bird_train_gold_schema_linking_json = 'gold_schema_linking/bird_train_gold_schema_linking.json'
-    bird_dev_gold_schema_linking_json = 'gold_schema_linking/bird_dev_gold_schema_linking.json'
-
-    
-    process_sql_file(spider_train_gold_sql_path, spider_train_gold_schema_linking_json)
-    process_sql_file(spider_dev_gold_sql_path, spider_dev_gold_schema_linking_json)
-    process_sql_file(bird_train_gold_sql_path, bird_train_gold_schema_linking_json)
-    process_sql_file(bird_dev_gold_sql_path, bird_dev_gold_schema_linking_json)
-
-    pass
-
-    #TODO: manual check the output file, especailly remarks are not null
+    #TODO: manual check the output file

@@ -50,24 +50,24 @@ def get_database_schema(db_path):
 
 """
 Extract the schema information of all databases of a dataset and save to a JSON file
-:param dataset_path: The path of the dataset folder
-:param output_json: The path of the output JSON file
+:param db_path: The path of the database folder
+:param db_schema_json: The path of the output JSON file of entire database schema
 :param nested_folder: Whether the databases are located in nested folders
 :return: None
 """
-def extract_entire_dataset_schemas(dataset_path, output_json, nested_folder=False):
+def extract_entire_dataset_schemas(db_path, db_schema_json, nested_folder=False):
     all_schemas = []
     if nested_folder == False:
         # All database is located in one folder, no nested folder e.g. spider2-lite
-        for file_name in os.listdir(dataset_path):
+        for file_name in os.listdir(db_path):
             if file_name.endswith('.sqlite'):
-                db_file = os.path.join(dataset_path, file_name)
+                db_file = os.path.join(db_path, file_name)
                 schema = get_database_schema(db_file)
                 all_schemas.append(schema)
     else:
         # Each database is located in a separate folder, e.g. spider and bird
-        for folder_name in os.listdir(dataset_path):
-            folder_path = os.path.join(dataset_path, folder_name)
+        for folder_name in os.listdir(db_path):
+            folder_path = os.path.join(db_path, folder_name)
             # Check if the folder exists
             if os.path.isdir(folder_path):
                 db_file = os.path.join(folder_path, f"{folder_name}.sqlite")
@@ -79,24 +79,30 @@ def extract_entire_dataset_schemas(dataset_path, output_json, nested_folder=Fals
                     raise FileNotFoundError(f"Database files not found: {db_file}")
     
     # Save the schema information to a JSON file
-    with open(output_json, 'w', encoding='utf-8') as f:
+    with open(db_schema_json, 'w', encoding='utf-8') as f:
         json.dump(all_schemas, f, ensure_ascii=False, indent=2)
-        print(f"[i] Schema information of entire databases has been saved to {output_json}")
+        print(f"[i] Schema information of entire databases has been saved to {db_schema_json}")
 
 
 
 if __name__ == '__main__':
-    spider_path = '/data/zhuyizhang/dataset/spider/database'
-    bird_train_path = '/data/zhuyizhang/dataset/bird/train/train_databases'
-    bird_dev_path = '/data/zhuyizhang/dataset/bird/dev/dev_databases'
-    spider2_lite_localdb_path = '/data/zhuyizhang/dataset/spider2-lite/spider2-localdb'
-    
-    spider_output_json = 'db_schema/spider_schemas.json'
-    bird_train_output_json = 'db_schema/bird_train_schemas.json'
-    bird_dev_output_json = 'db_schema/bird_dev_schemas.json'
-    spider2_lite_output_json = 'db_schema/spider2_lite_schemas.json'
+    with open('config.json') as config_file:
+        config = json.load(config_file)
 
-    extract_entire_dataset_schemas(spider_path, spider_output_json, nested_folder=True)
-    extract_entire_dataset_schemas(bird_train_path, bird_train_output_json, nested_folder=True)
-    extract_entire_dataset_schemas(bird_dev_path, bird_dev_output_json, nested_folder=True)
-    extract_entire_dataset_schemas(spider2_lite_localdb_path, spider2_lite_output_json, nested_folder=False) # Note that file structure of spider2-lite is not nested
+    spider_db_path = config['spider_paths']['all_databases']
+    spider_db_schema_json = config['db_schema_paths']['spider_schemas']
+    extract_entire_dataset_schemas(spider_db_path, spider_db_schema_json, nested_folder=True)
+
+    bird_train_db_path = config['bird_paths']['train_databases']
+    bird_train_db_schema_json = config['db_schema_paths']['bird_train_schemas']
+    extract_entire_dataset_schemas(bird_train_db_path, bird_train_db_schema_json, nested_folder=True)
+
+    bird_dev_db_path = config['bird_paths']['dev_databases']
+    bird_dev_db_schema_json = config['db_schema_paths']['bird_dev_schemas']
+    extract_entire_dataset_schemas(bird_dev_db_path, bird_dev_db_schema_json, nested_folder=True)
+
+    spider2_lite_localdb_path = config['spider2_lite_paths']['spider2_localdb']
+    spider2_lite_db_schema_json = config['db_schema_paths']['spider2_lite_schemas']
+    extract_entire_dataset_schemas(spider2_lite_localdb_path, spider2_lite_db_schema_json, nested_folder=False) # Note that file structure of spider2-lite is not nested
+
+    
