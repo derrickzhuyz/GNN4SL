@@ -1,24 +1,16 @@
-import re
-import json
+from typing import Tuple, List, Dict
 import sqlglot
 import sqlglot.expressions as exp
 import sqlglot.optimizer.qualify as qualify
-from typing import Tuple, List, Dict
+import json
+import re
 
 
-"""
-Extract the tables and columns from a SQL query
-:param sql_query: The SQL query
-:param schema: The schema information of the database
-:param dialect: The SQL dialect
-:return: A dictionary of gold schema linking
-"""
 def extract_tables_and_columns(
     sql_query: str, curr_line_no: int, schema: Dict = None, dialect: str = "sqlite"
 ) -> Dict:
     
     original_sql_query = sql_query
-    remarks = ""
 
     # Extract the database name from the SQL query (in the end of sql)
     sql_query_parts = sql_query.rsplit(maxsplit=1)
@@ -37,18 +29,15 @@ def extract_tables_and_columns(
         try:
             # Apply qualify to ensure all column names are fully qualified
             expression = qualify.qualify(expression, schema=schema)
-        except sqlglot.errors.OptimizeError as qualification_e:
-            print(f"[* Warning] Qualification failed on line {curr_line_no}: {qualification_e}")
-            remarks = f"Qualification failed: {qualification_e}."
-    except sqlglot.errors.ParseError as parse_sql_e:
+        except sqlglot.errors.OptimizeError as e:
+            print(f"[! Warning] Qualification failed on line {curr_line_no}: {e}")
+    except sqlglot.errors.ParseError:
         print(f"[! Error] Failed to parse on line {curr_line_no}. SQL query: {original_sql_query}")
         return {
             "database": database,
             "tables": [{"table": "extract_gold_schema_error", "columns": ["extract_schema_error"]}],
-            "gold_sql": original_sql_query,
-            "remarks": f"Failed to parse SQL: {parse_sql_e}."
+            "gold_sql": original_sql_query
         }
-    
     
     cte_aliases = [cte.alias for cte in expression.find_all(exp.CTE)]
     sub_queries = list(expression.find_all((exp.Subquery, exp.CTE), bfs=False))
@@ -74,18 +63,12 @@ def extract_tables_and_columns(
     result = {
         "database": database,
         "tables": [{"table": table, "columns": columns} for table, columns in all_tables.items()],
-        "gold_sql": original_sql_query,
-        "remarks": remarks
+        "gold_sql": original_sql_query
     }
 
     return result
 
 
-"""
-Preprocess the SQL query to normalize it
-:param sql_query: The original SQL query
-:return: The normalized SQL query
-"""
 def preprocess_sql_query(sql_query: str) -> str:
     """Preprocess the SQL query to normalize it."""
     # Convert null and empty string comparisons to IS NULL and IS NOT NULL
@@ -97,19 +80,11 @@ def preprocess_sql_query(sql_query: str) -> str:
     sql_query = re.sub(r'"([^"]*)\'([^\']*)\'([^"]*)"', lambda m: m.group(0).replace("'", ''), sql_query)
 
     # Remove special characters from the SQL query to avoid errors
-    # sql_query = sql_query.replace('`', '"').replace(";", "")
     sql_query = sql_query.replace('"',"'")
 
     return sql_query
 
 
-"""
-Extract tables and columns from a subquery when CTEs are involved
-:param expression: The SQL expression
-:param cte_aliases: The CTE aliases
-:param schema: The schema information of the database
-:return: A tuple of tables and columns
-"""
 def get_subquery_tables_and_columns(expression, cte_aliases, schema):
     tables = [
         t.name.lower()
@@ -158,12 +133,6 @@ def get_subquery_tables_and_columns(expression, cte_aliases, schema):
     return tables, columns_dict
     
 
-"""
-Process gold SQL files, extract save the gold schema linking to a JSON file
-:param input_file: The path of the input SQL file
-:param output_file: The path of the output JSON file
-:return: None
-"""
 def process_sql_file(input_file: str, output_file: str):
     results = []
     with open(input_file, 'r') as f:
@@ -172,40 +141,83 @@ def process_sql_file(input_file: str, output_file: str):
             if sql_query:
                 try:
                     result = extract_tables_and_columns(sql_query, curr_line_no=idx + 1)
-                    result["id"] = idx
+                    result["id"] = idx + 1
                     results.append(result)
                 except ValueError as e:
-                    print(f"[! Error] Failed to process SQL on line {idx + 1}: {e} (id: {idx})")
+                    print(f"[! Error] Failed to process SQL on line {idx + 1}: {e}")
                     
 
     with open(output_file, 'w') as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
-        print("--------------------------------------------------------------------------------------------")
         print(f"[i] Gold schema linking has been saved to {output_file}")
-        print("--------------------------------------------------------------------------------------------")
 
 
+# if __name__ == "__main__":
 
-if __name__ == "__main__":
-    with open('config.json') as config_file:
-        config = json.load(config_file)
+#     spider_train_gold_sql_path = '/data/zhuyizhang/dataset/spider/train_gold.sql'
+#     spider_dev_gold_sql_path = '/data/zhuyizhang/dataset/spider/dev_gold.sql'
+#     bird_train_gold_sql_path = '/data/zhuyizhang/dataset/bird/train/train_gold.sql'
+#     bird_dev_gold_sql_path = '/data/zhuyizhang/dataset/bird/dev/dev.sql'
 
-    spider_train_gold_sql = config['spider_paths']['train_gold_sql']
-    spider_train_gold_schema_linking = config['gold_schema_linking_paths']['spider_train']
-    process_sql_file(spider_train_gold_sql, spider_train_gold_schema_linking)
+#     spider_train_gold_schema_linking_json = 'gold_schema_linking/spider_train_gold_schema_linking.json'
+#     spider_dev_gold_schema_linking_json = 'gold_schema_linking/spider_dev_gold_schema_linking.json'
+#     bird_train_gold_schema_linking_json = 'gold_schema_linking/bird_train_gold_schema_linking.json'
+#     bird_dev_gold_schema_linking_json = 'gold_schema_linking/bird_dev_gold_schema_linking.json'
 
-    spider_dev_gold_sql = config['spider_paths']['dev_gold_sql']
-    spider_dev_gold_schema_linking = config['gold_schema_linking_paths']['spider_dev']
-    process_sql_file(spider_dev_gold_sql, spider_dev_gold_schema_linking)
     
-    bird_train_gold_sql = config['bird_paths']['train_gold_sql']
-    bird_train_gold_schema_linking = config['gold_schema_linking_paths']['bird_train']
-    process_sql_file(bird_train_gold_sql, bird_train_gold_schema_linking)
+#     process_sql_file(spider_train_gold_sql_path, spider_train_gold_schema_linking_json)
+#     process_sql_file(spider_dev_gold_sql_path, spider_dev_gold_schema_linking_json)
+#     process_sql_file(bird_train_gold_sql_path, bird_train_gold_schema_linking_json)
+#     process_sql_file(bird_dev_gold_sql_path, bird_dev_gold_schema_linking_json)
 
-    bird_dev_gold_sql = config['bird_paths']['dev_gold_sql']
-    bird_dev_gold_schema_linking = config['gold_schema_linking_paths']['bird_dev']
-    process_sql_file(bird_dev_gold_sql, bird_dev_gold_schema_linking)
+#     pass
+
+sql_query_1 = """SELECT name FROM head WHERE born_state == 'California'  geo
+"""
+
+sql_query_2 = """
+WITH ManagerCTE AS (
+    SELECT EmployeeID, EmployeeName, ManagerID
+    FROM Employees
+)
+SELECT 
+    e.EmployeeName AS 'Employee',
+    m.EmployeeName AS 'Manager'
+FROM 
+    ManagerCTE e
+LEFT JOIN 
+    ManagerCTE m ON e.ManagerID = m.EmployeeID; hhh
+"""
+
+sql_query_3 = """SELECT `Free Meal Count (K-12)` / `Enrollment (K-12)` FROM frpm WHERE `County Name` = 'Alameda' ORDER BY (CAST(`Free Meal Count (K-12)` AS REAL) / `Enrollment (K-12)`) DESC LIMIT 1;   www
+"""
+
+sql_query_4 = """SELECT count(*) FROM singer\tconcert_singer
+"""
+
+sql_query_5 = """SELECT country FROM singer WHERE age  >  40 INTERSECT SELECT country FROM singer WHERE age  <  30\tconcert_singer
+"""
+
+sql_query_6 = """WITH SubQuery AS (SELECT DISTINCT T1.atom_id, T1.element, T1.molecule_id, T2.label FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR006') SELECT CAST(COUNT(CASE WHEN element = 'h' THEN atom_id ELSE NULL END) AS REAL) / (CASE WHEN COUNT(atom_id) = 0 THEN NULL ELSE COUNT(atom_id) END) AS ratio, label FROM SubQuery GROUP BY label\ttoxicology
+"""
+
+sql_query_7 = """SELECT count(*) FROM head WHERE age  >  56	department_management"""
+
+# Qualification failed cases
+sql_query_8 = """SELECT template_type_code FROM Templates EXCEPT SELECT template_type_code FROM Templates AS T1 JOIN Documents AS T2 ON T1.template_id  =  T2.template_id\tcre_Doc_Template_Mgt
+"""
+
+sql_query_9 = """SELECT winner_name FROM matches WHERE YEAR  =  2013 INTERSECT SELECT winner_name FROM matches WHERE YEAR  =  2016\twta_1"""
+
+sql_query_10 = """SELECT template_id FROM Templates EXCEPT SELECT template_id FROM Documents\tcre_Doc_Template_Mgt"""
+
+sql_query_11 = """SELECT professional_id ,  last_name ,  cell_number FROM Professionals WHERE state  =  'Indiana' UNION SELECT T1.professional_id ,  T1.last_name ,  T1.cell_number FROM Professionals AS T1 JOIN Treatments AS T2 ON T1.professional_id  =  T2.professional_id GROUP BY T1.professional_id HAVING count(*)  >  2\tdog_kennels
+"""
+
+sql_query_12 = """
+WITH SubQuery AS (SELECT DISTINCT T1.atom_id, T1.element, T1.molecule_id, T2.label FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR006') SELECT CAST(COUNT(CASE WHEN element = 'h' THEN atom_id ELSE NULL END) AS REAL) / (CASE WHEN COUNT(atom_id) = 0 THEN NULL ELSE COUNT(atom_id) END) AS ratio, label FROM SubQuery GROUP BY label\ttoxicology
+"""
 
 
-    #TODO: manual check the output file, especailly remarks are not null
-    #TODO: fix issues
+result = extract_tables_and_columns(sql_query_12, curr_line_no = 1)
+print(json.dumps(result, indent=2, ensure_ascii=False)) 

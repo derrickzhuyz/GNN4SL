@@ -17,17 +17,17 @@
         "spider2_localdb": "/data/zhuyizhang/dataset/spider2-lite/spider2-localdb"
     },
     "gold_schema_linking_paths": {
-        "gold_schema_linking_base": "gold_schema_linking",
-        "spider_train": "gold_schema_linking/spider_train_gold_schema_linking.json",
-        "spider_dev": "gold_schema_linking/spider_dev_gold_schema_linking.json",
-        "bird_train": "gold_schema_linking/bird_train_gold_schema_linking.json",
-        "bird_dev": "gold_schema_linking/bird_dev_gold_schema_linking.json"
+        "gold_schema_linking_base": "data/gold_schema_linking",
+        "spider_train": "data/gold_schema_linking/spider_train_gold_schema_linking.json",
+        "spider_dev": "data/gold_schema_linking/spider_dev_gold_schema_linking.json",
+        "bird_train": "data/gold_schema_linking/bird_train_gold_schema_linking.json",
+        "bird_dev": "data/gold_schema_linking/bird_dev_gold_schema_linking.json"
     },
     "db_schema_paths": {
-        "db_schema_base": "db_schema",
-        "spider_schemas": "db_schema/spider_schemas.json",
-        "bird_train_schemas": "db_schema/bird_train_schemas.json",
-        "bird_dev_schemas": "db_schema/bird_dev_schemas.json",
-        "spider2_lite_schemas": "db_schema/spider2_lite_schemas.json"
+        "db_schema_base": "data/db_schema",
+        "spider_schemas": "data/db_schema/spider_schemas.json",
+        "bird_train_schemas": "data/db_schema/bird_train_schemas.json",
+        "bird_dev_schemas": "data/db_schema/bird_dev_schemas.json",
+        "spider2_lite_schemas": "data/db_schema/spider2_lite_schemas.json"
     }
 }
