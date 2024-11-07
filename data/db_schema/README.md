@@ -1,1 +1,1 @@
-The entire schema of each database is extracted from .sqlite file and store in this dir.
+The entire schema of each database is extracted from .sqlite file and stored in this dir.

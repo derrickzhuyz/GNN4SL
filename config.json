@@ -1,24 +1,33 @@
 {
     "spider_paths": {
         "spider_base": "/data/zhuyizhang/dataset/spider",
-        "train_gold_sql": "/data/zhuyizhang/dataset/spider/train_gold.sql",
+        "train_gold_sql": "data/preprocessed/train_gold.sql",
+        "train_others_gold_sql": "data/preprocessed/train_others_gold.sql",
+        "full_train_gold_sql": "data/preprocessed/full_train_gold.sql",
         "dev_gold_sql": "/data/zhuyizhang/dataset/spider/dev_gold.sql",
-        "all_databases": "/data/zhuyizhang/dataset/spider/database"
+        "all_databases": "/data/zhuyizhang/dataset/spider/database",
+        "train_info": "/data/zhuyizhang/dataset/spider/train_spider.json",
+        "dev_info": "/data/zhuyizhang/dataset/spider/dev.json",
+        "train_others_info": "/data/zhuyizhang/dataset/spider/train_others.json",
+        "full_train_info": "data/preprocessed/full_train_info.json"
     },
     "bird_paths": {
         "bird_base": "/data/zhuyizhang/dataset/bird",
         "train_gold_sql": "/data/zhuyizhang/dataset/bird/train/train_gold.sql",
         "dev_gold_sql": "/data/zhuyizhang/dataset/bird/dev/dev.sql",
         "train_databases": "/data/zhuyizhang/dataset/bird/train/train_databases",
-        "dev_databases": "/data/zhuyizhang/dataset/bird/dev/dev_databases"
+        "dev_databases": "/data/zhuyizhang/dataset/bird/dev/dev_databases",
+        "train_info": "/data/zhuyizhang/dataset/bird/train/train.json",
+        "dev_info": "/data/zhuyizhang/dataset/bird/dev/dev.json"
     },
     "spider2_lite_paths": {
         "spider2_lite_base": "/data/zhuyizhang/dataset/spider2-lite",
         "spider2_localdb": "/data/zhuyizhang/dataset/spider2-lite/spider2-localdb"
     },
+    
     "gold_schema_linking_paths": {
         "gold_schema_linking_base": "data/gold_schema_linking",
-        "spider_train": "data/gold_schema_linking/spider_train_gold_schema_linking.json",
+        "spider_train": "data/gold_schema_linking/spider_train_gold_schema_linking.json", 
         "spider_dev": "data/gold_schema_linking/spider_dev_gold_schema_linking.json",
         "bird_train": "data/gold_schema_linking/bird_train_gold_schema_linking.json",
         "bird_dev": "data/gold_schema_linking/bird_dev_gold_schema_linking.json"

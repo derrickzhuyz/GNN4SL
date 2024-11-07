@@ -1,0 +1,1 @@
+To store preprocessed files: combined full info file of Spider (train_spider.json and train_others.json), and extracted full gold SQL in spider traning set.
