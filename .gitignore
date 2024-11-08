@@ -1,7 +1,8 @@
-*/__pycache__/*
+**/__pycache__/**
 **/*.sqlite
 **/*.json
 **/*.log
 **/*.sql
+**/*.pt
 
 !config.json
