@@ -15,6 +15,7 @@ class SchemaLinkingDataset(Dataset):
         """
         self.dataset_type = dataset_type
         self.split = split
+        self.graph_data_dir = os.path.join(root, 'graph_data')
         super().__init__(root, transform)
     
     @property
@@ -26,6 +27,10 @@ class SchemaLinkingDataset(Dataset):
     @property
     def processed_file_names(self) -> List[str]:
         return [f'{self.dataset_type}_{self.split}_schema_linking.pt']
+
+    @property
+    def processed_dir(self) -> str:
+        return self.graph_data_dir
 
     def process(self):
         # Load schema file
@@ -45,8 +50,8 @@ class SchemaLinkingDataset(Dataset):
                 data_list.append(graph)
         
         # Save processed data
-        processed_path = os.path.join(self.processed_dir, self.processed_file_names[0])
-        os.makedirs(self.processed_dir, exist_ok=True)
+        processed_path = os.path.join(self.graph_data_dir, self.processed_file_names[0])
+        os.makedirs(self.graph_data_dir, exist_ok=True)
         torch.save(data_list, processed_path)
 
     def _create_graph(self, question: Dict, schema: Dict) -> HeteroData:
@@ -128,10 +133,19 @@ class SchemaLinkingDataset(Dataset):
             return json.load(f)
 
     def len(self) -> int:
-        processed_path = os.path.join(self.processed_dir, self.processed_file_names[0])
+        processed_path = os.path.join(self.graph_data_dir, self.processed_file_names[0])
         return len(torch.load(processed_path))
 
     def get(self, idx: int) -> HeteroData:
-        processed_path = os.path.join(self.processed_dir, self.processed_file_names[0])
+        processed_path = os.path.join(self.graph_data_dir, self.processed_file_names[0])
         data_list = torch.load(processed_path)
         return data_list[idx] 
+
+
+
+if __name__ == "__main__":
+    # Create datasets (labeled graph data)
+    spider_train = SchemaLinkingDataset(root='data/', dataset_type='spider', split='train')
+    spider_dev = SchemaLinkingDataset(root='data/', dataset_type='spider', split='dev')
+    bird_train = SchemaLinkingDataset(root='data/', dataset_type='bird', split='train')
+    bird_dev = SchemaLinkingDataset(root='data/', dataset_type='bird', split='dev')

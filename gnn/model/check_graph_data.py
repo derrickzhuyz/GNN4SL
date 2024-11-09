@@ -38,13 +38,13 @@ bird_train = SchemaLinkingDataset(root='data/', dataset_type='bird', split='trai
 bird_dev = SchemaLinkingDataset(root='data/', dataset_type='bird', split='dev')
 
 # Example: get a graph from Spider training set
-# graph_idx = 0  # You can change this to check different questions
+# graph_idx = 0  # Change this to check different questions
 # dataset_type = 'spider'
 # split = 'dev'
 # graph = spider_dev[graph_idx]
 # print(graph)
 
-graph_idx = 0  # You can change this to check different questions
+graph_idx = 0
 dataset_type = 'bird'
 split = 'train'
 graph = bird_train[graph_idx]
