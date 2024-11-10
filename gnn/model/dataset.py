@@ -18,6 +18,13 @@ class SchemaLinkingDataset(Dataset):
         self.graph_data_dir = os.path.join(root, 'graph_data')
         super().__init__(root, transform)
     
+    """
+    Property methods:
+    - raw_file_names: The names of the raw files
+    - processed_file_names: The names of the processed files
+    - processed_dir: The directory of the processed files
+    """
+
     @property
     def raw_file_names(self) -> List[str]:
         schema_file = 'spider_schemas.json' if self.dataset_type == 'spider' else f'bird_{self.split}_schemas.json'
@@ -32,6 +39,10 @@ class SchemaLinkingDataset(Dataset):
     def processed_dir(self) -> str:
         return self.graph_data_dir
 
+
+    """
+    Process the raw data into a list of HeteroData objects
+    """
     def process(self):
         # Load schema file
         schema_path = os.path.join(self.root, 'db_schema', self.raw_file_names[0])
@@ -54,6 +65,13 @@ class SchemaLinkingDataset(Dataset):
         os.makedirs(self.graph_data_dir, exist_ok=True)
         torch.save(data_list, processed_path)
 
+
+    """
+    Create a HeteroData object for a given question and schema
+    :param question: A dictionary representing a question
+    :param schema: A dictionary representing a schema
+    :return: A HeteroData object
+    """
     def _create_graph(self, question: Dict, schema: Dict) -> HeteroData:
         data = HeteroData()
         
@@ -128,23 +146,40 @@ class SchemaLinkingDataset(Dataset):
         
         return data
 
+
+    """
+    Load a JSON file
+    :param path: The path to the JSON file
+    :return: A dictionary representing the JSON data
+    """
     def _load_json(self, path: str) -> Dict:
         with open(path, 'r') as f:
             return json.load(f)
 
+
+    """
+    Get the number of graphs in the dataset
+    :return: The number of graphs in the dataset
+    """
     def len(self) -> int:
         processed_path = os.path.join(self.graph_data_dir, self.processed_file_names[0])
-        return len(torch.load(processed_path))
+        return len(torch.load(processed_path, weights_only=False))
 
+
+    """
+    Get a graph from the dataset by index
+    :param idx: The index of the graph to get
+    :return: A HeteroData object
+    """
     def get(self, idx: int) -> HeteroData:
         processed_path = os.path.join(self.graph_data_dir, self.processed_file_names[0])
-        data_list = torch.load(processed_path)
-        return data_list[idx] 
+        data_list = torch.load(processed_path, weights_only=False)
+        return data_list[idx]
 
 
 
 if __name__ == "__main__":
-    # Create datasets (labeled graph data)
+    # Create datasets (labeled heterogenous graph data)
     spider_train = SchemaLinkingDataset(root='data/', dataset_type='spider', split='train')
     spider_dev = SchemaLinkingDataset(root='data/', dataset_type='spider', split='dev')
     bird_train = SchemaLinkingDataset(root='data/', dataset_type='bird', split='train')
