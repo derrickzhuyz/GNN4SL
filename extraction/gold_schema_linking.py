@@ -200,21 +200,21 @@ class SchemaLinkingExtractor:
 
 
 if __name__ == "__main__":
-    with open('config.json') as config_file:
-        config = json.load(config_file)
+    with open('config/path_config.json') as config_file:
+        path_config = json.load(config_file)
     
     extractor = SchemaLinkingExtractor()
     
     # Process Spider dataset (full_train and dev)
     for dataset in ['train', 'dev']:
         extractor.process_sql_file(
-            config['spider_paths'][f'{"full_" if dataset == "train" else ""}{dataset}_gold_sql'],
-            config['gold_schema_linking_paths'][f'spider_{dataset}']
+            path_config['spider_paths'][f'{"full_" if dataset == "train" else ""}{dataset}_gold_sql'],
+            path_config['gold_schema_linking_paths'][f'spider_{dataset}']
         )
     
     # Process Bird dataset (train and dev)
     for dataset in ['train', 'dev']:
         extractor.process_sql_file(
-            config['bird_paths'][f'{dataset}_gold_sql'],
-            config['gold_schema_linking_paths'][f'bird_{dataset}']
+            path_config['bird_paths'][f'{dataset}_gold_sql'],
+            path_config['gold_schema_linking_paths'][f'bird_{dataset}']
         )

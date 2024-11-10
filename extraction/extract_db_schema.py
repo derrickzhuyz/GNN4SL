@@ -101,23 +101,23 @@ def extract_entire_dataset_schemas(db_path, db_schema_json, nested_folder=False)
 
 
 if __name__ == '__main__':
-    with open('config.json') as config_file:
-        config = json.load(config_file)
+    with open('config/path_config.json') as config_file:
+        path_config = json.load(config_file)
 
-    spider_db_path = config['spider_paths']['all_databases']
-    spider_db_schema_json = config['db_schema_paths']['spider_schemas']
+    spider_db_path = path_config['spider_paths']['all_databases']
+    spider_db_schema_json = path_config['db_schema_paths']['spider_schemas']
     extract_entire_dataset_schemas(spider_db_path, spider_db_schema_json, nested_folder=True)
 
-    bird_train_db_path = config['bird_paths']['train_databases']
-    bird_train_db_schema_json = config['db_schema_paths']['bird_train_schemas']
+    bird_train_db_path = path_config['bird_paths']['train_databases']
+    bird_train_db_schema_json = path_config['db_schema_paths']['bird_train_schemas']
     extract_entire_dataset_schemas(bird_train_db_path, bird_train_db_schema_json, nested_folder=True)
 
-    bird_dev_db_path = config['bird_paths']['dev_databases']
-    bird_dev_db_schema_json = config['db_schema_paths']['bird_dev_schemas']
+    bird_dev_db_path = path_config['bird_paths']['dev_databases']
+    bird_dev_db_schema_json = path_config['db_schema_paths']['bird_dev_schemas']
     extract_entire_dataset_schemas(bird_dev_db_path, bird_dev_db_schema_json, nested_folder=True)
 
-    spider2_lite_localdb_path = config['spider2_lite_paths']['spider2_localdb']
-    spider2_lite_db_schema_json = config['db_schema_paths']['spider2_lite_schemas']
+    spider2_lite_localdb_path = path_config['spider2_lite_paths']['spider2_localdb']
+    spider2_lite_db_schema_json = path_config['db_schema_paths']['spider2_lite_schemas']
     extract_entire_dataset_schemas(spider2_lite_localdb_path, spider2_lite_db_schema_json, nested_folder=False) # Note that file structure of spider2-lite is not nested
 
     

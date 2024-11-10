@@ -34,28 +34,28 @@ def extract_sql_from_train_others(input_file, output_file):
 
 
 if __name__ == "__main__":
-    with open('config.json', 'r') as f:
-        config = json.load(f)
+    with open('config/path_config.json', 'r') as f:
+        path_config = json.load(f)
 
     # For Spider (training): Combine info train_spider.json and train_others.json into full_train_info.json, then extract gold SQL to full_train_gold.sql
     try:
-        with open(config['spider_paths']['train_info'], 'r') as f:
+        with open(path_config['spider_paths']['train_info'], 'r') as f:
             train_spider_data = json.load(f)
 
-        with open(config['spider_paths']['train_others_info'], 'r') as f:
+        with open(path_config['spider_paths']['train_others_info'], 'r') as f:
             train_others_data = json.load(f)
 
         combined_data = train_spider_data + train_others_data
 
-        with open(config['spider_paths']['full_train_info'], 'w') as f:
+        with open(path_config['spider_paths']['full_train_info'], 'w') as f:
             json.dump(combined_data, f, indent=2)
 
-        logger.info(f"[i] Combined JSON data has been saved to {config['spider_paths']['full_train_info']}")
+        logger.info(f"[i] Combined JSON data has been saved to {path_config['spider_paths']['full_train_info']}")
     except Exception as e:
         logger.error(f"[! Error] An error occurred while combining JSON files: {e}")
     
     try:
-        extract_sql_from_train_others(config['spider_paths']['full_train_info'], config['spider_paths']['full_train_gold_sql'])
+        extract_sql_from_train_others(path_config['spider_paths']['full_train_info'], path_config['spider_paths']['full_train_gold_sql'])
     except Exception as e:
         logger.error(f"[! Error] An error occurred while extracting SQL from training set: {e}")
     

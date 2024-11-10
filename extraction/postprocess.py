@@ -209,27 +209,27 @@ class GoldSchemaLinkingInfoAligner:
 
 
 if __name__ == "__main__":
-    with open('config.json') as config_file:
-        config = json.load(config_file)
+    with open('config/path_config.json') as config_file:
+        path_config = json.load(config_file)
 
     # Information alignment for gold schema linking files
     gold_schema_aligner = GoldSchemaLinkingInfoAligner()
-    gold_schema_aligner.information_alignment(info_path=config['bird_paths']['dev_info'], 
-                                      gold_schema_path=config['gold_schema_linking_paths']['bird_dev'])
-    gold_schema_aligner.information_alignment(info_path=config['bird_paths']['train_info'], 
-                                      gold_schema_path=config['gold_schema_linking_paths']['bird_train'])
-    gold_schema_aligner.information_alignment(info_path=config['spider_paths']['dev_info'], 
-                                      gold_schema_path=config['gold_schema_linking_paths']['spider_dev'])
-    gold_schema_aligner.information_alignment(info_path=config['spider_paths']['full_train_info'], 
-                                      gold_schema_path=config['gold_schema_linking_paths']['spider_train'])
+    gold_schema_aligner.information_alignment(info_path=path_config['bird_paths']['dev_info'], 
+                                      gold_schema_path=path_config['gold_schema_linking_paths']['bird_dev'])
+    gold_schema_aligner.information_alignment(info_path=path_config['bird_paths']['train_info'], 
+                                      gold_schema_path=path_config['gold_schema_linking_paths']['bird_train'])
+    gold_schema_aligner.information_alignment(info_path=path_config['spider_paths']['dev_info'], 
+                                      gold_schema_path=path_config['gold_schema_linking_paths']['spider_dev'])
+    gold_schema_aligner.information_alignment(info_path=path_config['spider_paths']['full_train_info'], 
+                                      gold_schema_path=path_config['gold_schema_linking_paths']['spider_train'])
     
 
     # Postprocess entire database schemas for each dataset
     db_schema_files = [
-        config['db_schema_paths']['bird_dev_schemas'],
-        config['db_schema_paths']['bird_train_schemas'],
-        config['db_schema_paths']['spider_schemas'],
-        config['db_schema_paths']['spider2_lite_schemas']
+        path_config['db_schema_paths']['bird_dev_schemas'],
+        path_config['db_schema_paths']['bird_train_schemas'],
+        path_config['db_schema_paths']['spider_schemas'],
+        path_config['db_schema_paths']['spider2_lite_schemas']
     ]
 
     for item in db_schema_files:
@@ -242,4 +242,4 @@ if __name__ == "__main__":
         processor.add_stats()
 
     # Fix foreign keys for certain database that not automatically processed above
-    fix_mondial_geo_foreign_keys(config['db_schema_paths']['bird_train_schemas'], database_name="mondial_geo") # mondial_geo (bird train)
+    fix_mondial_geo_foreign_keys(path_config['db_schema_paths']['bird_train_schemas'], database_name="mondial_geo") # mondial_geo (bird train)
