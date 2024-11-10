@@ -152,72 +152,53 @@ def process_sql_file(input_file: str, output_file: str):
         print(f"[i] Gold schema linking has been saved to {output_file}")
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
-#     spider_train_gold_sql_path = '/data/zhuyizhang/dataset/spider/train_gold.sql'
-#     spider_dev_gold_sql_path = '/data/zhuyizhang/dataset/spider/dev_gold.sql'
-#     bird_train_gold_sql_path = '/data/zhuyizhang/dataset/bird/train/train_gold.sql'
-#     bird_dev_gold_sql_path = '/data/zhuyizhang/dataset/bird/dev/dev.sql'
+    sql_query_1 = """SELECT name FROM head WHERE born_state == 'California'  geo
+    """
 
-#     spider_train_gold_schema_linking_json = 'gold_schema_linking/spider_train_gold_schema_linking.json'
-#     spider_dev_gold_schema_linking_json = 'gold_schema_linking/spider_dev_gold_schema_linking.json'
-#     bird_train_gold_schema_linking_json = 'gold_schema_linking/bird_train_gold_schema_linking.json'
-#     bird_dev_gold_schema_linking_json = 'gold_schema_linking/bird_dev_gold_schema_linking.json'
+    sql_query_2 = """
+    WITH ManagerCTE AS (
+        SELECT EmployeeID, EmployeeName, ManagerID
+        FROM Employees
+    )
+    SELECT 
+        e.EmployeeName AS 'Employee',
+        m.EmployeeName AS 'Manager'
+    FROM 
+        ManagerCTE e
+    LEFT JOIN 
+        ManagerCTE m ON e.ManagerID = m.EmployeeID; hhh
+    """
 
-    
-#     process_sql_file(spider_train_gold_sql_path, spider_train_gold_schema_linking_json)
-#     process_sql_file(spider_dev_gold_sql_path, spider_dev_gold_schema_linking_json)
-#     process_sql_file(bird_train_gold_sql_path, bird_train_gold_schema_linking_json)
-#     process_sql_file(bird_dev_gold_sql_path, bird_dev_gold_schema_linking_json)
+    sql_query_3 = """SELECT `Free Meal Count (K-12)` / `Enrollment (K-12)` FROM frpm WHERE `County Name` = 'Alameda' ORDER BY (CAST(`Free Meal Count (K-12)` AS REAL) / `Enrollment (K-12)`) DESC LIMIT 1;   www
+    """
 
-#     pass
+    sql_query_4 = """SELECT count(*) FROM singer\tconcert_singer
+    """
 
-sql_query_1 = """SELECT name FROM head WHERE born_state == 'California'  geo
-"""
+    sql_query_5 = """SELECT country FROM singer WHERE age  >  40 INTERSECT SELECT country FROM singer WHERE age  <  30\tconcert_singer
+    """
 
-sql_query_2 = """
-WITH ManagerCTE AS (
-    SELECT EmployeeID, EmployeeName, ManagerID
-    FROM Employees
-)
-SELECT 
-    e.EmployeeName AS 'Employee',
-    m.EmployeeName AS 'Manager'
-FROM 
-    ManagerCTE e
-LEFT JOIN 
-    ManagerCTE m ON e.ManagerID = m.EmployeeID; hhh
-"""
+    sql_query_6 = """WITH SubQuery AS (SELECT DISTINCT T1.atom_id, T1.element, T1.molecule_id, T2.label FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR006') SELECT CAST(COUNT(CASE WHEN element = 'h' THEN atom_id ELSE NULL END) AS REAL) / (CASE WHEN COUNT(atom_id) = 0 THEN NULL ELSE COUNT(atom_id) END) AS ratio, label FROM SubQuery GROUP BY label\ttoxicology
+    """
 
-sql_query_3 = """SELECT `Free Meal Count (K-12)` / `Enrollment (K-12)` FROM frpm WHERE `County Name` = 'Alameda' ORDER BY (CAST(`Free Meal Count (K-12)` AS REAL) / `Enrollment (K-12)`) DESC LIMIT 1;   www
-"""
+    sql_query_7 = """SELECT count(*) FROM head WHERE age  >  56	department_management"""
 
-sql_query_4 = """SELECT count(*) FROM singer\tconcert_singer
-"""
+    # Qualification failed cases
+    sql_query_8 = """SELECT template_type_code FROM Templates EXCEPT SELECT template_type_code FROM Templates AS T1 JOIN Documents AS T2 ON T1.template_id  =  T2.template_id\tcre_Doc_Template_Mgt
+    """
 
-sql_query_5 = """SELECT country FROM singer WHERE age  >  40 INTERSECT SELECT country FROM singer WHERE age  <  30\tconcert_singer
-"""
+    sql_query_9 = """SELECT winner_name FROM matches WHERE YEAR  =  2013 INTERSECT SELECT winner_name FROM matches WHERE YEAR  =  2016\twta_1"""
 
-sql_query_6 = """WITH SubQuery AS (SELECT DISTINCT T1.atom_id, T1.element, T1.molecule_id, T2.label FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR006') SELECT CAST(COUNT(CASE WHEN element = 'h' THEN atom_id ELSE NULL END) AS REAL) / (CASE WHEN COUNT(atom_id) = 0 THEN NULL ELSE COUNT(atom_id) END) AS ratio, label FROM SubQuery GROUP BY label\ttoxicology
-"""
+    sql_query_10 = """SELECT template_id FROM Templates EXCEPT SELECT template_id FROM Documents\tcre_Doc_Template_Mgt"""
 
-sql_query_7 = """SELECT count(*) FROM head WHERE age  >  56	department_management"""
+    sql_query_11 = """SELECT professional_id ,  last_name ,  cell_number FROM Professionals WHERE state  =  'Indiana' UNION SELECT T1.professional_id ,  T1.last_name ,  T1.cell_number FROM Professionals AS T1 JOIN Treatments AS T2 ON T1.professional_id  =  T2.professional_id GROUP BY T1.professional_id HAVING count(*)  >  2\tdog_kennels
+    """
 
-# Qualification failed cases
-sql_query_8 = """SELECT template_type_code FROM Templates EXCEPT SELECT template_type_code FROM Templates AS T1 JOIN Documents AS T2 ON T1.template_id  =  T2.template_id\tcre_Doc_Template_Mgt
-"""
+    sql_query_12 = """
+    WITH SubQuery AS (SELECT DISTINCT T1.atom_id, T1.element, T1.molecule_id, T2.label FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR006') SELECT CAST(COUNT(CASE WHEN element = 'h' THEN atom_id ELSE NULL END) AS REAL) / (CASE WHEN COUNT(atom_id) = 0 THEN NULL ELSE COUNT(atom_id) END) AS ratio, label FROM SubQuery GROUP BY label\ttoxicology
+    """
 
-sql_query_9 = """SELECT winner_name FROM matches WHERE YEAR  =  2013 INTERSECT SELECT winner_name FROM matches WHERE YEAR  =  2016\twta_1"""
-
-sql_query_10 = """SELECT template_id FROM Templates EXCEPT SELECT template_id FROM Documents\tcre_Doc_Template_Mgt"""
-
-sql_query_11 = """SELECT professional_id ,  last_name ,  cell_number FROM Professionals WHERE state  =  'Indiana' UNION SELECT T1.professional_id ,  T1.last_name ,  T1.cell_number FROM Professionals AS T1 JOIN Treatments AS T2 ON T1.professional_id  =  T2.professional_id GROUP BY T1.professional_id HAVING count(*)  >  2\tdog_kennels
-"""
-
-sql_query_12 = """
-WITH SubQuery AS (SELECT DISTINCT T1.atom_id, T1.element, T1.molecule_id, T2.label FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR006') SELECT CAST(COUNT(CASE WHEN element = 'h' THEN atom_id ELSE NULL END) AS REAL) / (CASE WHEN COUNT(atom_id) = 0 THEN NULL ELSE COUNT(atom_id) END) AS ratio, label FROM SubQuery GROUP BY label\ttoxicology
-"""
-
-
-result = extract_tables_and_columns(sql_query_12, curr_line_no = 1)
-print(json.dumps(result, indent=2, ensure_ascii=False)) 
+    result = extract_tables_and_columns(sql_query_12, curr_line_no = 1)
+    print(json.dumps(result, indent=2, ensure_ascii=False)) 

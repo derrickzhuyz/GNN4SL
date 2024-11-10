@@ -1,6 +1,10 @@
 import sqlite3
 import json
 import os
+from loguru import logger
+
+logger.add("logs/extraction.log", rotation="1 MB", level="INFO", 
+           format="{time} {level} {message}", compression="zip")
 
 
 """
@@ -28,11 +32,22 @@ def get_database_schema(db_path):
         # Get the column information of each table
         cursor.execute(f'PRAGMA table_info("{table_name}");')
         columns = cursor.fetchall()
-        column_names = [column[1] for column in columns]
-        # Add to the schema list
+        
+        # Modified to include primary key information
+        columns_info = []
+        primary_keys = []
+        for column in columns:
+            column_name = column[1]
+            is_pk = column[5]  # The 6th element (index 5) indicates if column is part of primary key
+            columns_info.append(column_name)
+            if is_pk > 0:  # SQLite uses 1 to indicate primary key
+                primary_keys.append(column_name)
+
+        # Modified table schema to include primary keys
         schema["tables"].append({
             "table": table_name,
-            "columns": column_names
+            "columns": columns_info,
+            "primary_keys": primary_keys
         })
         # Get the foreign key information of the table
         cursor.execute(f'PRAGMA foreign_key_list("{table_name}");')
@@ -81,7 +96,7 @@ def extract_entire_dataset_schemas(db_path, db_schema_json, nested_folder=False)
     # Save the schema information to a JSON file
     with open(db_schema_json, 'w', encoding='utf-8') as f:
         json.dump(all_schemas, f, ensure_ascii=False, indent=2)
-        print(f"[i] Schema information of entire databases has been saved to {db_schema_json}")
+        logger.info(f"[i] Schema information of entire databases has been saved to {db_schema_json}")
 
 
 

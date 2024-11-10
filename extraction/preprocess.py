@@ -1,5 +1,8 @@
 import json
+from loguru import logger
 
+logger.add("logs/extraction.log", rotation="1 MB", level="INFO", 
+           format="{time} {level} {message}", compression="zip")
 
 """This file should be used before entire database schema extraction and before gold schema linking has been done and stored"""
 
@@ -24,9 +27,9 @@ def extract_sql_from_train_others(input_file, output_file):
         with open(output_file, 'w') as f:
             f.write("\n".join(output_data))
         
-        print(f"[i] Extracted {len(output_data)} SQL queries to {output_file}")
+        logger.info(f"[i] Extracted {len(output_data)} SQL queries to {output_file}")
     except Exception as e:
-        print(f"[! Error] An error occurred: {e}")
+        logger.error(f"[! Error] An error occurred: {e}")
 
 
 
@@ -34,7 +37,7 @@ if __name__ == "__main__":
     with open('config.json', 'r') as f:
         config = json.load(f)
 
-    # For Spider (training): combine the train_gold.sql and train_others_gold.sql files into full_train_gold.sql
+    # For Spider (training): Combine info train_spider.json and train_others.json into full_train_info.json, then extract gold SQL to full_train_gold.sql
     try:
         with open(config['spider_paths']['train_info'], 'r') as f:
             train_spider_data = json.load(f)
@@ -47,12 +50,12 @@ if __name__ == "__main__":
         with open(config['spider_paths']['full_train_info'], 'w') as f:
             json.dump(combined_data, f, indent=2)
 
-        print(f"[i] Combined JSON data has been saved to {config['spider_paths']['full_train_info']}")
+        logger.info(f"[i] Combined JSON data has been saved to {config['spider_paths']['full_train_info']}")
     except Exception as e:
-        print(f"[! Error] An error occurred while combining JSON files: {e}")
+        logger.error(f"[! Error] An error occurred while combining JSON files: {e}")
     
     try:
         extract_sql_from_train_others(config['spider_paths']['full_train_info'], config['spider_paths']['full_train_gold_sql'])
     except Exception as e:
-        print(f"[! Error] An error occurred while extracting SQL from training set: {e}")
+        logger.error(f"[! Error] An error occurred while extracting SQL from training set: {e}")
     

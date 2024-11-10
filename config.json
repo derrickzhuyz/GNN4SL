@@ -1,8 +1,8 @@
 {
     "spider_paths": {
         "spider_base": "/data/zhuyizhang/dataset/spider",
-        "train_gold_sql": "data/preprocessed/train_gold.sql",
-        "train_others_gold_sql": "data/preprocessed/train_others_gold.sql",
+        "train_gold_sql": "",
+        "train_others_gold_sql": "",
         "full_train_gold_sql": "data/preprocessed/full_train_gold.sql",
         "dev_gold_sql": "/data/zhuyizhang/dataset/spider/dev_gold.sql",
         "all_databases": "/data/zhuyizhang/dataset/spider/database",

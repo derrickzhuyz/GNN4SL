@@ -1,6 +1,7 @@
-from dataset import SchemaLinkingDataset
+from graph_dataset import SchemaLinkingGraphDataset
 import json
 import os
+
 
 def load_schema(dataset_type, split):
     schema_file = 'spider_schemas.json' if dataset_type == 'spider' else f'bird_{split}_schemas.json'
@@ -32,10 +33,10 @@ def get_node_names(graph_idx, dataset_type, split):
     return table_names, column_names
 
 # Create separate datasets
-spider_train = SchemaLinkingDataset(root='data/', dataset_type='spider', split='train')
-spider_dev = SchemaLinkingDataset(root='data/', dataset_type='spider', split='dev')
-bird_train = SchemaLinkingDataset(root='data/', dataset_type='bird', split='train')
-bird_dev = SchemaLinkingDataset(root='data/', dataset_type='bird', split='dev')
+spider_train = SchemaLinkingGraphDataset(root='data/', dataset_type='spider', split='train')
+spider_dev = SchemaLinkingGraphDataset(root='data/', dataset_type='spider', split='dev')
+bird_train = SchemaLinkingGraphDataset(root='data/', dataset_type='bird', split='train')
+bird_dev = SchemaLinkingGraphDataset(root='data/', dataset_type='bird', split='dev')
 
 # Example: get a graph from Spider training set
 # graph_idx = 0  # Change this to check different questions

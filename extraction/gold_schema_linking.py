@@ -6,12 +6,18 @@ import sqlglot
 import sqlglot.expressions as exp
 import sqlglot.optimizer.qualify as qualify
 from typing import Tuple, List, Dict
+from loguru import logger
+
+logger.add("logs/extraction.log", rotation="1 MB", level="INFO", 
+           format="{time} {level} {message}", compression="zip")
 
 
+"""Class for extracting gold schema linking from gold SQL"""
 class SchemaLinkingExtractor:
 
     def __init__(self, dialect: str = "sqlite"):
         self.dialect = dialect
+
 
     """
     Preprocess the SQL query to normalize it
@@ -112,10 +118,10 @@ class SchemaLinkingExtractor:
             try:
                 expression = qualify.qualify(expression, schema=schema)
             except sqlglot.errors.OptimizeError as qualification_e:
-                print(f"[* Warning] Qualification failed on line {curr_line_no}: {qualification_e}")
+                logger.warning(f"[* Warning] Qualification failed on line {curr_line_no}: {qualification_e}")
                 remarks = f"Qualification failed: {qualification_e}."
         except sqlglot.errors.ParseError as parse_sql_e:
-            print(f"[! Error] Failed to parse on line {curr_line_no}. SQL query: {original_sql_query}")
+            logger.error(f"[! Error] Failed to parse on line {curr_line_no}. SQL query: {original_sql_query}")
             return self._create_error_result(database, original_sql_query, parse_sql_e)
 
         cte_aliases = [cte.alias for cte in expression.find_all(exp.CTE)]
@@ -182,13 +188,13 @@ class SchemaLinkingExtractor:
                         result["id"] = idx
                         results.append(result)
                     except ValueError as e:
-                        print(f"[! Error] Failed to process SQL on line {idx + 1}: {e} (id: {idx})")
+                        logger.error(f"[! Error] Failed to process SQL on line {idx + 1}: {e} (id: {idx})")
 
         with open(output_file, 'w') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
-            print("--------------------------------------------------------------------------------------------")
-            print(f"[i] Gold schema linking has been saved to {output_file}")
-            print("--------------------------------------------------------------------------------------------")
+            logger.info("--------------------------------------------------------------------------------------------")
+            logger.info(f"[i] Gold schema linking has been saved to {output_file}")
+            logger.info("--------------------------------------------------------------------------------------------")
 
     
 

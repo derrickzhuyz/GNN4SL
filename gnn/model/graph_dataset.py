@@ -3,16 +3,23 @@ import torch
 from torch_geometric.data import HeteroData, Dataset
 from typing import Dict, List, Set, Tuple
 import os
+from loguru import logger
 
-class SchemaLinkingDataset(Dataset):
+logger.add("logs/schema2graph_dataset.log", rotation="1 MB", level="INFO", 
+           format="{time} {level} {message}", compression="zip")
+
+
+"""Graph Dataset Class for Schema Linking"""
+class SchemaLinkingGraphDataset(Dataset):
+
+    """
+    Args:
+        root: Root directory where the dataset should be saved
+        dataset_type: One of ['spider', 'bird'] to specify which dataset to use
+        split: One of ['train', 'dev'] to specify train or dev split
+        transform: Optional transform to be applied on a sample
+    """ 
     def __init__(self, root, dataset_type='spider', split='train', transform=None):
-        """
-        Args:
-            root: Root directory where the dataset should be saved
-            dataset_type: One of ['spider', 'bird'] to specify which dataset to use
-            split: One of ['train', 'dev'] to specify train or dev split
-            transform: Optional transform to be applied on a sample
-        """
         self.dataset_type = dataset_type
         self.split = split
         self.graph_data_dir = os.path.join(root, 'graph_data')
@@ -118,7 +125,7 @@ class SchemaLinkingDataset(Dataset):
             seen_pairs = set()  # To track unique pairs
             for fk in schema['foreign_keys']:
                 if fk['column'] is None or any(c is None for c in fk['column']):
-                    print(f"Warning: Skipping invalid foreign key: {fk}")
+                    logger.warning(f"[* Warning] Skipping invalid foreign key: {fk}")
                     continue
                 
                 table1, table2 = [t.lower() for t in fk['table']]
@@ -180,7 +187,7 @@ class SchemaLinkingDataset(Dataset):
 
 if __name__ == "__main__":
     # Create datasets (labeled heterogenous graph data)
-    spider_train = SchemaLinkingDataset(root='data/', dataset_type='spider', split='train')
-    spider_dev = SchemaLinkingDataset(root='data/', dataset_type='spider', split='dev')
-    bird_train = SchemaLinkingDataset(root='data/', dataset_type='bird', split='train')
-    bird_dev = SchemaLinkingDataset(root='data/', dataset_type='bird', split='dev')
+    spider_train = SchemaLinkingGraphDataset(root='data/', dataset_type='spider', split='train')
+    spider_dev = SchemaLinkingGraphDataset(root='data/', dataset_type='spider', split='dev')
+    bird_train = SchemaLinkingGraphDataset(root='data/', dataset_type='bird', split='train')
+    bird_dev = SchemaLinkingGraphDataset(root='data/', dataset_type='bird', split='dev')
