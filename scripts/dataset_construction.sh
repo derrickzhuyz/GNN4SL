@@ -41,6 +41,16 @@ echo "[INFO] Schema extraction completed! Now you can run db_schema_stats.ipynb 
 # Schema extraction log
 echo "[INFO] Schema extraction log: logs/extraction.log"
 
+
+
+echo "[INFO] Running extract_labeled_dataset.py..."
+python extraction/extract_labeled_dataset.py
+if [ $? -ne 0 ]; then
+    echo "[! Error] extract_labeled_dataset.py failed."
+    exit 1
+fi
+
+
 # Schema to graph
 echo "[INFO] Running graph_dataset.py..."
 python gnn/model/graph_dataset.py

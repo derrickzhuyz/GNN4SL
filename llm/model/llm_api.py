@@ -1,0 +1,85 @@
+import os
+import json
+import time
+from openai import OpenAI
+from tqdm import tqdm
+from loguru import logger
+from prompts import *
+
+logger.add("logs/llm_api.log", rotation="1 MB", level="INFO", 
+           format="{time} {level} {message}", compression="zip")
+
+
+"""
+Get the response from the LLM by calling API
+:param prompt: The prompt to send to the LLM
+:return: The response from the LLM
+"""
+def get_response(prompt):
+    client = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        base_url=os.getenv("OPENAI_BASE_URL"),
+    )
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo", #'gpt-4o-mini'
+        # model="gpt-4", #'gpt-4o-2024-08-06'
+        messages=[{'role': 'system', 'content': 'You are an expert in database.'},
+                  {'role': 'user', 'content': prompt},]
+        )
+    return completion.choices[0].message.content
+
+
+"""
+Remove the code block tags from the response
+:param text: The response from the LLM
+:return: The response without the code block tags
+"""
+def remove_code_block_tags(text):
+    # Check that the string starts with '''' JSON and ends with '''
+    if text.startswith("```json") and text.endswith("```"):
+        logger.info("[i] Handled the json formatting issue")
+        return text[7:-3].strip()  # Remove the ''' json at the beginning and the ''' at the end
+    return text
+
+
+
+if __name__ == '__main__':
+    # Read the JSON file
+    with open('data/gold_schema_linking/spider_train_gold_schema_linking.json', 'r', encoding='utf-8') as file:
+        data = json.load(file)  # Load the JSON data as a Python object
+
+    
+    with open("linked_schema.json", "a", encoding="utf-8") as file:
+        file.write("[")
+
+    # Iterate over each object
+    cnt = 0
+    for item in tqdm(data, desc="Schema Linking Progress" ):
+        database = item.get('database')
+        question = item.get('question')
+
+        with open('data/db_schema/spider_schemas.json', 'r', encoding='utf-8') as file:
+            schemas = json.load(file)
+
+        # Find the item with the specified 'database' value
+        schema = None
+        for item in schemas:
+            if item.get('database') == database:
+                schema = item
+                break  
+
+        if not schema:
+            logger.error("[! Error] Schema not found.")
+        formatted_prompt = PROMPT_INSTRUCTION.format(example=EXAMPLE, db_schema=schema, question=question)
+
+        #print(formatted_prompt)
+        linked_schema = remove_code_block_tags(get_response(formatted_prompt))
+
+        with open("linked_schema.json", "a", encoding="utf-8") as file:
+            file.write(linked_schema)
+            file.write(",")
+        cnt+=1
+        logger.info(f"[+] Successfully processed {cnt} items")
+
+    with open("linked_schema.json", "a", encoding="utf-8") as file:
+        file.write("]")

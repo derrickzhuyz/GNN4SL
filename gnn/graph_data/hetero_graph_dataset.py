@@ -1,16 +1,23 @@
 import json
 import torch
-from torch_geometric.data import HeteroData, Dataset
-from typing import Dict, List, Set, Tuple
 import os
 from loguru import logger
+from typing import Dict, List, Set, Tuple
+from torch_geometric.data import HeteroData, Dataset
+from torch.serialization import add_safe_globals
+from torch_geometric.data.storage import BaseStorage, NodeStorage, EdgeStorage
+
 
 logger.add("logs/schema2graph_dataset.log", rotation="1 MB", level="INFO", 
            format="{time} {level} {message}", compression="zip")
 
 
+# Add PyTorch Geometric classes to safe globals
+add_safe_globals([BaseStorage, NodeStorage, EdgeStorage, HeteroData])
+
+
 """Graph Dataset Class for Schema Linking"""
-class SchemaLinkingGraphDataset(Dataset):
+class SchemaLinkingHeteroGraphDataset(Dataset):
 
     """
     Args:
@@ -22,7 +29,7 @@ class SchemaLinkingGraphDataset(Dataset):
     def __init__(self, root, dataset_type='spider', split='train', transform=None):
         self.dataset_type = dataset_type
         self.split = split
-        self.graph_data_dir = os.path.join(root, 'graph_data')
+        self.graph_data_dir = os.path.join(root, 'hetero_graph_schema_linking_dataset')
         super().__init__(root, transform)
     
     """
@@ -34,9 +41,7 @@ class SchemaLinkingGraphDataset(Dataset):
 
     @property
     def raw_file_names(self) -> List[str]:
-        schema_file = 'spider_schemas.json' if self.dataset_type == 'spider' else f'bird_{self.split}_schemas.json'
-        linking_file = f'{self.dataset_type}_{self.split}_gold_schema_linking.json'
-        return [schema_file, linking_file]
+        return [f'{self.dataset_type}_{self.split}_labeled.json']
 
     @property
     def processed_file_names(self) -> List[str]:
@@ -51,19 +56,15 @@ class SchemaLinkingGraphDataset(Dataset):
     Process the raw data into a list of HeteroData objects
     """
     def process(self):
-        # Load schema file
-        schema_path = os.path.join(self.root, 'db_schema', self.raw_file_names[0])
-        schemas = self._load_json(schema_path)
-        schema_dict = {schema['database']: schema for schema in schemas}
-        
-        # Load question file
-        linking_path = os.path.join(self.root, 'gold_schema_linking', self.raw_file_names[1])
-        questions = self._load_json(linking_path)
-        
-        # Process each question and create graphs
+        # Load labeled dataset
+        path_config = self._load_json('config/path_config.json')
+        labeled_path = os.path.join(path_config['labeled_dataset_paths']['labeled_dataset_base'], self.raw_file_names[0])
+        labeled_data = self._load_json(labeled_path)
+    
+        # Process each example and create graphs
         data_list = []
-        for q in questions:
-            graph = self._create_graph(q, schema_dict[q['database']])
+        for example in labeled_data:
+            graph = self._create_graph(example)
             if graph is not None:
                 data_list.append(graph)
         
@@ -75,36 +76,25 @@ class SchemaLinkingGraphDataset(Dataset):
 
     """
     Create a HeteroData object for a given question and schema
-    :param question: A dictionary representing a question
-    :param schema: A dictionary representing a schema
+    :param example: A dictionary representing a labeled example
     :return: A HeteroData object
     """
-    def _create_graph(self, question: Dict, schema: Dict) -> HeteroData:
+    def _create_graph(self, example: Dict) -> HeteroData:
         data = HeteroData()
         
-        # Get relevant tables and columns from question
-        relevant_tables = set()
-        relevant_columns = set()
-        for table in question['tables']:
-            relevant_tables.add(table['table'].lower())
-            for col in table['columns']:
-                relevant_columns.add((table['table'].lower(), col.lower()))
+        # Create table nodes
+        table_names = [t['name'].lower() for t in example['tables']]
+        data['table'].x = torch.eye(len(table_names))
+        data['table'].y = torch.tensor([t['relevant'] for t in example['tables']])
         
-        # Create table nodes (all tables in schema)
-        table_names = [t['table'].lower() for t in schema['tables']]
-        data['table'].x = torch.eye(len(table_names))  # One-hot encoding
-        data['table'].y = torch.tensor([1 if t in relevant_tables else 0 
-                                      for t in table_names])
-        
-        # Create column nodes (all columns in schema)
+        # Create column nodes
         columns = []
         column_labels = []
-        for table in schema['tables']:
-            table_name = table['table'].lower()
+        for table in example['tables']:
+            table_name = table['name'].lower()
             for col in table['columns']:
-                col_name = col.lower()
-                columns.append((table_name, col_name))
-                column_labels.append(1 if (table_name, col_name) in relevant_columns else 0)
+                columns.append((table_name, col['name'].lower()))
+                column_labels.append(col['relevant'])
         
         data['column'].x = torch.eye(len(columns))
         data['column'].y = torch.tensor(column_labels)
@@ -120,10 +110,11 @@ class SchemaLinkingGraphDataset(Dataset):
                 edge_index_contains).t().contiguous()
         
         # Create foreign key edges
-        if 'foreign_keys' in schema:
+        if 'foreign_keys' in example:
             edge_index_fk = []
-            seen_pairs = set()  # To track unique pairs
-            for fk in schema['foreign_keys']:
+            seen_pairs = set()
+            
+            for fk in example['foreign_keys']:
                 if fk['column'] is None or any(c is None for c in fk['column']):
                     logger.warning(f"[* Warning] Skipping invalid foreign key: {fk}")
                     continue
@@ -170,7 +161,8 @@ class SchemaLinkingGraphDataset(Dataset):
     """
     def len(self) -> int:
         processed_path = os.path.join(self.graph_data_dir, self.processed_file_names[0])
-        return len(torch.load(processed_path, weights_only=False))
+        data_list = torch.load(processed_path, weights_only=False)
+        return len(data_list)
 
 
     """
@@ -187,7 +179,7 @@ class SchemaLinkingGraphDataset(Dataset):
 
 if __name__ == "__main__":
     # Create datasets (labeled heterogenous graph data)
-    spider_train = SchemaLinkingGraphDataset(root='data/', dataset_type='spider', split='train')
-    spider_dev = SchemaLinkingGraphDataset(root='data/', dataset_type='spider', split='dev')
-    bird_train = SchemaLinkingGraphDataset(root='data/', dataset_type='bird', split='train')
-    bird_dev = SchemaLinkingGraphDataset(root='data/', dataset_type='bird', split='dev')
+    spider_train = SchemaLinkingHeteroGraphDataset(root='data/', dataset_type='spider', split='train')
+    spider_dev = SchemaLinkingHeteroGraphDataset(root='data/', dataset_type='spider', split='dev')
+    bird_train = SchemaLinkingHeteroGraphDataset(root='data/', dataset_type='bird', split='train')
+    bird_dev = SchemaLinkingHeteroGraphDataset(root='data/', dataset_type='bird', split='dev')

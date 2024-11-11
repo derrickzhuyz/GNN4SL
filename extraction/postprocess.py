@@ -172,7 +172,7 @@ class DBSchemaPostProcessor:
 
 
 """Class for aligning information in info file with gold schema linking file"""
-class GoldSchemaLinkingInfoAligner:
+class GoldSchemaLinkingPostProcessor:
     """
     Align the information in the info file with the gold schema linking file
     :param info_path (str): Path to the info file
@@ -205,6 +205,35 @@ class GoldSchemaLinkingInfoAligner:
             logger.info(f"[i] Aligned data has been saved to {gold_schema_path}")
         except Exception as e:
             logger.error(f"[! Error] An error occurred during information alignment: {str(e)}")
+    
+
+    """
+    Add statistics to the gold schema linking results
+    :param gold_schema_path (str): Path to the gold schema linking file
+    :return: None
+    """
+    @staticmethod
+    def add_stats(gold_schema_path: str) -> None:
+        try:
+            with open(gold_schema_path, 'r') as f:
+                gold_data = json.load(f)
+
+            for item in gold_data:
+                tables = item.get('tables', [])
+                unique_tables = set()
+                unique_columns = set()
+                for table in tables:
+                    table_name = table['table']
+                    unique_tables.add(table_name)
+                    for column in table.get('columns', []):
+                        unique_columns.add(column)
+                item['involved_table_count'] = len(unique_tables)
+                item['involved_column_count'] = len(unique_columns)
+            with open(gold_schema_path, 'w') as f:
+                json.dump(gold_data, f, indent=2)
+            logger.info(f"[i] Statistics added to {gold_schema_path}")
+        except Exception as e:
+            logger.error(f"[! Error] An error occurred while adding stats: {str(e)}")
 
 
 
@@ -213,16 +242,21 @@ if __name__ == "__main__":
         path_config = json.load(config_file)
 
     # Information alignment for gold schema linking files
-    gold_schema_aligner = GoldSchemaLinkingInfoAligner()
-    gold_schema_aligner.information_alignment(info_path=path_config['bird_paths']['dev_info'], 
+    gold_processor = GoldSchemaLinkingPostProcessor()
+    gold_processor.information_alignment(info_path=path_config['bird_paths']['dev_info'], 
                                       gold_schema_path=path_config['gold_schema_linking_paths']['bird_dev'])
-    gold_schema_aligner.information_alignment(info_path=path_config['bird_paths']['train_info'], 
+    gold_processor.information_alignment(info_path=path_config['bird_paths']['train_info'], 
                                       gold_schema_path=path_config['gold_schema_linking_paths']['bird_train'])
-    gold_schema_aligner.information_alignment(info_path=path_config['spider_paths']['dev_info'], 
+    gold_processor.information_alignment(info_path=path_config['spider_paths']['dev_info'], 
                                       gold_schema_path=path_config['gold_schema_linking_paths']['spider_dev'])
-    gold_schema_aligner.information_alignment(info_path=path_config['spider_paths']['full_train_info'], 
+    gold_processor.information_alignment(info_path=path_config['spider_paths']['full_train_info'], 
                                       gold_schema_path=path_config['gold_schema_linking_paths']['spider_train'])
     
+    # Add stats for gold schema linking results
+    gold_processor.add_stats(path_config['gold_schema_linking_paths']['bird_dev'])
+    gold_processor.add_stats(path_config['gold_schema_linking_paths']['bird_train'])
+    gold_processor.add_stats(path_config['gold_schema_linking_paths']['spider_dev'])
+    gold_processor.add_stats(path_config['gold_schema_linking_paths']['spider_train'])
 
     # Postprocess entire database schemas for each dataset
     db_schema_files = [

@@ -110,9 +110,12 @@ EXAMPLE = '''## Given the following SQLite database schema:
     "question": "What are the names, countries, and ages for every singer in descending order of age?"
   }'''
 
+
+
 PROMPT_INSTRUCTION = '''### Returns the Schema used for the question in json format only and with no explanation.
-### Example:{EXAMPLE}
+### Example: 
+{example}
 ### Given the following SQLite database schema: 
-${db_schema}
-### Quesion: ${question}
+{db_schema}
+### Quesion: {question}
 ###'''
