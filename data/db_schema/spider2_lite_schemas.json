@@ -1,0 +1,7824 @@
+[
+  {
+    "database": "electronic_sales",
+    "tables": [
+      {
+        "table": "customers",
+        "columns": [
+          "index",
+          "customer_id",
+          "customer_unique_id",
+          "customer_zip_code_prefix",
+          "customer_city",
+          "customer_state"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "sellers",
+        "columns": [
+          "index",
+          "seller_id",
+          "seller_zip_code_prefix",
+          "seller_city",
+          "seller_state"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "order_reviews",
+        "columns": [
+          "index",
+          "review_id",
+          "order_id",
+          "review_score",
+          "review_comment_title",
+          "review_comment_message",
+          "review_creation_date",
+          "review_answer_timestamp"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "order_items",
+        "columns": [
+          "index",
+          "order_id",
+          "order_item_id",
+          "product_id",
+          "seller_id",
+          "shipping_limit_date",
+          "price",
+          "freight_value"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "products",
+        "columns": [
+          "index",
+          "product_id",
+          "product_category_name",
+          "product_name_lenght",
+          "product_description_lenght",
+          "product_photos_qty",
+          "product_weight_g",
+          "product_length_cm",
+          "product_height_cm",
+          "product_width_cm"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "geolocation",
+        "columns": [
+          "index",
+          "geolocation_zip_code_prefix",
+          "geolocation_lat",
+          "geolocation_lng",
+          "geolocation_city",
+          "geolocation_state"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "product_category_name_translation",
+        "columns": [
+          "index",
+          "product_category_name",
+          "product_category_name_english"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "orders",
+        "columns": [
+          "index",
+          "order_id",
+          "customer_id",
+          "order_status",
+          "order_purchase_timestamp",
+          "order_approved_at",
+          "order_delivered_carrier_date",
+          "order_delivered_customer_date",
+          "order_estimated_delivery_date"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "order_payments",
+        "columns": [
+          "index",
+          "order_id",
+          "payment_sequential",
+          "payment_type",
+          "payment_installments",
+          "payment_value"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 9,
+    "total_column_count": 61
+  },
+  {
+    "database": "delivery_center",
+    "tables": [
+      {
+        "table": "channels",
+        "columns": [
+          "channel_id",
+          "channel_name",
+          "channel_type"
+        ],
+        "primary_keys": [
+          "channel_id"
+        ]
+      },
+      {
+        "table": "drivers",
+        "columns": [
+          "driver_id",
+          "driver_modal",
+          "driver_type"
+        ],
+        "primary_keys": [
+          "driver_id"
+        ]
+      },
+      {
+        "table": "deliveries",
+        "columns": [
+          "delivery_id",
+          "delivery_order_id",
+          "driver_id",
+          "delivery_distance_meters",
+          "delivery_status"
+        ],
+        "primary_keys": [
+          "delivery_id"
+        ]
+      },
+      {
+        "table": "hubs",
+        "columns": [
+          "hub_id",
+          "hub_name",
+          "hub_city",
+          "hub_state",
+          "hub_latitude",
+          "hub_longitude"
+        ],
+        "primary_keys": [
+          "hub_id"
+        ]
+      },
+      {
+        "table": "payments",
+        "columns": [
+          "payment_id",
+          "payment_order_id",
+          "payment_amount",
+          "payment_fee",
+          "payment_method",
+          "payment_status"
+        ],
+        "primary_keys": [
+          "payment_id"
+        ]
+      },
+      {
+        "table": "stores",
+        "columns": [
+          "store_id",
+          "hub_id",
+          "store_name",
+          "store_segment",
+          "store_plan_price",
+          "store_latitude",
+          "store_longitude"
+        ],
+        "primary_keys": [
+          "store_id"
+        ]
+      },
+      {
+        "table": "orders",
+        "columns": [
+          "order_id",
+          "store_id",
+          "channel_id",
+          "payment_order_id",
+          "delivery_order_id",
+          "order_status",
+          "order_amount",
+          "order_delivery_fee",
+          "order_delivery_cost",
+          "order_created_hour",
+          "order_created_minute",
+          "order_created_day",
+          "order_created_month",
+          "order_created_year",
+          "order_moment_created",
+          "order_moment_accepted",
+          "order_moment_ready",
+          "order_moment_collected",
+          "order_moment_in_expedition",
+          "order_moment_delivering",
+          "order_moment_delivered",
+          "order_moment_finished",
+          "order_metric_collected_time",
+          "order_metric_paused_time",
+          "order_metric_production_time",
+          "order_metric_walking_time",
+          "order_metric_expediton_speed_time",
+          "order_metric_transit_time",
+          "order_metric_cycle_time"
+        ],
+        "primary_keys": [
+          "order_id"
+        ]
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 7,
+    "total_column_count": 59
+  },
+  {
+    "database": "music",
+    "tables": [
+      {
+        "table": "Album",
+        "columns": [
+          "AlbumId",
+          "Title",
+          "ArtistId"
+        ],
+        "primary_keys": [
+          "AlbumId"
+        ]
+      },
+      {
+        "table": "Artist",
+        "columns": [
+          "ArtistId",
+          "Name"
+        ],
+        "primary_keys": [
+          "ArtistId"
+        ]
+      },
+      {
+        "table": "Customer",
+        "columns": [
+          "CustomerId",
+          "FirstName",
+          "LastName",
+          "Company",
+          "Address",
+          "City",
+          "State",
+          "Country",
+          "PostalCode",
+          "Phone",
+          "Fax",
+          "Email",
+          "SupportRepId"
+        ],
+        "primary_keys": [
+          "CustomerId"
+        ]
+      },
+      {
+        "table": "Employee",
+        "columns": [
+          "EmployeeId",
+          "LastName",
+          "FirstName",
+          "Title",
+          "ReportsTo",
+          "BirthDate",
+          "HireDate",
+          "Address",
+          "City",
+          "State",
+          "Country",
+          "PostalCode",
+          "Phone",
+          "Fax",
+          "Email"
+        ],
+        "primary_keys": [
+          "EmployeeId"
+        ]
+      },
+      {
+        "table": "Genre",
+        "columns": [
+          "GenreId",
+          "Name"
+        ],
+        "primary_keys": [
+          "GenreId"
+        ]
+      },
+      {
+        "table": "Invoice",
+        "columns": [
+          "InvoiceId",
+          "CustomerId",
+          "InvoiceDate",
+          "BillingAddress",
+          "BillingCity",
+          "BillingState",
+          "BillingCountry",
+          "BillingPostalCode",
+          "Total"
+        ],
+        "primary_keys": [
+          "InvoiceId"
+        ]
+      },
+      {
+        "table": "InvoiceLine",
+        "columns": [
+          "InvoiceLineId",
+          "InvoiceId",
+          "TrackId",
+          "UnitPrice",
+          "Quantity"
+        ],
+        "primary_keys": [
+          "InvoiceLineId"
+        ]
+      },
+      {
+        "table": "MediaType",
+        "columns": [
+          "MediaTypeId",
+          "Name"
+        ],
+        "primary_keys": [
+          "MediaTypeId"
+        ]
+      },
+      {
+        "table": "Playlist",
+        "columns": [
+          "PlaylistId",
+          "Name"
+        ],
+        "primary_keys": [
+          "PlaylistId"
+        ]
+      },
+      {
+        "table": "PlaylistTrack",
+        "columns": [
+          "PlaylistId",
+          "TrackId"
+        ],
+        "primary_keys": [
+          "PlaylistId",
+          "TrackId"
+        ]
+      },
+      {
+        "table": "Track",
+        "columns": [
+          "TrackId",
+          "Name",
+          "AlbumId",
+          "MediaTypeId",
+          "GenreId",
+          "Composer",
+          "Milliseconds",
+          "Bytes",
+          "UnitPrice"
+        ],
+        "primary_keys": [
+          "TrackId"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "Album",
+          "Artist"
+        ],
+        "column": [
+          "ArtistId",
+          "ArtistId"
+        ]
+      },
+      {
+        "table": [
+          "Customer",
+          "Employee"
+        ],
+        "column": [
+          "SupportRepId",
+          "EmployeeId"
+        ]
+      },
+      {
+        "table": [
+          "Invoice",
+          "Customer"
+        ],
+        "column": [
+          "CustomerId",
+          "CustomerId"
+        ]
+      },
+      {
+        "table": [
+          "InvoiceLine",
+          "Track"
+        ],
+        "column": [
+          "TrackId",
+          "TrackId"
+        ]
+      },
+      {
+        "table": [
+          "InvoiceLine",
+          "Invoice"
+        ],
+        "column": [
+          "InvoiceId",
+          "InvoiceId"
+        ]
+      },
+      {
+        "table": [
+          "PlaylistTrack",
+          "Track"
+        ],
+        "column": [
+          "TrackId",
+          "TrackId"
+        ]
+      },
+      {
+        "table": [
+          "PlaylistTrack",
+          "Playlist"
+        ],
+        "column": [
+          "PlaylistId",
+          "PlaylistId"
+        ]
+      },
+      {
+        "table": [
+          "Track",
+          "MediaType"
+        ],
+        "column": [
+          "MediaTypeId",
+          "MediaTypeId"
+        ]
+      },
+      {
+        "table": [
+          "Track",
+          "Genre"
+        ],
+        "column": [
+          "GenreId",
+          "GenreId"
+        ]
+      },
+      {
+        "table": [
+          "Track",
+          "Album"
+        ],
+        "column": [
+          "AlbumId",
+          "AlbumId"
+        ]
+      }
+    ],
+    "foreign_key_count": 10,
+    "table_count": 11,
+    "total_column_count": 64
+  },
+  {
+    "database": "AdventureWorks",
+    "tables": [
+      {
+        "table": "salesperson",
+        "columns": [
+          "businessentityid",
+          "territoryid",
+          "salesquota",
+          "bonus",
+          "commissionpct",
+          "salesytd",
+          "saleslastyear",
+          "rowguid",
+          "modifieddate"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "product",
+        "columns": [
+          "productid",
+          "NAME",
+          "productnumber",
+          "makeflag",
+          "finishedgoodsflag",
+          "color",
+          "safetystocklevel",
+          "reorderpoint",
+          "standardcost",
+          "listprice",
+          "size",
+          "sizeunitmeasurecode",
+          "weightunitmeasurecode",
+          "weight",
+          "daystomanufacture",
+          "productline",
+          "class",
+          "style",
+          "productsubcategoryid",
+          "productmodelid",
+          "sellstartdate",
+          "sellenddate",
+          "discontinueddate",
+          "rowguid",
+          "modifieddate"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "productmodelproductdescriptionculture",
+        "columns": [
+          "productmodelid",
+          "productdescriptionid",
+          "cultureid",
+          "modifieddate"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "productdescription",
+        "columns": [
+          "productdescriptionid",
+          "description",
+          "rowguid",
+          "modifieddate"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "productreview",
+        "columns": [
+          "productreviewid",
+          "productid",
+          "reviewername",
+          "reviewdate",
+          "emailaddress",
+          "rating",
+          "comments",
+          "modifeddate",
+          "modifieddate"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "productcategory",
+        "columns": [
+          "productcategoryid",
+          "name",
+          "rowguid",
+          "modifieddate"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "productsubcategory",
+        "columns": [
+          "productsubcategoryid",
+          "productcategoryid",
+          "name",
+          "rowguid",
+          "modifieddate"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "salesorderdetail",
+        "columns": [
+          "salesorderid",
+          "salesorderdetailid",
+          "carriertrackingnumber",
+          "orderqty",
+          "productid",
+          "specialofferid",
+          "unitprice",
+          "unitpricediscount",
+          "rowguid",
+          "modifieddate"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "salesorderheader",
+        "columns": [
+          "salesorderid",
+          "revisionnumber",
+          "orderdate",
+          "duedate",
+          "shipdate",
+          "STATUS",
+          "onlineorderflag",
+          "purchaseordernumber",
+          "accountnumber",
+          "customerid",
+          "salespersonid",
+          "territoryid",
+          "billtoaddressid",
+          "shiptoaddressid",
+          "shipmethodid",
+          "creditcardid",
+          "creditcardapprovalcode",
+          "currencyrateid",
+          "subtotal",
+          "taxamt",
+          "freight",
+          "totaldue",
+          "comment",
+          "rowguid",
+          "modifieddate"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "salesterritory",
+        "columns": [
+          "territoryid",
+          "name",
+          "countryregioncode",
+          "group",
+          "salesytd",
+          "saleslastyear",
+          "costytd",
+          "costlastyear",
+          "rowguid",
+          "modifieddate"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "countryregioncurrency",
+        "columns": [
+          "countryregioncode",
+          "currencycode",
+          "modifieddate"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "currencyrate",
+        "columns": [
+          "currencyrateid",
+          "currencyratedate",
+          "fromcurrencycode",
+          "tocurrencycode",
+          "averagerate",
+          "endofdayrate",
+          "modifieddate"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "SalesPersonQuotaHistory",
+        "columns": [
+          "BusinessEntityID",
+          "QuotaDate",
+          "SalesQuota",
+          "rowguid",
+          "ModifiedDate"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 13,
+    "total_column_count": 120
+  },
+  {
+    "database": "stacking",
+    "tables": [
+      {
+        "table": "problem",
+        "columns": [
+          "name",
+          "path",
+          "type",
+          "target"
+        ],
+        "primary_keys": [
+          "name"
+        ]
+      },
+      {
+        "table": "eda",
+        "columns": [
+          "name",
+          "version",
+          "feature",
+          "type",
+          "range",
+          "drop_user",
+          "drop_correlation",
+          "target"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "feature_importance",
+        "columns": [
+          "name",
+          "version",
+          "step",
+          "feature",
+          "importance"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "solution",
+        "columns": [
+          "name",
+          "version",
+          "correlation",
+          "nb_model",
+          "nb_feature",
+          "score",
+          "test_size",
+          "resampling"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "model_score",
+        "columns": [
+          "name",
+          "version",
+          "step",
+          "model",
+          "train_score",
+          "test_score"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "model_importance",
+        "columns": [
+          "name",
+          "version",
+          "step",
+          "model",
+          "importance"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "model",
+        "columns": [
+          "name",
+          "version",
+          "step",
+          "L1_model"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 7,
+    "total_column_count": 40
+  },
+  {
+    "database": "log",
+    "tables": [
+      {
+        "table": "mst_users",
+        "columns": [
+          "user_id",
+          "sex",
+          "birth_date",
+          "register_date",
+          "register_device",
+          "withdraw_date"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "action_log",
+        "columns": [
+          "session",
+          "user_id",
+          "action",
+          "category",
+          "products",
+          "amount",
+          "stamp"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "activity_log",
+        "columns": [
+          "stamp",
+          "session",
+          "action",
+          "option",
+          "path",
+          "search_type"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "read_log",
+        "columns": [
+          "stamp",
+          "session",
+          "action",
+          "url"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "form_log",
+        "columns": [
+          "stamp",
+          "session",
+          "action",
+          "path",
+          "status"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "form_error_log",
+        "columns": [
+          "stamp",
+          "session",
+          "form",
+          "field",
+          "error_type",
+          "value"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "action_log_with_ip",
+        "columns": [
+          "session",
+          "user_id",
+          "action",
+          "ip",
+          "stamp"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "access_log",
+        "columns": [
+          "session",
+          "user_id",
+          "action",
+          "stamp"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "action_log_with_noise",
+        "columns": [
+          "stamp",
+          "session",
+          "action",
+          "products",
+          "url",
+          "ip",
+          "user_agent"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "invalid_action_log",
+        "columns": [
+          "stamp",
+          "session",
+          "user_id",
+          "action",
+          "category",
+          "products",
+          "amount"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "mst_categories",
+        "columns": [
+          "id",
+          "name",
+          "stamp"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "dup_action_log",
+        "columns": [
+          "stamp",
+          "session",
+          "user_id",
+          "action",
+          "products"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "mst_products_20161201",
+        "columns": [
+          "product_id",
+          "name",
+          "price",
+          "updated_at"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "mst_products_20170101",
+        "columns": [
+          "product_id",
+          "name",
+          "price",
+          "updated_at"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "app1_mst_users",
+        "columns": [
+          "user_id",
+          "name",
+          "email"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "app2_mst_users",
+        "columns": [
+          "user_id",
+          "name",
+          "phone"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "mst_users_with_card_number",
+        "columns": [
+          "user_id",
+          "card_number"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "purchase_log",
+        "columns": [
+          "purchase_id",
+          "user_id",
+          "amount",
+          "stamp"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "product_sales",
+        "columns": [
+          "category_name",
+          "product_id",
+          "sales"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 19,
+    "total_column_count": 88
+  },
+  {
+    "database": "EntertainmentAgency",
+    "tables": [
+      {
+        "table": "Agents",
+        "columns": [
+          "AgentID",
+          "AgtFirstName",
+          "AgtLastName",
+          "AgtStreetAddress",
+          "AgtCity",
+          "AgtState",
+          "AgtZipCode",
+          "AgtPhoneNumber",
+          "DateHired",
+          "Salary",
+          "CommissionRate"
+        ],
+        "primary_keys": [
+          "AgentID"
+        ]
+      },
+      {
+        "table": "Customers",
+        "columns": [
+          "CustomerID",
+          "CustFirstName",
+          "CustLastName",
+          "CustStreetAddress",
+          "CustCity",
+          "CustState",
+          "CustZipCode",
+          "CustPhoneNumber"
+        ],
+        "primary_keys": [
+          "CustomerID"
+        ]
+      },
+      {
+        "table": "Engagements",
+        "columns": [
+          "EngagementNumber",
+          "StartDate",
+          "EndDate",
+          "StartTime",
+          "StopTime",
+          "ContractPrice",
+          "CustomerID",
+          "AgentID",
+          "EntertainerID"
+        ],
+        "primary_keys": [
+          "EngagementNumber"
+        ]
+      },
+      {
+        "table": "Entertainer_Members",
+        "columns": [
+          "EntertainerID",
+          "MemberID",
+          "Status"
+        ],
+        "primary_keys": [
+          "EntertainerID",
+          "MemberID"
+        ]
+      },
+      {
+        "table": "Entertainer_Styles",
+        "columns": [
+          "EntertainerID",
+          "StyleID",
+          "StyleStrength"
+        ],
+        "primary_keys": [
+          "EntertainerID",
+          "StyleID"
+        ]
+      },
+      {
+        "table": "Entertainers",
+        "columns": [
+          "EntertainerID",
+          "EntStageName",
+          "EntSSN",
+          "EntStreetAddress",
+          "EntCity",
+          "EntState",
+          "EntZipCode",
+          "EntPhoneNumber",
+          "EntWebPage",
+          "EntEMailAddress",
+          "DateEntered"
+        ],
+        "primary_keys": [
+          "EntertainerID"
+        ]
+      },
+      {
+        "table": "Members",
+        "columns": [
+          "MemberID",
+          "MbrFirstName",
+          "MbrLastName",
+          "MbrPhoneNumber",
+          "Gender"
+        ],
+        "primary_keys": [
+          "MemberID"
+        ]
+      },
+      {
+        "table": "Musical_Preferences",
+        "columns": [
+          "CustomerID",
+          "StyleID",
+          "PreferenceSeq"
+        ],
+        "primary_keys": [
+          "CustomerID",
+          "StyleID"
+        ]
+      },
+      {
+        "table": "Musical_Styles",
+        "columns": [
+          "StyleID",
+          "StyleName"
+        ],
+        "primary_keys": [
+          "StyleID"
+        ]
+      },
+      {
+        "table": "ztblDays",
+        "columns": [
+          "DateField"
+        ],
+        "primary_keys": [
+          "DateField"
+        ]
+      },
+      {
+        "table": "ztblMonths",
+        "columns": [
+          "MonthYear",
+          "YearNumber",
+          "MonthNumber",
+          "MonthStart",
+          "MonthEnd",
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December"
+        ],
+        "primary_keys": [
+          "YearNumber",
+          "MonthNumber"
+        ]
+      },
+      {
+        "table": "ztblSkipLabels",
+        "columns": [
+          "LabelCount"
+        ],
+        "primary_keys": [
+          "LabelCount"
+        ]
+      },
+      {
+        "table": "ztblWeeks",
+        "columns": [
+          "WeekStart",
+          "WeekEnd"
+        ],
+        "primary_keys": [
+          "WeekStart"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "Engagements",
+          "Entertainers"
+        ],
+        "column": [
+          "EntertainerID",
+          "EntertainerID"
+        ]
+      },
+      {
+        "table": [
+          "Engagements",
+          "Customers"
+        ],
+        "column": [
+          "CustomerID",
+          "CustomerID"
+        ]
+      },
+      {
+        "table": [
+          "Engagements",
+          "Agents"
+        ],
+        "column": [
+          "AgentID",
+          "AgentID"
+        ]
+      },
+      {
+        "table": [
+          "Entertainer_Members",
+          "Members"
+        ],
+        "column": [
+          "MemberID",
+          "MemberID"
+        ]
+      },
+      {
+        "table": [
+          "Entertainer_Members",
+          "Entertainers"
+        ],
+        "column": [
+          "EntertainerID",
+          "EntertainerID"
+        ]
+      },
+      {
+        "table": [
+          "Entertainer_Styles",
+          "Musical_Styles"
+        ],
+        "column": [
+          "StyleID",
+          "StyleID"
+        ]
+      },
+      {
+        "table": [
+          "Entertainer_Styles",
+          "Entertainers"
+        ],
+        "column": [
+          "EntertainerID",
+          "EntertainerID"
+        ]
+      },
+      {
+        "table": [
+          "Musical_Preferences",
+          "Musical_Styles"
+        ],
+        "column": [
+          "StyleID",
+          "StyleID"
+        ]
+      },
+      {
+        "table": [
+          "Musical_Preferences",
+          "Customers"
+        ],
+        "column": [
+          "CustomerID",
+          "CustomerID"
+        ]
+      }
+    ],
+    "foreign_key_count": 9,
+    "table_count": 13,
+    "total_column_count": 76
+  },
+  {
+    "database": "EU_soccer",
+    "tables": [
+      {
+        "table": "Player_Attributes",
+        "columns": [
+          "id",
+          "player_fifa_api_id",
+          "player_api_id",
+          "date",
+          "overall_rating",
+          "potential",
+          "preferred_foot",
+          "attacking_work_rate",
+          "defensive_work_rate",
+          "crossing",
+          "finishing",
+          "heading_accuracy",
+          "short_passing",
+          "volleys",
+          "dribbling",
+          "curve",
+          "free_kick_accuracy",
+          "long_passing",
+          "ball_control",
+          "acceleration",
+          "sprint_speed",
+          "agility",
+          "reactions",
+          "balance",
+          "shot_power",
+          "jumping",
+          "stamina",
+          "strength",
+          "long_shots",
+          "aggression",
+          "interceptions",
+          "positioning",
+          "vision",
+          "penalties",
+          "marking",
+          "standing_tackle",
+          "sliding_tackle",
+          "gk_diving",
+          "gk_handling",
+          "gk_kicking",
+          "gk_positioning",
+          "gk_reflexes"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Player",
+        "columns": [
+          "id",
+          "player_api_id",
+          "player_name",
+          "player_fifa_api_id",
+          "birthday",
+          "height",
+          "weight"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Match",
+        "columns": [
+          "id",
+          "country_id",
+          "league_id",
+          "season",
+          "stage",
+          "date",
+          "match_api_id",
+          "home_team_api_id",
+          "away_team_api_id",
+          "home_team_goal",
+          "away_team_goal",
+          "home_player_X1",
+          "home_player_X2",
+          "home_player_X3",
+          "home_player_X4",
+          "home_player_X5",
+          "home_player_X6",
+          "home_player_X7",
+          "home_player_X8",
+          "home_player_X9",
+          "home_player_X10",
+          "home_player_X11",
+          "away_player_X1",
+          "away_player_X2",
+          "away_player_X3",
+          "away_player_X4",
+          "away_player_X5",
+          "away_player_X6",
+          "away_player_X7",
+          "away_player_X8",
+          "away_player_X9",
+          "away_player_X10",
+          "away_player_X11",
+          "home_player_Y1",
+          "home_player_Y2",
+          "home_player_Y3",
+          "home_player_Y4",
+          "home_player_Y5",
+          "home_player_Y6",
+          "home_player_Y7",
+          "home_player_Y8",
+          "home_player_Y9",
+          "home_player_Y10",
+          "home_player_Y11",
+          "away_player_Y1",
+          "away_player_Y2",
+          "away_player_Y3",
+          "away_player_Y4",
+          "away_player_Y5",
+          "away_player_Y6",
+          "away_player_Y7",
+          "away_player_Y8",
+          "away_player_Y9",
+          "away_player_Y10",
+          "away_player_Y11",
+          "home_player_1",
+          "home_player_2",
+          "home_player_3",
+          "home_player_4",
+          "home_player_5",
+          "home_player_6",
+          "home_player_7",
+          "home_player_8",
+          "home_player_9",
+          "home_player_10",
+          "home_player_11",
+          "away_player_1",
+          "away_player_2",
+          "away_player_3",
+          "away_player_4",
+          "away_player_5",
+          "away_player_6",
+          "away_player_7",
+          "away_player_8",
+          "away_player_9",
+          "away_player_10",
+          "away_player_11",
+          "goal",
+          "shoton",
+          "shotoff",
+          "foulcommit",
+          "card",
+          "cross",
+          "corner",
+          "possession",
+          "B365H",
+          "B365D",
+          "B365A",
+          "BWH",
+          "BWD",
+          "BWA",
+          "IWH",
+          "IWD",
+          "IWA",
+          "LBH",
+          "LBD",
+          "LBA",
+          "PSH",
+          "PSD",
+          "PSA",
+          "WHH",
+          "WHD",
+          "WHA",
+          "SJH",
+          "SJD",
+          "SJA",
+          "VCH",
+          "VCD",
+          "VCA",
+          "GBH",
+          "GBD",
+          "GBA",
+          "BSH",
+          "BSD",
+          "BSA"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "League",
+        "columns": [
+          "id",
+          "country_id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Country",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Team",
+        "columns": [
+          "id",
+          "team_api_id",
+          "team_fifa_api_id",
+          "team_long_name",
+          "team_short_name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Team_Attributes",
+        "columns": [
+          "id",
+          "team_fifa_api_id",
+          "team_api_id",
+          "date",
+          "buildUpPlaySpeed",
+          "buildUpPlaySpeedClass",
+          "buildUpPlayDribbling",
+          "buildUpPlayDribblingClass",
+          "buildUpPlayPassing",
+          "buildUpPlayPassingClass",
+          "buildUpPlayPositioningClass",
+          "chanceCreationPassing",
+          "chanceCreationPassingClass",
+          "chanceCreationCrossing",
+          "chanceCreationCrossingClass",
+          "chanceCreationShooting",
+          "chanceCreationShootingClass",
+          "chanceCreationPositioningClass",
+          "defencePressure",
+          "defencePressureClass",
+          "defenceAggression",
+          "defenceAggressionClass",
+          "defenceTeamWidth",
+          "defenceTeamWidthClass",
+          "defenceDefenderLineClass"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "Player_Attributes",
+          "Player"
+        ],
+        "column": [
+          "player_api_id",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Player_Attributes",
+          "Player"
+        ],
+        "column": [
+          "player_fifa_api_id",
+          "player_fifa_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_11",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_10",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_9",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_8",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_7",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_6",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_5",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_4",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_3",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_2",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_1",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_11",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_10",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_9",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_8",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_7",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_6",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_5",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_4",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_3",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_2",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_1",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Team"
+        ],
+        "column": [
+          "away_team_api_id",
+          "team_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Team"
+        ],
+        "column": [
+          "home_team_api_id",
+          "team_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "League"
+        ],
+        "column": [
+          "league_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "country"
+        ],
+        "column": [
+          "country_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "League",
+          "country"
+        ],
+        "column": [
+          "country_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "Team_Attributes",
+          "Team"
+        ],
+        "column": [
+          "team_api_id",
+          "team_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Team_Attributes",
+          "Team"
+        ],
+        "column": [
+          "team_fifa_api_id",
+          "team_fifa_api_id"
+        ]
+      }
+    ],
+    "foreign_key_count": 31,
+    "table_count": 7,
+    "total_column_count": 199
+  },
+  {
+    "database": "California_Traffic_Collision",
+    "tables": [
+      {
+        "table": "victims",
+        "columns": [
+          "id",
+          "case_id",
+          "party_number",
+          "victim_role",
+          "victim_sex",
+          "victim_age",
+          "victim_degree_of_injury",
+          "victim_seating_position",
+          "victim_safety_equipment_1",
+          "victim_safety_equipment_2",
+          "victim_ejected"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "collisions",
+        "columns": [
+          "case_id",
+          "jurisdiction",
+          "officer_id",
+          "reporting_district",
+          "chp_shift",
+          "population",
+          "county_city_location",
+          "county_location",
+          "special_condition",
+          "beat_type",
+          "chp_beat_type",
+          "city_division_lapd",
+          "chp_beat_class",
+          "beat_number",
+          "primary_road",
+          "secondary_road",
+          "distance",
+          "direction",
+          "intersection",
+          "weather_1",
+          "weather_2",
+          "state_highway_indicator",
+          "caltrans_county",
+          "caltrans_district",
+          "state_route",
+          "route_suffix",
+          "postmile_prefix",
+          "postmile",
+          "location_type",
+          "ramp_intersection",
+          "side_of_highway",
+          "tow_away",
+          "collision_severity",
+          "killed_victims",
+          "injured_victims",
+          "party_count",
+          "primary_collision_factor",
+          "pcf_violation_code",
+          "pcf_violation_category",
+          "pcf_violation",
+          "pcf_violation_subsection",
+          "hit_and_run",
+          "type_of_collision",
+          "motor_vehicle_involved_with",
+          "pedestrian_action",
+          "road_surface",
+          "road_condition_1",
+          "road_condition_2",
+          "lighting",
+          "control_device",
+          "chp_road_type",
+          "pedestrian_collision",
+          "bicycle_collision",
+          "motorcycle_collision",
+          "truck_collision",
+          "not_private_property",
+          "alcohol_involved",
+          "statewide_vehicle_type_at_fault",
+          "chp_vehicle_type_at_fault",
+          "severe_injury_count",
+          "other_visible_injury_count",
+          "complaint_of_pain_injury_count",
+          "pedestrian_killed_count",
+          "pedestrian_injured_count",
+          "bicyclist_killed_count",
+          "bicyclist_injured_count",
+          "motorcyclist_killed_count",
+          "motorcyclist_injured_count",
+          "primary_ramp",
+          "secondary_ramp",
+          "latitude",
+          "longitude",
+          "collision_date",
+          "collision_time",
+          "process_date"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "case_ids",
+        "columns": [
+          "case_id",
+          "db_year"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "parties",
+        "columns": [
+          "id",
+          "case_id",
+          "party_number",
+          "party_type",
+          "at_fault",
+          "party_sex",
+          "party_age",
+          "party_sobriety",
+          "party_drug_physical",
+          "direction_of_travel",
+          "party_safety_equipment_1",
+          "party_safety_equipment_2",
+          "financial_responsibility",
+          "hazardous_materials",
+          "cellphone_in_use",
+          "cellphone_use_type",
+          "school_bus_related",
+          "oaf_violation_code",
+          "oaf_violation_category",
+          "oaf_violation_section",
+          "oaf_violation_suffix",
+          "other_associate_factor_1",
+          "other_associate_factor_2",
+          "party_number_killed",
+          "party_number_injured",
+          "movement_preceding_collision",
+          "vehicle_year",
+          "vehicle_make",
+          "statewide_vehicle_type",
+          "chp_vehicle_type_towing",
+          "chp_vehicle_type_towed",
+          "party_race"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 4,
+    "total_column_count": 120
+  },
+  {
+    "database": "city_legislation",
+    "tables": [
+      {
+        "table": "aliens_details",
+        "columns": [
+          "detail_id",
+          "favorite_food",
+          "feeding_frequency",
+          "aggressive"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "skills_dim",
+        "columns": [
+          "skill_id",
+          "skills",
+          "type"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "legislators_terms",
+        "columns": [
+          "id_bioguide",
+          "term_number",
+          "term_id",
+          "term_type",
+          "term_start",
+          "term_end",
+          "state",
+          "district",
+          "class",
+          "party",
+          "how",
+          "url",
+          "address",
+          "phone",
+          "fax",
+          "contact_form",
+          "office",
+          "state_rank",
+          "rss_url",
+          "caucus"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "cities_currencies",
+        "columns": [
+          "currency_id",
+          "country_code_2",
+          "currency_name",
+          "currency_code"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "legislators",
+        "columns": [
+          "full_name",
+          "first_name",
+          "last_name",
+          "middle_name",
+          "nickname",
+          "suffix",
+          "other_names_end",
+          "other_names_middle",
+          "other_names_last",
+          "birthday",
+          "gender",
+          "id_bioguide",
+          "id_bioguide_previous_0",
+          "id_govtrack",
+          "id_icpsr",
+          "id_wikipedia",
+          "id_wikidata",
+          "id_google_entity_id",
+          "id_house_history",
+          "id_house_history_alternate",
+          "id_thomas",
+          "id_cspan",
+          "id_votesmart",
+          "id_lis",
+          "id_ballotpedia",
+          "id_opensecrets",
+          "id_fec_0",
+          "id_fec_1",
+          "id_fec_2"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "skills_job_dim",
+        "columns": [
+          "job_id",
+          "skill_id"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "job_postings_fact",
+        "columns": [
+          "job_id",
+          "company_id",
+          "job_title_short",
+          "job_title",
+          "job_location",
+          "job_via",
+          "job_schedule_type",
+          "job_work_from_home",
+          "search_location",
+          "job_posted_date",
+          "job_no_degree_mention",
+          "job_health_insurance",
+          "job_country",
+          "salary_rate",
+          "salary_year_avg",
+          "salary_hour_avg"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "alien_data",
+        "columns": [
+          "id",
+          "first_name",
+          "last_name",
+          "email",
+          "gender",
+          "type",
+          "birth_year",
+          "age",
+          "favorite_food",
+          "feeding_frequency",
+          "aggressive",
+          "occupation",
+          "current_location",
+          "state",
+          "us_region",
+          "country"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "cities_countries",
+        "columns": [
+          "country_id",
+          "country_name",
+          "country_code_2",
+          "country_code_3",
+          "region",
+          "sub_region",
+          "intermediate_region",
+          "created_on"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "legislation_date_dim",
+        "columns": [
+          "date",
+          "month_name",
+          "day_of_month"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "cities",
+        "columns": [
+          "city_id",
+          "city_name",
+          "latitude",
+          "longitude",
+          "country_code_2",
+          "capital",
+          "population",
+          "insert_date"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "aliens_location",
+        "columns": [
+          "loc_id",
+          "current_location",
+          "state",
+          "country",
+          "occupation"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "aliens",
+        "columns": [
+          "id",
+          "first_name",
+          "last_name",
+          "email",
+          "gender",
+          "type",
+          "birth_year"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "cities_languages",
+        "columns": [
+          "language_id",
+          "language",
+          "country_code_2"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "job_company",
+        "columns": [
+          "company_id",
+          "name",
+          "link",
+          "link_google",
+          "thumbnail"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 15,
+    "total_column_count": 133
+  },
+  {
+    "database": "complex_oracle",
+    "tables": [
+      {
+        "table": "countries",
+        "columns": [
+          "country_id",
+          "country_iso_code",
+          "country_name",
+          "country_subregion",
+          "country_subregion_id",
+          "country_region",
+          "country_region_id",
+          "country_total",
+          "country_total_id"
+        ],
+        "primary_keys": [
+          "country_id"
+        ]
+      },
+      {
+        "table": "customers",
+        "columns": [
+          "cust_id",
+          "cust_first_name",
+          "cust_last_name",
+          "cust_gender",
+          "cust_year_of_birth",
+          "cust_marital_status",
+          "cust_street_address",
+          "cust_postal_code",
+          "cust_city",
+          "cust_city_id",
+          "cust_state_province",
+          "cust_state_province_id",
+          "country_id",
+          "cust_main_phone_number",
+          "cust_income_level",
+          "cust_credit_limit",
+          "cust_email",
+          "cust_total",
+          "cust_total_id",
+          "cust_src_id",
+          "cust_eff_from",
+          "cust_eff_to",
+          "cust_valid"
+        ],
+        "primary_keys": [
+          "cust_id"
+        ]
+      },
+      {
+        "table": "promotions",
+        "columns": [
+          "promo_id",
+          "promo_name",
+          "promo_subcategory",
+          "promo_subcategory_id",
+          "promo_category",
+          "promo_category_id",
+          "promo_cost",
+          "promo_begin_date",
+          "promo_end_date",
+          "promo_total",
+          "promo_total_id"
+        ],
+        "primary_keys": [
+          "promo_id"
+        ]
+      },
+      {
+        "table": "products",
+        "columns": [
+          "prod_id",
+          "prod_name",
+          "prod_desc",
+          "prod_subcategory",
+          "prod_subcategory_id",
+          "prod_subcategory_desc",
+          "prod_category",
+          "prod_category_id",
+          "prod_category_desc",
+          "prod_weight_class",
+          "prod_unit_of_measure",
+          "prod_pack_size",
+          "supplier_id",
+          "prod_status",
+          "prod_list_price",
+          "prod_min_price",
+          "prod_total",
+          "prod_total_id",
+          "prod_src_id",
+          "prod_eff_from",
+          "prod_eff_to",
+          "prod_valid"
+        ],
+        "primary_keys": [
+          "prod_id"
+        ]
+      },
+      {
+        "table": "times",
+        "columns": [
+          "time_id",
+          "day_name",
+          "day_number_in_week",
+          "day_number_in_month",
+          "calendar_week_number",
+          "fiscal_week_number",
+          "week_ending_day",
+          "week_ending_day_id",
+          "calendar_month_number",
+          "fiscal_month_number",
+          "calendar_month_desc",
+          "calendar_month_id",
+          "fiscal_month_desc",
+          "fiscal_month_id",
+          "days_in_cal_month",
+          "days_in_fis_month",
+          "end_of_cal_month",
+          "end_of_fis_month",
+          "calendar_month_name",
+          "fiscal_month_name",
+          "calendar_quarter_desc",
+          "calendar_quarter_id",
+          "fiscal_quarter_desc",
+          "fiscal_quarter_id",
+          "days_in_cal_quarter",
+          "days_in_fis_quarter",
+          "end_of_cal_quarter",
+          "end_of_fis_quarter",
+          "calendar_quarter_number",
+          "fiscal_quarter_number",
+          "calendar_year",
+          "calendar_year_id",
+          "fiscal_year",
+          "fiscal_year_id",
+          "days_in_cal_year",
+          "days_in_fis_year",
+          "end_of_cal_year",
+          "end_of_fis_year"
+        ],
+        "primary_keys": [
+          "time_id"
+        ]
+      },
+      {
+        "table": "channels",
+        "columns": [
+          "channel_id",
+          "channel_desc",
+          "channel_class",
+          "channel_class_id",
+          "channel_total",
+          "channel_total_id"
+        ],
+        "primary_keys": [
+          "channel_id"
+        ]
+      },
+      {
+        "table": "sales",
+        "columns": [
+          "prod_id",
+          "cust_id",
+          "time_id",
+          "channel_id",
+          "promo_id",
+          "quantity_sold",
+          "amount_sold"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "costs",
+        "columns": [
+          "prod_id",
+          "time_id",
+          "promo_id",
+          "channel_id",
+          "unit_cost",
+          "unit_price"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "supplementary_demographics",
+        "columns": [
+          "cust_id",
+          "education",
+          "occupation",
+          "household_size",
+          "yrs_residence",
+          "affinity_card",
+          "cricket",
+          "baseball",
+          "tennis",
+          "soccer",
+          "golf",
+          "unknown",
+          "misc",
+          "comments"
+        ],
+        "primary_keys": [
+          "cust_id"
+        ]
+      },
+      {
+        "table": "currency",
+        "columns": [
+          "country",
+          "year",
+          "month",
+          "to_us"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "customers",
+          "countries"
+        ],
+        "column": [
+          "country_id",
+          "country_id"
+        ]
+      },
+      {
+        "table": [
+          "sales",
+          "times"
+        ],
+        "column": [
+          "time_id",
+          "time_id"
+        ]
+      },
+      {
+        "table": [
+          "sales",
+          "channels"
+        ],
+        "column": [
+          "channel_id",
+          "channel_id"
+        ]
+      },
+      {
+        "table": [
+          "sales",
+          "products"
+        ],
+        "column": [
+          "prod_id",
+          "prod_id"
+        ]
+      },
+      {
+        "table": [
+          "sales",
+          "customers"
+        ],
+        "column": [
+          "cust_id",
+          "cust_id"
+        ]
+      },
+      {
+        "table": [
+          "sales",
+          "promotions"
+        ],
+        "column": [
+          "promo_id",
+          "promo_id"
+        ]
+      },
+      {
+        "table": [
+          "costs",
+          "channels"
+        ],
+        "column": [
+          "channel_id",
+          "channel_id"
+        ]
+      },
+      {
+        "table": [
+          "costs",
+          "times"
+        ],
+        "column": [
+          "time_id",
+          "time_id"
+        ]
+      },
+      {
+        "table": [
+          "costs",
+          "products"
+        ],
+        "column": [
+          "prod_id",
+          "prod_id"
+        ]
+      },
+      {
+        "table": [
+          "costs",
+          "promotions"
+        ],
+        "column": [
+          "promo_id",
+          "promo_id"
+        ]
+      }
+    ],
+    "foreign_key_count": 10,
+    "table_count": 10,
+    "total_column_count": 140
+  },
+  {
+    "database": "bank_sales_trading",
+    "tables": [
+      {
+        "table": "weekly_sales",
+        "columns": [
+          "week_date",
+          "region",
+          "platform",
+          "segment",
+          "customer_type",
+          "transactions",
+          "sales"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "shopping_cart_users",
+        "columns": [
+          "user_id",
+          "cookie_id",
+          "start_date"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "bitcoin_members",
+        "columns": [
+          "member_id",
+          "first_name",
+          "region"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "interest_metrics",
+        "columns": [
+          "_month",
+          "_year",
+          "month_year",
+          "interest_id",
+          "composition",
+          "index_value",
+          "ranking",
+          "percentile_ranking"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "customer_regions",
+        "columns": [
+          "region_id",
+          "region_name"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "customer_transactions",
+        "columns": [
+          "customer_id",
+          "txn_date",
+          "txn_type",
+          "txn_amount"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "bitcoin_transactions",
+        "columns": [
+          "txn_id",
+          "member_id",
+          "ticker",
+          "txn_date",
+          "txn_type",
+          "quantity",
+          "percentage_fee",
+          "txn_time"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "customer_nodes",
+        "columns": [
+          "customer_id",
+          "region_id",
+          "node_id",
+          "start_date",
+          "end_date"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "cleaned_weekly_sales",
+        "columns": [
+          "week_date_formatted",
+          "week_date",
+          "region",
+          "platform",
+          "segment",
+          "customer_type",
+          "transactions",
+          "sales",
+          "week_number",
+          "month_number",
+          "calendar_year",
+          "age_band",
+          "demographic",
+          "avg_transaction"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "veg_txn_df",
+        "columns": [
+          "index",
+          "txn_date",
+          "txn_time",
+          "item_code",
+          "qty_sold(kg)",
+          "unit_selling_px_rmb/kg",
+          "sale/return",
+          "discount(%)",
+          "day_of_week"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "shopping_cart_events",
+        "columns": [
+          "visit_id",
+          "cookie_id",
+          "page_id",
+          "event_type",
+          "sequence_number",
+          "event_time"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "shopping_cart_page_hierarchy",
+        "columns": [
+          "page_id",
+          "page_name",
+          "product_category",
+          "product_id"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "bitcoin_prices",
+        "columns": [
+          "ticker",
+          "market_date",
+          "price",
+          "open",
+          "high",
+          "low",
+          "volume",
+          "change"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "interest_map",
+        "columns": [
+          "id",
+          "interest_name",
+          "interest_summary",
+          "created_at",
+          "last_modified"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "veg_loss_rate_df",
+        "columns": [
+          "index",
+          "item_code",
+          "item_name",
+          "loss_rate_%"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "shopping_cart_campaign_identifier",
+        "columns": [
+          "campaign_id",
+          "products",
+          "campaign_name",
+          "start_date",
+          "end_date"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "veg_cat",
+        "columns": [
+          "index",
+          "item_code",
+          "item_name",
+          "category_code",
+          "category_name"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "veg_whsle_df",
+        "columns": [
+          "index",
+          "whsle_date",
+          "item_code",
+          "whsle_px_rmb-kg"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "shopping_cart_event_identifier",
+        "columns": [
+          "event_type",
+          "event_name"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 19,
+    "total_column_count": 106
+  },
+  {
+    "database": "education_business",
+    "tables": [
+      {
+        "table": "hardware_dim_customer",
+        "columns": [
+          "customer_code",
+          "customer",
+          "platform",
+          "channel",
+          "market",
+          "sub_zone",
+          "region"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "hardware_fact_pre_invoice_deductions",
+        "columns": [
+          "customer_code",
+          "fiscal_year",
+          "pre_invoice_discount_pct"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "web_sales_reps",
+        "columns": [
+          "id",
+          "name",
+          "region_id"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "hardware_dim_product",
+        "columns": [
+          "product_code",
+          "division",
+          "segment",
+          "category",
+          "product",
+          "variant"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "web_orders",
+        "columns": [
+          "id",
+          "account_id",
+          "occurred_at",
+          "standard_qty",
+          "gloss_qty",
+          "poster_qty",
+          "total",
+          "standard_amt_usd",
+          "gloss_amt_usd",
+          "poster_amt_usd",
+          "total_amt_usd"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "StaffHours",
+        "columns": [
+          "StaffMember",
+          "EventDate",
+          "EventTime",
+          "EventType"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "university_enrollment",
+        "columns": [
+          "OfferNo",
+          "StdNo",
+          "EnrGrade"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "university_faculty",
+        "columns": [
+          "FacNo",
+          "FacFirstName",
+          "FacLastName",
+          "FacCity",
+          "FacState",
+          "FacDept",
+          "FacRank",
+          "FacSalary",
+          "FacSupervisor",
+          "FacHireDate",
+          "FacZipCode"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "university_student",
+        "columns": [
+          "StdNo",
+          "StdFirstName",
+          "StdLastName",
+          "StdCity",
+          "StdState",
+          "StdZip",
+          "StdMajor",
+          "StdClass",
+          "StdGPA"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "university_offering",
+        "columns": [
+          "OfferNo",
+          "CourseNo",
+          "OffTerm",
+          "OffYear",
+          "OffLocation",
+          "OffTime",
+          "FacNo",
+          "OffDays"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "web_accounts",
+        "columns": [
+          "id",
+          "name",
+          "website",
+          "lat",
+          "long",
+          "primary_poc",
+          "sales_rep_id"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "web_events",
+        "columns": [
+          "id",
+          "account_id",
+          "occurred_at",
+          "channel"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "SalaryDataset",
+        "columns": [
+          "index",
+          "CompanyName",
+          "JobTitle",
+          "SalariesReported",
+          "Location",
+          "Salary"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "web_region",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "hardware_fact_gross_price",
+        "columns": [
+          "product_code",
+          "fiscal_year",
+          "gross_price"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "hardware_fact_manufacturing_cost",
+        "columns": [
+          "product_code",
+          "cost_year",
+          "manufacturing_cost"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "university_course",
+        "columns": [
+          "CourseNo",
+          "CrsDesc",
+          "CrsUnits"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "hardware_fact_sales_monthly",
+        "columns": [
+          "date",
+          "product_code",
+          "customer_code",
+          "sold_quantity",
+          "fiscal_year"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 18,
+    "total_column_count": 98
+  },
+  {
+    "database": "Pagila",
+    "tables": [
+      {
+        "table": "actor",
+        "columns": [
+          "actor_id",
+          "first_name",
+          "last_name",
+          "last_update"
+        ],
+        "primary_keys": [
+          "actor_id"
+        ]
+      },
+      {
+        "table": "country",
+        "columns": [
+          "country_id",
+          "country",
+          "last_update"
+        ],
+        "primary_keys": [
+          "country_id"
+        ]
+      },
+      {
+        "table": "city",
+        "columns": [
+          "city_id",
+          "city",
+          "country_id",
+          "last_update"
+        ],
+        "primary_keys": [
+          "city_id"
+        ]
+      },
+      {
+        "table": "address",
+        "columns": [
+          "address_id",
+          "address",
+          "address2",
+          "district",
+          "city_id",
+          "postal_code",
+          "phone",
+          "last_update"
+        ],
+        "primary_keys": [
+          "address_id"
+        ]
+      },
+      {
+        "table": "language",
+        "columns": [
+          "language_id",
+          "name",
+          "last_update"
+        ],
+        "primary_keys": [
+          "language_id"
+        ]
+      },
+      {
+        "table": "category",
+        "columns": [
+          "category_id",
+          "name",
+          "last_update"
+        ],
+        "primary_keys": [
+          "category_id"
+        ]
+      },
+      {
+        "table": "customer",
+        "columns": [
+          "customer_id",
+          "store_id",
+          "first_name",
+          "last_name",
+          "email",
+          "address_id",
+          "active",
+          "create_date",
+          "last_update"
+        ],
+        "primary_keys": [
+          "customer_id"
+        ]
+      },
+      {
+        "table": "film",
+        "columns": [
+          "film_id",
+          "title",
+          "description",
+          "release_year",
+          "language_id",
+          "original_language_id",
+          "rental_duration",
+          "rental_rate",
+          "length",
+          "replacement_cost",
+          "rating",
+          "special_features",
+          "last_update"
+        ],
+        "primary_keys": [
+          "film_id"
+        ]
+      },
+      {
+        "table": "film_actor",
+        "columns": [
+          "actor_id",
+          "film_id",
+          "last_update"
+        ],
+        "primary_keys": [
+          "actor_id",
+          "film_id"
+        ]
+      },
+      {
+        "table": "film_category",
+        "columns": [
+          "film_id",
+          "category_id",
+          "last_update"
+        ],
+        "primary_keys": [
+          "film_id",
+          "category_id"
+        ]
+      },
+      {
+        "table": "film_text",
+        "columns": [
+          "film_id",
+          "title",
+          "description"
+        ],
+        "primary_keys": [
+          "film_id"
+        ]
+      },
+      {
+        "table": "inventory",
+        "columns": [
+          "inventory_id",
+          "film_id",
+          "store_id",
+          "last_update"
+        ],
+        "primary_keys": [
+          "inventory_id"
+        ]
+      },
+      {
+        "table": "staff",
+        "columns": [
+          "staff_id",
+          "first_name",
+          "last_name",
+          "address_id",
+          "picture",
+          "email",
+          "store_id",
+          "active",
+          "username",
+          "password",
+          "last_update"
+        ],
+        "primary_keys": [
+          "staff_id"
+        ]
+      },
+      {
+        "table": "store",
+        "columns": [
+          "store_id",
+          "manager_staff_id",
+          "address_id",
+          "last_update"
+        ],
+        "primary_keys": [
+          "store_id"
+        ]
+      },
+      {
+        "table": "payment",
+        "columns": [
+          "payment_id",
+          "customer_id",
+          "staff_id",
+          "rental_id",
+          "amount",
+          "payment_date",
+          "last_update"
+        ],
+        "primary_keys": [
+          "payment_id"
+        ]
+      },
+      {
+        "table": "rental",
+        "columns": [
+          "rental_id",
+          "rental_date",
+          "inventory_id",
+          "customer_id",
+          "return_date",
+          "staff_id",
+          "last_update"
+        ],
+        "primary_keys": [
+          "rental_id"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "city",
+          "country"
+        ],
+        "column": [
+          "country_id",
+          "country_id"
+        ]
+      },
+      {
+        "table": [
+          "address",
+          "city"
+        ],
+        "column": [
+          "city_id",
+          "city_id"
+        ]
+      },
+      {
+        "table": [
+          "customer",
+          "address"
+        ],
+        "column": [
+          "address_id",
+          "address_id"
+        ]
+      },
+      {
+        "table": [
+          "customer",
+          "store"
+        ],
+        "column": [
+          "store_id",
+          "store_id"
+        ]
+      },
+      {
+        "table": [
+          "film",
+          "language"
+        ],
+        "column": [
+          "original_language_id",
+          "language_id"
+        ]
+      },
+      {
+        "table": [
+          "film",
+          "language"
+        ],
+        "column": [
+          "language_id",
+          "language_id"
+        ]
+      },
+      {
+        "table": [
+          "film_actor",
+          "film"
+        ],
+        "column": [
+          "film_id",
+          "film_id"
+        ]
+      },
+      {
+        "table": [
+          "film_actor",
+          "actor"
+        ],
+        "column": [
+          "actor_id",
+          "actor_id"
+        ]
+      },
+      {
+        "table": [
+          "film_category",
+          "category"
+        ],
+        "column": [
+          "category_id",
+          "category_id"
+        ]
+      },
+      {
+        "table": [
+          "film_category",
+          "film"
+        ],
+        "column": [
+          "film_id",
+          "film_id"
+        ]
+      },
+      {
+        "table": [
+          "inventory",
+          "film"
+        ],
+        "column": [
+          "film_id",
+          "film_id"
+        ]
+      },
+      {
+        "table": [
+          "inventory",
+          "store"
+        ],
+        "column": [
+          "store_id",
+          "store_id"
+        ]
+      },
+      {
+        "table": [
+          "staff",
+          "address"
+        ],
+        "column": [
+          "address_id",
+          "address_id"
+        ]
+      },
+      {
+        "table": [
+          "staff",
+          "store"
+        ],
+        "column": [
+          "store_id",
+          "store_id"
+        ]
+      },
+      {
+        "table": [
+          "store",
+          "address"
+        ],
+        "column": [
+          "address_id",
+          "address_id"
+        ]
+      },
+      {
+        "table": [
+          "store",
+          "staff"
+        ],
+        "column": [
+          "manager_staff_id",
+          "staff_id"
+        ]
+      },
+      {
+        "table": [
+          "payment",
+          "staff"
+        ],
+        "column": [
+          "staff_id",
+          "staff_id"
+        ]
+      },
+      {
+        "table": [
+          "payment",
+          "customer"
+        ],
+        "column": [
+          "customer_id",
+          "customer_id"
+        ]
+      },
+      {
+        "table": [
+          "payment",
+          "rental"
+        ],
+        "column": [
+          "rental_id",
+          "rental_id"
+        ]
+      },
+      {
+        "table": [
+          "rental",
+          "customer"
+        ],
+        "column": [
+          "customer_id",
+          "customer_id"
+        ]
+      },
+      {
+        "table": [
+          "rental",
+          "inventory"
+        ],
+        "column": [
+          "inventory_id",
+          "inventory_id"
+        ]
+      },
+      {
+        "table": [
+          "rental",
+          "staff"
+        ],
+        "column": [
+          "staff_id",
+          "staff_id"
+        ]
+      }
+    ],
+    "foreign_key_count": 22,
+    "table_count": 16,
+    "total_column_count": 89
+  },
+  {
+    "database": "Brazilian_E_Commerce",
+    "tables": [
+      {
+        "table": "olist_customers",
+        "columns": [
+          "customer_id",
+          "customer_unique_id",
+          "customer_zip_code_prefix",
+          "customer_city",
+          "customer_state"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "olist_sellers",
+        "columns": [
+          "seller_id",
+          "seller_zip_code_prefix",
+          "seller_city",
+          "seller_state"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "olist_order_reviews",
+        "columns": [
+          "review_id",
+          "order_id",
+          "review_score",
+          "review_comment_title",
+          "review_comment_message",
+          "review_creation_date",
+          "review_answer_timestamp"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "olist_order_items",
+        "columns": [
+          "order_id",
+          "order_item_id",
+          "product_id",
+          "seller_id",
+          "shipping_limit_date",
+          "price",
+          "freight_value"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "olist_products",
+        "columns": [
+          "product_id",
+          "product_category_name",
+          "product_name_lenght",
+          "product_description_lenght",
+          "product_photos_qty",
+          "product_weight_g",
+          "product_length_cm",
+          "product_height_cm",
+          "product_width_cm"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "olist_geolocation",
+        "columns": [
+          "geolocation_zip_code_prefix",
+          "geolocation_lat",
+          "geolocation_lng",
+          "geolocation_city",
+          "geolocation_state"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "product_category_name_translation",
+        "columns": [
+          "product_category_name",
+          "product_category_name_english"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "olist_orders",
+        "columns": [
+          "order_id",
+          "customer_id",
+          "order_status",
+          "order_purchase_timestamp",
+          "order_approved_at",
+          "order_delivered_carrier_date",
+          "order_delivered_customer_date",
+          "order_estimated_delivery_date"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "olist_order_payments",
+        "columns": [
+          "order_id",
+          "payment_sequential",
+          "payment_type",
+          "payment_installments",
+          "payment_value"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "olist_products_dataset",
+        "columns": [
+          "index",
+          "product_id",
+          "product_category_name",
+          "product_name_lenght",
+          "product_description_lenght",
+          "product_photos_qty",
+          "product_weight_g",
+          "product_length_cm",
+          "product_height_cm",
+          "product_width_cm"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 10,
+    "total_column_count": 62
+  },
+  {
+    "database": "f1",
+    "tables": [
+      {
+        "table": "circuits",
+        "columns": [
+          "circuit_id",
+          "circuit_ref",
+          "name",
+          "location",
+          "country",
+          "lat",
+          "lng",
+          "alt",
+          "url"
+        ],
+        "primary_keys": [
+          "circuit_id"
+        ]
+      },
+      {
+        "table": "constructor_results",
+        "columns": [
+          "constructor_results_id",
+          "race_id",
+          "constructor_id",
+          "points",
+          "status"
+        ],
+        "primary_keys": [
+          "constructor_results_id"
+        ]
+      },
+      {
+        "table": "constructor_standings",
+        "columns": [
+          "constructor_standings_id",
+          "race_id",
+          "constructor_id",
+          "points",
+          "position",
+          "position_text",
+          "wins"
+        ],
+        "primary_keys": [
+          "constructor_standings_id"
+        ]
+      },
+      {
+        "table": "constructors",
+        "columns": [
+          "constructor_id",
+          "constructor_ref",
+          "name",
+          "nationality",
+          "url"
+        ],
+        "primary_keys": [
+          "constructor_id"
+        ]
+      },
+      {
+        "table": "driver_standings",
+        "columns": [
+          "driver_standings_id",
+          "race_id",
+          "driver_id",
+          "points",
+          "position",
+          "position_text",
+          "wins"
+        ],
+        "primary_keys": [
+          "driver_standings_id"
+        ]
+      },
+      {
+        "table": "drivers",
+        "columns": [
+          "driver_id",
+          "driver_ref",
+          "number",
+          "code",
+          "forename",
+          "surname",
+          "dob",
+          "nationality",
+          "url"
+        ],
+        "primary_keys": [
+          "driver_id"
+        ]
+      },
+      {
+        "table": "lap_times",
+        "columns": [
+          "race_id",
+          "driver_id",
+          "lap",
+          "position",
+          "time",
+          "milliseconds"
+        ],
+        "primary_keys": [
+          "race_id",
+          "driver_id",
+          "lap"
+        ]
+      },
+      {
+        "table": "pit_stops",
+        "columns": [
+          "race_id",
+          "driver_id",
+          "stop",
+          "lap",
+          "time",
+          "duration",
+          "milliseconds"
+        ],
+        "primary_keys": [
+          "race_id",
+          "driver_id",
+          "stop"
+        ]
+      },
+      {
+        "table": "qualifying",
+        "columns": [
+          "qualify_id",
+          "race_id",
+          "driver_id",
+          "constructor_id",
+          "number",
+          "position",
+          "q1",
+          "q2",
+          "q3"
+        ],
+        "primary_keys": [
+          "qualify_id"
+        ]
+      },
+      {
+        "table": "races",
+        "columns": [
+          "race_id",
+          "year",
+          "round",
+          "circuit_id",
+          "name",
+          "date",
+          "time",
+          "url",
+          "fp1_date",
+          "fp1_time",
+          "fp2_date",
+          "fp2_time",
+          "fp3_date",
+          "fp3_time",
+          "quali_date",
+          "quali_time",
+          "sprint_date",
+          "sprint_time"
+        ],
+        "primary_keys": [
+          "race_id"
+        ]
+      },
+      {
+        "table": "results",
+        "columns": [
+          "result_id",
+          "race_id",
+          "driver_id",
+          "constructor_id",
+          "number",
+          "grid",
+          "position",
+          "position_text",
+          "position_order",
+          "points",
+          "laps",
+          "time",
+          "milliseconds",
+          "fastest_lap",
+          "rank",
+          "fastest_lap_time",
+          "fastest_lap_speed",
+          "status_id"
+        ],
+        "primary_keys": [
+          "result_id"
+        ]
+      },
+      {
+        "table": "seasons",
+        "columns": [
+          "year",
+          "url"
+        ],
+        "primary_keys": [
+          "year"
+        ]
+      },
+      {
+        "table": "status",
+        "columns": [
+          "status_id",
+          "status"
+        ],
+        "primary_keys": [
+          "status_id"
+        ]
+      },
+      {
+        "table": "sprint_results",
+        "columns": [
+          "result_id",
+          "race_id",
+          "driver_id",
+          "constructor_id",
+          "number",
+          "grid",
+          "position",
+          "position_text",
+          "position_order",
+          "points",
+          "laps",
+          "time",
+          "milliseconds",
+          "fastest_lap",
+          "fastest_lap_time",
+          "fastest_lap_speed",
+          "status_id"
+        ],
+        "primary_keys": [
+          "result_id"
+        ]
+      },
+      {
+        "table": "short_grand_prix_names",
+        "columns": [
+          "full_name",
+          "short_name"
+        ],
+        "primary_keys": [
+          "full_name"
+        ]
+      },
+      {
+        "table": "short_constructor_names",
+        "columns": [
+          "constructor_ref",
+          "short_name"
+        ],
+        "primary_keys": [
+          "constructor_ref"
+        ]
+      },
+      {
+        "table": "liveries",
+        "columns": [
+          "constructor_ref",
+          "start_year",
+          "end_year",
+          "primary_hex_code"
+        ],
+        "primary_keys": [
+          "constructor_ref",
+          "start_year",
+          "end_year"
+        ]
+      },
+      {
+        "table": "tdr_overrides",
+        "columns": [
+          "year",
+          "constructor_ref",
+          "driver_ref",
+          "team_driver_rank"
+        ],
+        "primary_keys": [
+          "year",
+          "constructor_ref",
+          "driver_ref"
+        ]
+      },
+      {
+        "table": "circuits_ext",
+        "columns": [
+          "circuit_id",
+          "circuit_ref",
+          "name",
+          "location",
+          "country",
+          "lat",
+          "lng",
+          "alt",
+          "url",
+          "last_race_year",
+          "number_of_races"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "constructors_ext",
+        "columns": [
+          "constructor_id",
+          "constructor_ref",
+          "name",
+          "nationality",
+          "url",
+          "short_name"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "drivers_ext",
+        "columns": [
+          "driver_id",
+          "driver_ref",
+          "number",
+          "code",
+          "forename",
+          "surname",
+          "full_name",
+          "dob",
+          "nationality",
+          "url"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "driver_standings_ext",
+        "columns": [
+          "driver_standings_id",
+          "race_id",
+          "driver_id",
+          "points",
+          "position",
+          "position_text",
+          "wins"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "lap_times_ext",
+        "columns": [
+          "race_id",
+          "driver_id",
+          "lap",
+          "position",
+          "time",
+          "milliseconds",
+          "seconds",
+          "running_milliseconds"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "lap_time_stats",
+        "columns": [
+          "race_id",
+          "driver_id",
+          "avg_milliseconds",
+          "avg_seconds",
+          "stdev_milliseconds",
+          "stdev_seconds"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "races_ext",
+        "columns": [
+          "race_id",
+          "year",
+          "round",
+          "circuit_id",
+          "name",
+          "date",
+          "time",
+          "url",
+          "fp1_date",
+          "fp1_time",
+          "fp2_date",
+          "fp2_time",
+          "fp3_date",
+          "fp3_time",
+          "quali_date",
+          "quali_time",
+          "sprint_date",
+          "sprint_time",
+          "is_pit_data_available",
+          "short_name",
+          "has_sprint",
+          "max_points"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "team_driver_ranks",
+        "columns": [
+          "year",
+          "constructor_id",
+          "constructor_ref",
+          "driver_id",
+          "driver_ref",
+          "team_driver_rank"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "drives",
+        "columns": [
+          "year",
+          "driver_id",
+          "drive_id",
+          "constructor_id",
+          "first_round",
+          "last_round",
+          "is_first_drive_of_season",
+          "is_final_drive_of_season"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "retirements",
+        "columns": [
+          "race_id",
+          "driver_id",
+          "lap",
+          "position_order",
+          "status_id",
+          "retirement_type"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "lap_positions",
+        "columns": [
+          "race_id",
+          "driver_id",
+          "lap",
+          "position",
+          "lap_type"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "overtakes",
+        "columns": [
+          "race_id",
+          "overtaking_driver_id",
+          "lap",
+          "current_position",
+          "previous_position",
+          "overtaken_driver_id",
+          "overtake_type",
+          "overtake_desc"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 30,
+    "total_column_count": 236
+  },
+  {
+    "database": "modern_data",
+    "tables": [
+      {
+        "table": "pizza_names",
+        "columns": [
+          "pizza_id",
+          "pizza_name"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "companies_funding",
+        "columns": [
+          "company_id",
+          "valuation",
+          "funding",
+          "select_investors"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "pizza_customer_orders",
+        "columns": [
+          "order_id",
+          "customer_id",
+          "pizza_id",
+          "exclusions",
+          "extras",
+          "order_time"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "pizza_toppings",
+        "columns": [
+          "topping_id",
+          "topping_name"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "trees",
+        "columns": [
+          "idx",
+          "tree_id",
+          "tree_dbh",
+          "stump_diam",
+          "status",
+          "health",
+          "spc_latin",
+          "spc_common",
+          "address",
+          "zipcode",
+          "borocode",
+          "boroname",
+          "nta_name",
+          "state",
+          "latitude",
+          "longitude"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "pizza_recipes",
+        "columns": [
+          "pizza_id",
+          "toppings"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "statistics",
+        "columns": [
+          "date",
+          "state",
+          "total_cases",
+          "total_deaths"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "income_trees",
+        "columns": [
+          "zipcode",
+          "Estimate_Total",
+          "Margin_of_Error_Total",
+          "Estimate_Median_income",
+          "Margin_of_Error_Median_income",
+          "Estimate_Mean_income",
+          "Margin_of_Error_Mean_income"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "pizza_clean_runner_orders",
+        "columns": [
+          "order_id",
+          "runner_id",
+          "pickup_time",
+          "distance",
+          "duration",
+          "cancellation"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "pizza_runner_orders",
+        "columns": [
+          "order_id",
+          "runner_id",
+          "pickup_time",
+          "distance",
+          "duration",
+          "cancellation"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "word_list",
+        "columns": [
+          "words"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "companies_dates",
+        "columns": [
+          "company_id",
+          "date_joined",
+          "year_founded"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "pizza_get_extras",
+        "columns": [
+          "row_id",
+          "order_id",
+          "extras",
+          "extras_count"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "pizza_get_exclusions",
+        "columns": [
+          "row_id",
+          "order_id",
+          "exclusions",
+          "total_exclusions"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "pizza_clean_customer_orders",
+        "columns": [
+          "order_id",
+          "customer_id",
+          "pizza_id",
+          "exclusions",
+          "extras",
+          "order_time"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "companies_industries",
+        "columns": [
+          "company_id",
+          "industry"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "pizza_runners",
+        "columns": [
+          "runner_id",
+          "registration_date"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 17,
+    "total_column_count": 77
+  },
+  {
+    "database": "school_scheduling",
+    "tables": [
+      {
+        "table": "Buildings",
+        "columns": [
+          "BuildingCode",
+          "BuildingName",
+          "NumberOfFloors",
+          "ElevatorAccess",
+          "SiteParkingAvailable"
+        ],
+        "primary_keys": [
+          "BuildingCode"
+        ]
+      },
+      {
+        "table": "Categories",
+        "columns": [
+          "CategoryID",
+          "CategoryDescription",
+          "DepartmentID"
+        ],
+        "primary_keys": [
+          "CategoryID"
+        ]
+      },
+      {
+        "table": "Class_Rooms",
+        "columns": [
+          "ClassRoomID",
+          "BuildingCode",
+          "PhoneAvailable"
+        ],
+        "primary_keys": [
+          "ClassRoomID"
+        ]
+      },
+      {
+        "table": "Classes",
+        "columns": [
+          "ClassID",
+          "SubjectID",
+          "ClassRoomID",
+          "Credits",
+          "StartDate",
+          "StartTime",
+          "Duration",
+          "MondaySchedule",
+          "TuesdaySchedule",
+          "WednesdaySchedule",
+          "ThursdaySchedule",
+          "FridaySchedule",
+          "SaturdaySchedule"
+        ],
+        "primary_keys": [
+          "ClassID"
+        ]
+      },
+      {
+        "table": "Departments",
+        "columns": [
+          "DepartmentID",
+          "DeptName",
+          "DeptChair"
+        ],
+        "primary_keys": [
+          "DepartmentID"
+        ]
+      },
+      {
+        "table": "Faculty",
+        "columns": [
+          "StaffID",
+          "Title",
+          "Status",
+          "Tenured"
+        ],
+        "primary_keys": [
+          "StaffID"
+        ]
+      },
+      {
+        "table": "Faculty_Categories",
+        "columns": [
+          "StaffID",
+          "CategoryID"
+        ],
+        "primary_keys": [
+          "StaffID",
+          "CategoryID"
+        ]
+      },
+      {
+        "table": "Faculty_Classes",
+        "columns": [
+          "ClassID",
+          "StaffID"
+        ],
+        "primary_keys": [
+          "ClassID",
+          "StaffID"
+        ]
+      },
+      {
+        "table": "Faculty_Subjects",
+        "columns": [
+          "StaffID",
+          "SubjectID",
+          "ProficiencyRating"
+        ],
+        "primary_keys": [
+          "StaffID",
+          "SubjectID"
+        ]
+      },
+      {
+        "table": "Majors",
+        "columns": [
+          "MajorID",
+          "Major"
+        ],
+        "primary_keys": [
+          "MajorID"
+        ]
+      },
+      {
+        "table": "Staff",
+        "columns": [
+          "StaffID",
+          "StfFirstName",
+          "StfLastname",
+          "StfStreetAddress",
+          "StfCity",
+          "StfState",
+          "StfZipCode",
+          "StfAreaCode",
+          "StfPhoneNumber",
+          "Salary",
+          "DateHired",
+          "Position"
+        ],
+        "primary_keys": [
+          "StaffID"
+        ]
+      },
+      {
+        "table": "Student_Class_Status",
+        "columns": [
+          "ClassStatus",
+          "ClassStatusDescription"
+        ],
+        "primary_keys": [
+          "ClassStatus"
+        ]
+      },
+      {
+        "table": "Student_Schedules",
+        "columns": [
+          "StudentID",
+          "ClassID",
+          "ClassStatus",
+          "Grade"
+        ],
+        "primary_keys": [
+          "StudentID",
+          "ClassID"
+        ]
+      },
+      {
+        "table": "Students",
+        "columns": [
+          "StudentID",
+          "StudFirstName",
+          "StudLastName",
+          "StudStreetAddress",
+          "StudCity",
+          "StudState",
+          "StudZipCode",
+          "StudAreaCode",
+          "StudPhoneNumber",
+          "StudGPA",
+          "StudMajor"
+        ],
+        "primary_keys": [
+          "StudentID"
+        ]
+      },
+      {
+        "table": "Subjects",
+        "columns": [
+          "SubjectID",
+          "CategoryID",
+          "SubjectCode",
+          "SubjectName",
+          "SubjectPreReq",
+          "SubjectDescription"
+        ],
+        "primary_keys": [
+          "SubjectID"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "Class_Rooms",
+          "Buildings"
+        ],
+        "column": [
+          "BuildingCode",
+          "BuildingCode"
+        ]
+      },
+      {
+        "table": [
+          "Classes",
+          "Subjects"
+        ],
+        "column": [
+          "SubjectID",
+          "SubjectID"
+        ]
+      },
+      {
+        "table": [
+          "Classes",
+          "Class_Rooms"
+        ],
+        "column": [
+          "ClassRoomID",
+          "ClassRoomID"
+        ]
+      },
+      {
+        "table": [
+          "Departments",
+          "Staff"
+        ],
+        "column": [
+          "DeptChair",
+          "StaffID"
+        ]
+      },
+      {
+        "table": [
+          "Faculty",
+          "Staff"
+        ],
+        "column": [
+          "StaffID",
+          "StaffID"
+        ]
+      },
+      {
+        "table": [
+          "Faculty_Categories",
+          "Faculty"
+        ],
+        "column": [
+          "StaffID",
+          "StaffID"
+        ]
+      },
+      {
+        "table": [
+          "Faculty_Categories",
+          "Categories"
+        ],
+        "column": [
+          "CategoryID",
+          "CategoryID"
+        ]
+      },
+      {
+        "table": [
+          "Faculty_Classes",
+          "Staff"
+        ],
+        "column": [
+          "StaffID",
+          "StaffID"
+        ]
+      },
+      {
+        "table": [
+          "Faculty_Classes",
+          "Classes"
+        ],
+        "column": [
+          "ClassID",
+          "ClassID"
+        ]
+      },
+      {
+        "table": [
+          "Faculty_Subjects",
+          "Subjects"
+        ],
+        "column": [
+          "SubjectID",
+          "SubjectID"
+        ]
+      },
+      {
+        "table": [
+          "Faculty_Subjects",
+          "Faculty"
+        ],
+        "column": [
+          "StaffID",
+          "StaffID"
+        ]
+      },
+      {
+        "table": [
+          "Student_Schedules",
+          "Students"
+        ],
+        "column": [
+          "StudentID",
+          "StudentID"
+        ]
+      },
+      {
+        "table": [
+          "Student_Schedules",
+          "Student_Class_Status"
+        ],
+        "column": [
+          "ClassStatus",
+          "ClassStatus"
+        ]
+      },
+      {
+        "table": [
+          "Student_Schedules",
+          "Classes"
+        ],
+        "column": [
+          "ClassID",
+          "ClassID"
+        ]
+      },
+      {
+        "table": [
+          "Students",
+          "Majors"
+        ],
+        "column": [
+          "StudMajor",
+          "MajorID"
+        ]
+      },
+      {
+        "table": [
+          "Subjects",
+          "Categories"
+        ],
+        "column": [
+          "CategoryID",
+          "CategoryID"
+        ]
+      }
+    ],
+    "foreign_key_count": 16,
+    "table_count": 15,
+    "total_column_count": 75
+  },
+  {
+    "database": "E_commerce",
+    "tables": [
+      {
+        "table": "product_category_name_translation",
+        "columns": [
+          "product_category_name",
+          "product_category_name_english"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "sellers",
+        "columns": [
+          "seller_id",
+          "seller_zip_code_prefix",
+          "seller_city",
+          "seller_state"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "customers",
+        "columns": [
+          "customer_id",
+          "customer_unique_id",
+          "customer_zip_code_prefix",
+          "customer_city",
+          "customer_state"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "geolocation",
+        "columns": [
+          "geolocation_zip_code_prefix",
+          "geolocation_lat",
+          "geolocation_lng",
+          "geolocation_city",
+          "geolocation_state"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "order_items",
+        "columns": [
+          "order_id",
+          "order_item_id",
+          "product_id",
+          "seller_id",
+          "shipping_limit_date",
+          "price",
+          "freight_value"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "order_payments",
+        "columns": [
+          "order_id",
+          "payment_sequential",
+          "payment_type",
+          "payment_installments",
+          "payment_value"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "order_reviews",
+        "columns": [
+          "review_id",
+          "order_id",
+          "review_score",
+          "review_comment_title",
+          "review_comment_message",
+          "review_creation_date",
+          "review_answer_timestamp"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "orders",
+        "columns": [
+          "order_id",
+          "customer_id",
+          "order_status",
+          "order_purchase_timestamp",
+          "order_approved_at",
+          "order_delivered_carrier_date",
+          "order_delivered_customer_date",
+          "order_estimated_delivery_date"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "products",
+        "columns": [
+          "product_id",
+          "product_category_name",
+          "product_name_lenght",
+          "product_description_lenght",
+          "product_photos_qty",
+          "product_weight_g",
+          "product_length_cm",
+          "product_height_cm",
+          "product_width_cm"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "leads_qualified",
+        "columns": [
+          "mql_id",
+          "first_contact_date",
+          "landing_page_id",
+          "origin"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "leads_closed",
+        "columns": [
+          "mql_id",
+          "seller_id",
+          "sdr_id",
+          "sr_id",
+          "won_date",
+          "business_segment",
+          "lead_type",
+          "lead_behaviour_profile",
+          "has_company",
+          "has_gtin",
+          "average_stock",
+          "business_type",
+          "declared_product_catalog_size",
+          "declared_monthly_revenue"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 11,
+    "total_column_count": 70
+  },
+  {
+    "database": "imdb_movies",
+    "tables": [
+      {
+        "table": "ERD",
+        "columns": [
+          "table",
+          "column",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5",
+          "Unnamed: 6",
+          "Unnamed: 7",
+          "Unnamed: 8",
+          "Unnamed: 9",
+          "Unnamed: 10",
+          "Unnamed: 11",
+          "Unnamed: 12"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "movies",
+        "columns": [
+          "id",
+          "title",
+          "year",
+          "date_published",
+          "duration",
+          "country",
+          "worlwide_gross_income",
+          "languages",
+          "production_company"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "genre",
+        "columns": [
+          "movie_id",
+          "genre"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "director_mapping",
+        "columns": [
+          "movie_id",
+          "name_id"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "role_mapping",
+        "columns": [
+          "movie_id",
+          "name_id",
+          "category"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "names",
+        "columns": [
+          "id",
+          "name",
+          "height",
+          "date_of_birth",
+          "known_for_movies"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "ratings",
+        "columns": [
+          "movie_id",
+          "avg_rating",
+          "total_votes",
+          "median_rating"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 7,
+    "total_column_count": 38
+  },
+  {
+    "database": "sqlite-sakila",
+    "tables": [
+      {
+        "table": "actor",
+        "columns": [
+          "actor_id",
+          "first_name",
+          "last_name",
+          "last_update"
+        ],
+        "primary_keys": [
+          "actor_id"
+        ]
+      },
+      {
+        "table": "country",
+        "columns": [
+          "country_id",
+          "country",
+          "last_update"
+        ],
+        "primary_keys": [
+          "country_id"
+        ]
+      },
+      {
+        "table": "city",
+        "columns": [
+          "city_id",
+          "city",
+          "country_id",
+          "last_update"
+        ],
+        "primary_keys": [
+          "city_id"
+        ]
+      },
+      {
+        "table": "address",
+        "columns": [
+          "address_id",
+          "address",
+          "address2",
+          "district",
+          "city_id",
+          "postal_code",
+          "phone",
+          "last_update"
+        ],
+        "primary_keys": [
+          "address_id"
+        ]
+      },
+      {
+        "table": "language",
+        "columns": [
+          "language_id",
+          "name",
+          "last_update"
+        ],
+        "primary_keys": [
+          "language_id"
+        ]
+      },
+      {
+        "table": "category",
+        "columns": [
+          "category_id",
+          "name",
+          "last_update"
+        ],
+        "primary_keys": [
+          "category_id"
+        ]
+      },
+      {
+        "table": "customer",
+        "columns": [
+          "customer_id",
+          "store_id",
+          "first_name",
+          "last_name",
+          "email",
+          "address_id",
+          "active",
+          "create_date",
+          "last_update"
+        ],
+        "primary_keys": [
+          "customer_id"
+        ]
+      },
+      {
+        "table": "film",
+        "columns": [
+          "film_id",
+          "title",
+          "description",
+          "release_year",
+          "language_id",
+          "original_language_id",
+          "rental_duration",
+          "rental_rate",
+          "length",
+          "replacement_cost",
+          "rating",
+          "special_features",
+          "last_update"
+        ],
+        "primary_keys": [
+          "film_id"
+        ]
+      },
+      {
+        "table": "film_actor",
+        "columns": [
+          "actor_id",
+          "film_id",
+          "last_update"
+        ],
+        "primary_keys": [
+          "actor_id",
+          "film_id"
+        ]
+      },
+      {
+        "table": "film_category",
+        "columns": [
+          "film_id",
+          "category_id",
+          "last_update"
+        ],
+        "primary_keys": [
+          "film_id",
+          "category_id"
+        ]
+      },
+      {
+        "table": "film_text",
+        "columns": [
+          "film_id",
+          "title",
+          "description"
+        ],
+        "primary_keys": [
+          "film_id"
+        ]
+      },
+      {
+        "table": "inventory",
+        "columns": [
+          "inventory_id",
+          "film_id",
+          "store_id",
+          "last_update"
+        ],
+        "primary_keys": [
+          "inventory_id"
+        ]
+      },
+      {
+        "table": "staff",
+        "columns": [
+          "staff_id",
+          "first_name",
+          "last_name",
+          "address_id",
+          "picture",
+          "email",
+          "store_id",
+          "active",
+          "username",
+          "password",
+          "last_update"
+        ],
+        "primary_keys": [
+          "staff_id"
+        ]
+      },
+      {
+        "table": "store",
+        "columns": [
+          "store_id",
+          "manager_staff_id",
+          "address_id",
+          "last_update"
+        ],
+        "primary_keys": [
+          "store_id"
+        ]
+      },
+      {
+        "table": "payment",
+        "columns": [
+          "payment_id",
+          "customer_id",
+          "staff_id",
+          "rental_id",
+          "amount",
+          "payment_date",
+          "last_update"
+        ],
+        "primary_keys": [
+          "payment_id"
+        ]
+      },
+      {
+        "table": "rental",
+        "columns": [
+          "rental_id",
+          "rental_date",
+          "inventory_id",
+          "customer_id",
+          "return_date",
+          "staff_id",
+          "last_update"
+        ],
+        "primary_keys": [
+          "rental_id"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "city",
+          "country"
+        ],
+        "column": [
+          "country_id",
+          "country_id"
+        ]
+      },
+      {
+        "table": [
+          "address",
+          "city"
+        ],
+        "column": [
+          "city_id",
+          "city_id"
+        ]
+      },
+      {
+        "table": [
+          "customer",
+          "address"
+        ],
+        "column": [
+          "address_id",
+          "address_id"
+        ]
+      },
+      {
+        "table": [
+          "customer",
+          "store"
+        ],
+        "column": [
+          "store_id",
+          "store_id"
+        ]
+      },
+      {
+        "table": [
+          "film",
+          "language"
+        ],
+        "column": [
+          "original_language_id",
+          "language_id"
+        ]
+      },
+      {
+        "table": [
+          "film",
+          "language"
+        ],
+        "column": [
+          "language_id",
+          "language_id"
+        ]
+      },
+      {
+        "table": [
+          "film_actor",
+          "film"
+        ],
+        "column": [
+          "film_id",
+          "film_id"
+        ]
+      },
+      {
+        "table": [
+          "film_actor",
+          "actor"
+        ],
+        "column": [
+          "actor_id",
+          "actor_id"
+        ]
+      },
+      {
+        "table": [
+          "film_category",
+          "category"
+        ],
+        "column": [
+          "category_id",
+          "category_id"
+        ]
+      },
+      {
+        "table": [
+          "film_category",
+          "film"
+        ],
+        "column": [
+          "film_id",
+          "film_id"
+        ]
+      },
+      {
+        "table": [
+          "inventory",
+          "film"
+        ],
+        "column": [
+          "film_id",
+          "film_id"
+        ]
+      },
+      {
+        "table": [
+          "inventory",
+          "store"
+        ],
+        "column": [
+          "store_id",
+          "store_id"
+        ]
+      },
+      {
+        "table": [
+          "staff",
+          "address"
+        ],
+        "column": [
+          "address_id",
+          "address_id"
+        ]
+      },
+      {
+        "table": [
+          "staff",
+          "store"
+        ],
+        "column": [
+          "store_id",
+          "store_id"
+        ]
+      },
+      {
+        "table": [
+          "store",
+          "address"
+        ],
+        "column": [
+          "address_id",
+          "address_id"
+        ]
+      },
+      {
+        "table": [
+          "store",
+          "staff"
+        ],
+        "column": [
+          "manager_staff_id",
+          "staff_id"
+        ]
+      },
+      {
+        "table": [
+          "payment",
+          "staff"
+        ],
+        "column": [
+          "staff_id",
+          "staff_id"
+        ]
+      },
+      {
+        "table": [
+          "payment",
+          "customer"
+        ],
+        "column": [
+          "customer_id",
+          "customer_id"
+        ]
+      },
+      {
+        "table": [
+          "payment",
+          "rental"
+        ],
+        "column": [
+          "rental_id",
+          "rental_id"
+        ]
+      },
+      {
+        "table": [
+          "rental",
+          "customer"
+        ],
+        "column": [
+          "customer_id",
+          "customer_id"
+        ]
+      },
+      {
+        "table": [
+          "rental",
+          "inventory"
+        ],
+        "column": [
+          "inventory_id",
+          "inventory_id"
+        ]
+      },
+      {
+        "table": [
+          "rental",
+          "staff"
+        ],
+        "column": [
+          "staff_id",
+          "staff_id"
+        ]
+      }
+    ],
+    "foreign_key_count": 22,
+    "table_count": 16,
+    "total_column_count": 89
+  },
+  {
+    "database": "Airlines",
+    "tables": [
+      {
+        "table": "aircrafts_data",
+        "columns": [
+          "aircraft_code",
+          "model",
+          "range"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "airports_data",
+        "columns": [
+          "airport_code",
+          "airport_name",
+          "city",
+          "coordinates",
+          "timezone"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "boarding_passes",
+        "columns": [
+          "ticket_no",
+          "flight_id",
+          "boarding_no",
+          "seat_no"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "bookings",
+        "columns": [
+          "book_ref",
+          "book_date",
+          "total_amount"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "flights",
+        "columns": [
+          "flight_id",
+          "flight_no",
+          "scheduled_departure",
+          "scheduled_arrival",
+          "departure_airport",
+          "arrival_airport",
+          "status",
+          "aircraft_code",
+          "actual_departure",
+          "actual_arrival"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "seats",
+        "columns": [
+          "aircraft_code",
+          "seat_no",
+          "fare_conditions"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "ticket_flights",
+        "columns": [
+          "ticket_no",
+          "flight_id",
+          "fare_conditions",
+          "amount"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "tickets",
+        "columns": [
+          "ticket_no",
+          "book_ref",
+          "passenger_id"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 8,
+    "total_column_count": 35
+  },
+  {
+    "database": "Db-IMDB",
+    "tables": [
+      {
+        "table": "Movie",
+        "columns": [
+          "index",
+          "MID",
+          "title",
+          "year",
+          "rating",
+          "num_votes"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "Genre",
+        "columns": [
+          "index",
+          "Name",
+          "GID"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "Language",
+        "columns": [
+          "index",
+          "Name",
+          "LAID"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "Country",
+        "columns": [
+          "index",
+          "Name",
+          "CID"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "Location",
+        "columns": [
+          "index",
+          "Name",
+          "LID"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "M_Location",
+        "columns": [
+          "index",
+          "MID",
+          "LID",
+          "ID"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "M_Country",
+        "columns": [
+          "index",
+          "MID",
+          "CID",
+          "ID"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "M_Language",
+        "columns": [
+          "index",
+          "MID",
+          "LAID",
+          "ID"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "M_Genre",
+        "columns": [
+          "index",
+          "MID",
+          "GID",
+          "ID"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "Person",
+        "columns": [
+          "index",
+          "PID",
+          "Name",
+          "Gender"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "M_Producer",
+        "columns": [
+          "index",
+          "MID",
+          "PID",
+          "ID"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "M_Director",
+        "columns": [
+          "index",
+          "MID",
+          "PID",
+          "ID"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "M_Cast",
+        "columns": [
+          "index",
+          "MID",
+          "PID",
+          "ID"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 13,
+    "total_column_count": 50
+  },
+  {
+    "database": "oracle_sql",
+    "tables": [
+      {
+        "table": "customers",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "conway_gen_zero",
+        "columns": [
+          "x",
+          "y",
+          "alive"
+        ],
+        "primary_keys": [
+          "x",
+          "y"
+        ]
+      },
+      {
+        "table": "web_devices",
+        "columns": [
+          "day",
+          "pc",
+          "tablet",
+          "phone"
+        ],
+        "primary_keys": [
+          "day"
+        ]
+      },
+      {
+        "table": "web_demographics",
+        "columns": [
+          "day",
+          "m_tw_cnt",
+          "m_tw_qty",
+          "m_fb_cnt",
+          "m_fb_qty",
+          "f_tw_cnt",
+          "f_tw_qty",
+          "f_fb_cnt",
+          "f_fb_qty"
+        ],
+        "primary_keys": [
+          "day"
+        ]
+      },
+      {
+        "table": "channels_dim",
+        "columns": [
+          "id",
+          "name",
+          "shortcut"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "gender_dim",
+        "columns": [
+          "letter",
+          "name"
+        ],
+        "primary_keys": [
+          "letter"
+        ]
+      },
+      {
+        "table": "packaging",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "packaging_relations",
+        "columns": [
+          "packaging_id",
+          "contains_id",
+          "qty"
+        ],
+        "primary_keys": [
+          "packaging_id",
+          "contains_id"
+        ]
+      },
+      {
+        "table": "product_groups",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "products",
+        "columns": [
+          "id",
+          "name",
+          "group_id"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "monthly_sales",
+        "columns": [
+          "product_id",
+          "mth",
+          "qty"
+        ],
+        "primary_keys": [
+          "product_id",
+          "mth"
+        ]
+      },
+      {
+        "table": "breweries",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "purchases",
+        "columns": [
+          "id",
+          "purchased",
+          "brewery_id",
+          "product_id",
+          "qty",
+          "cost"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "product_alcohol",
+        "columns": [
+          "product_id",
+          "sales_volume",
+          "abv"
+        ],
+        "primary_keys": [
+          "product_id"
+        ]
+      },
+      {
+        "table": "customer_favorites",
+        "columns": [
+          "customer_id",
+          "favorite_list"
+        ],
+        "primary_keys": [
+          "customer_id"
+        ]
+      },
+      {
+        "table": "customer_reviews",
+        "columns": [
+          "customer_id",
+          "review_list"
+        ],
+        "primary_keys": [
+          "customer_id"
+        ]
+      },
+      {
+        "table": "locations",
+        "columns": [
+          "id",
+          "warehouse",
+          "aisle",
+          "position"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "inventory",
+        "columns": [
+          "id",
+          "location_id",
+          "product_id",
+          "purchase_id",
+          "qty"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "orders",
+        "columns": [
+          "id",
+          "customer_id",
+          "ordered",
+          "delivery"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "orderlines",
+        "columns": [
+          "id",
+          "order_id",
+          "product_id",
+          "qty",
+          "amount"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "monthly_budget",
+        "columns": [
+          "product_id",
+          "mth",
+          "qty"
+        ],
+        "primary_keys": [
+          "product_id",
+          "mth"
+        ]
+      },
+      {
+        "table": "product_minimums",
+        "columns": [
+          "product_id",
+          "qty_minimum",
+          "qty_purchase"
+        ],
+        "primary_keys": [
+          "product_id"
+        ]
+      },
+      {
+        "table": "stock",
+        "columns": [
+          "symbol",
+          "company"
+        ],
+        "primary_keys": [
+          "symbol"
+        ]
+      },
+      {
+        "table": "ticker",
+        "columns": [
+          "symbol",
+          "day",
+          "price"
+        ],
+        "primary_keys": [
+          "symbol",
+          "day"
+        ]
+      },
+      {
+        "table": "web_apps",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "web_pages",
+        "columns": [
+          "app_id",
+          "page_no",
+          "friendly_url"
+        ],
+        "primary_keys": [
+          "app_id",
+          "page_no"
+        ]
+      },
+      {
+        "table": "web_counter_hist",
+        "columns": [
+          "app_id",
+          "page_no",
+          "day",
+          "counter"
+        ],
+        "primary_keys": [
+          "app_id",
+          "page_no",
+          "day"
+        ]
+      },
+      {
+        "table": "server_heartbeat",
+        "columns": [
+          "server",
+          "beat_time"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "web_page_visits",
+        "columns": [
+          "client_ip",
+          "visit_time",
+          "app_id",
+          "page_no"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "employees",
+        "columns": [
+          "id",
+          "name",
+          "title",
+          "supervisor_id"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "emp_hire_periods",
+        "columns": [
+          "emp_id",
+          "start_",
+          "end_",
+          "title"
+        ],
+        "primary_keys": [
+          "emp_id",
+          "start_"
+        ]
+      },
+      {
+        "table": "picking_list",
+        "columns": [
+          "id",
+          "created",
+          "picker_emp_id"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "picking_line",
+        "columns": [
+          "picklist_id",
+          "line_no",
+          "location_id",
+          "order_id",
+          "product_id",
+          "qty"
+        ],
+        "primary_keys": [
+          "picklist_id",
+          "line_no"
+        ]
+      },
+      {
+        "table": "picking_log",
+        "columns": [
+          "picklist_id",
+          "log_time",
+          "activity",
+          "location_id",
+          "pickline_no"
+        ],
+        "primary_keys": [
+          "picklist_id",
+          "log_time"
+        ]
+      },
+      {
+        "table": "id_name_type",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "id_name_coll_type",
+        "columns": [
+          "collection_id"
+        ],
+        "primary_keys": [
+          "collection_id"
+        ]
+      },
+      {
+        "table": "id_name_coll_entries",
+        "columns": [
+          "collection_id",
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "collection_id",
+          "id"
+        ]
+      },
+      {
+        "table": "favorite_coll_type",
+        "columns": [
+          "id"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "packaging_relations",
+          "packaging"
+        ],
+        "column": [
+          "contains_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "packaging_relations",
+          "packaging"
+        ],
+        "column": [
+          "packaging_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "products",
+          "product_groups"
+        ],
+        "column": [
+          "group_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "monthly_sales",
+          "products"
+        ],
+        "column": [
+          "product_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "purchases",
+          "products"
+        ],
+        "column": [
+          "product_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "purchases",
+          "breweries"
+        ],
+        "column": [
+          "brewery_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "product_alcohol",
+          "products"
+        ],
+        "column": [
+          "product_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "customer_favorites",
+          "customers"
+        ],
+        "column": [
+          "customer_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "customer_reviews",
+          "customers"
+        ],
+        "column": [
+          "customer_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "inventory",
+          "purchases"
+        ],
+        "column": [
+          "purchase_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "inventory",
+          "products"
+        ],
+        "column": [
+          "product_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "inventory",
+          "locations"
+        ],
+        "column": [
+          "location_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "orders",
+          "customers"
+        ],
+        "column": [
+          "customer_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "orderlines",
+          "products"
+        ],
+        "column": [
+          "product_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "orderlines",
+          "orders"
+        ],
+        "column": [
+          "order_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "monthly_budget",
+          "products"
+        ],
+        "column": [
+          "product_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "product_minimums",
+          "products"
+        ],
+        "column": [
+          "product_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "ticker",
+          "stock"
+        ],
+        "column": [
+          "symbol",
+          "symbol"
+        ]
+      },
+      {
+        "table": [
+          "web_pages",
+          "web_apps"
+        ],
+        "column": [
+          "app_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "web_counter_hist",
+          "web_pages"
+        ],
+        "column": [
+          "app_id",
+          "app_id"
+        ]
+      },
+      {
+        "table": [
+          "web_counter_hist",
+          "web_pages"
+        ],
+        "column": [
+          "page_no",
+          "page_no"
+        ]
+      },
+      {
+        "table": [
+          "web_page_visits",
+          "web_pages"
+        ],
+        "column": [
+          "app_id",
+          "app_id"
+        ]
+      },
+      {
+        "table": [
+          "web_page_visits",
+          "web_pages"
+        ],
+        "column": [
+          "page_no",
+          "page_no"
+        ]
+      },
+      {
+        "table": [
+          "emp_hire_periods",
+          "employees"
+        ],
+        "column": [
+          "emp_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "picking_list",
+          "employees"
+        ],
+        "column": [
+          "picker_emp_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "picking_line",
+          "products"
+        ],
+        "column": [
+          "product_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "picking_line",
+          "orders"
+        ],
+        "column": [
+          "order_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "picking_line",
+          "locations"
+        ],
+        "column": [
+          "location_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "picking_line",
+          "picking_list"
+        ],
+        "column": [
+          "picklist_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "picking_log",
+          "picking_line"
+        ],
+        "column": [
+          "picklist_id",
+          "picklist_id"
+        ]
+      },
+      {
+        "table": [
+          "picking_log",
+          "picking_line"
+        ],
+        "column": [
+          "pickline_no",
+          "line_no"
+        ]
+      },
+      {
+        "table": [
+          "picking_log",
+          "locations"
+        ],
+        "column": [
+          "location_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "picking_log",
+          "picking_list"
+        ],
+        "column": [
+          "picklist_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "id_name_coll_entries",
+          "id_name_coll_type"
+        ],
+        "column": [
+          "collection_id",
+          "collection_id"
+        ]
+      }
+    ],
+    "foreign_key_count": 34,
+    "table_count": 38,
+    "total_column_count": 124
+  },
+  {
+    "database": "IPL",
+    "tables": [
+      {
+        "table": "player",
+        "columns": [
+          "player_id",
+          "player_name",
+          "dob",
+          "batting_hand",
+          "bowling_skill",
+          "country_name"
+        ],
+        "primary_keys": [
+          "player_id"
+        ]
+      },
+      {
+        "table": "team",
+        "columns": [
+          "team_id",
+          "name"
+        ],
+        "primary_keys": [
+          "team_id"
+        ]
+      },
+      {
+        "table": "match",
+        "columns": [
+          "match_id",
+          "team_1",
+          "team_2",
+          "match_date",
+          "season_id",
+          "venue",
+          "toss_winner",
+          "toss_decision",
+          "win_type",
+          "win_margin",
+          "outcome_type",
+          "match_winner",
+          "man_of_the_match"
+        ],
+        "primary_keys": [
+          "match_id"
+        ]
+      },
+      {
+        "table": "player_match",
+        "columns": [
+          "match_id",
+          "player_id",
+          "role",
+          "team_id"
+        ],
+        "primary_keys": [
+          "match_id",
+          "player_id"
+        ]
+      },
+      {
+        "table": "ball_by_ball",
+        "columns": [
+          "match_id",
+          "over_id",
+          "ball_id",
+          "innings_no",
+          "team_batting",
+          "team_bowling",
+          "striker_batting_position",
+          "striker",
+          "non_striker",
+          "bowler"
+        ],
+        "primary_keys": [
+          "match_id",
+          "over_id",
+          "ball_id",
+          "innings_no"
+        ]
+      },
+      {
+        "table": "batsman_scored",
+        "columns": [
+          "match_id",
+          "over_id",
+          "ball_id",
+          "runs_scored",
+          "innings_no"
+        ],
+        "primary_keys": [
+          "match_id",
+          "over_id",
+          "ball_id",
+          "innings_no"
+        ]
+      },
+      {
+        "table": "wicket_taken",
+        "columns": [
+          "match_id",
+          "over_id",
+          "ball_id",
+          "player_out",
+          "kind_out",
+          "innings_no"
+        ],
+        "primary_keys": [
+          "match_id",
+          "over_id",
+          "ball_id",
+          "innings_no"
+        ]
+      },
+      {
+        "table": "extra_runs",
+        "columns": [
+          "match_id",
+          "over_id",
+          "ball_id",
+          "extra_type",
+          "extra_runs",
+          "innings_no"
+        ],
+        "primary_keys": [
+          "match_id",
+          "over_id",
+          "ball_id",
+          "innings_no"
+        ]
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 8,
+    "total_column_count": 52
+  },
+  {
+    "database": "WWE",
+    "tables": [
+      {
+        "table": "Promotions",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Tables",
+        "columns": [
+          "id",
+          "html",
+          "url"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Cards",
+        "columns": [
+          "id",
+          "table_id",
+          "location_id",
+          "promotion_id",
+          "event_date",
+          "event_id",
+          "url",
+          "info_html",
+          "match_html"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Locations",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Events",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Matches",
+        "columns": [
+          "id",
+          "card_id",
+          "winner_id",
+          "win_type",
+          "loser_id",
+          "match_type_id",
+          "duration",
+          "title_id",
+          "title_change"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Belts",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Wrestlers",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Match_Types",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 9,
+    "total_column_count": 33
+  },
+  {
+    "database": "Baseball",
+    "tables": [
+      {
+        "table": "all_star",
+        "columns": [
+          "player_id",
+          "year",
+          "game_num",
+          "game_id",
+          "team_id",
+          "league_id",
+          "gp",
+          "starting_pos"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "appearances",
+        "columns": [
+          "year",
+          "team_id",
+          "league_id",
+          "player_id",
+          "g_all",
+          "gs",
+          "g_batting",
+          "g_defense",
+          "g_p",
+          "g_c",
+          "g_1b",
+          "g_2b",
+          "g_3b",
+          "g_ss",
+          "g_lf",
+          "g_cf",
+          "g_rf",
+          "g_of",
+          "g_dh",
+          "g_ph",
+          "g_pr"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "manager_award",
+        "columns": [
+          "player_id",
+          "award_id",
+          "year",
+          "league_id",
+          "tie",
+          "notes"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "player_award",
+        "columns": [
+          "player_id",
+          "award_id",
+          "year",
+          "league_id",
+          "tie",
+          "notes"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "manager_award_vote",
+        "columns": [
+          "award_id",
+          "year",
+          "league_id",
+          "player_id",
+          "points_won",
+          "points_max",
+          "votes_first"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "player_award_vote",
+        "columns": [
+          "award_id",
+          "year",
+          "league_id",
+          "player_id",
+          "points_won",
+          "points_max",
+          "votes_first"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "batting",
+        "columns": [
+          "player_id",
+          "year",
+          "stint",
+          "team_id",
+          "league_id",
+          "g",
+          "ab",
+          "r",
+          "h",
+          "double",
+          "triple",
+          "hr",
+          "rbi",
+          "sb",
+          "cs",
+          "bb",
+          "so",
+          "ibb",
+          "hbp",
+          "sh",
+          "sf",
+          "g_idp"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "batting_postseason",
+        "columns": [
+          "year",
+          "round",
+          "player_id",
+          "team_id",
+          "league_id",
+          "g",
+          "ab",
+          "r",
+          "h",
+          "double",
+          "triple",
+          "hr",
+          "rbi",
+          "sb",
+          "cs",
+          "bb",
+          "so",
+          "ibb",
+          "hbp",
+          "sh",
+          "sf",
+          "g_idp"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "player_college",
+        "columns": [
+          "player_id",
+          "college_id",
+          "year"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "fielding",
+        "columns": [
+          "player_id",
+          "year",
+          "stint",
+          "team_id",
+          "league_id",
+          "pos",
+          "g",
+          "gs",
+          "inn_outs",
+          "po",
+          "a",
+          "e",
+          "dp",
+          "pb",
+          "wp",
+          "sb",
+          "cs",
+          "zr"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "fielding_outfield",
+        "columns": [
+          "player_id",
+          "year",
+          "stint",
+          "glf",
+          "gcf",
+          "grf"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "fielding_postseason",
+        "columns": [
+          "player_id",
+          "year",
+          "team_id",
+          "league_id",
+          "round",
+          "pos",
+          "g",
+          "gs",
+          "inn_outs",
+          "po",
+          "a",
+          "e",
+          "dp",
+          "tp",
+          "pb",
+          "sb",
+          "cs"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "hall_of_fame",
+        "columns": [
+          "player_id",
+          "yearid",
+          "votedby",
+          "ballots",
+          "needed",
+          "votes",
+          "inducted",
+          "category",
+          "needed_note"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "home_game",
+        "columns": [
+          "year",
+          "league_id",
+          "team_id",
+          "park_id",
+          "span_first",
+          "span_last",
+          "games",
+          "openings",
+          "attendance"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "manager",
+        "columns": [
+          "player_id",
+          "year",
+          "team_id",
+          "league_id",
+          "inseason",
+          "g",
+          "w",
+          "l",
+          "rank",
+          "plyr_mgr"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "manager_half",
+        "columns": [
+          "player_id",
+          "year",
+          "team_id",
+          "league_id",
+          "inseason",
+          "half",
+          "g",
+          "w",
+          "l",
+          "rank"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "player",
+        "columns": [
+          "player_id",
+          "birth_year",
+          "birth_month",
+          "birth_day",
+          "birth_country",
+          "birth_state",
+          "birth_city",
+          "death_year",
+          "death_month",
+          "death_day",
+          "death_country",
+          "death_state",
+          "death_city",
+          "name_first",
+          "name_last",
+          "name_given",
+          "weight",
+          "height",
+          "bats",
+          "throws",
+          "debut",
+          "final_game",
+          "retro_id",
+          "bbref_id"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "park",
+        "columns": [
+          "park_id",
+          "park_name",
+          "park_alias",
+          "city",
+          "state",
+          "country"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "pitching",
+        "columns": [
+          "player_id",
+          "year",
+          "stint",
+          "team_id",
+          "league_id",
+          "w",
+          "l",
+          "g",
+          "gs",
+          "cg",
+          "sho",
+          "sv",
+          "ipouts",
+          "h",
+          "er",
+          "hr",
+          "bb",
+          "so",
+          "baopp",
+          "era",
+          "ibb",
+          "wp",
+          "hbp",
+          "bk",
+          "bfp",
+          "gf",
+          "r",
+          "sh",
+          "sf",
+          "g_idp"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "pitching_postseason",
+        "columns": [
+          "player_id",
+          "year",
+          "round",
+          "team_id",
+          "league_id",
+          "w",
+          "l",
+          "g",
+          "gs",
+          "cg",
+          "sho",
+          "sv",
+          "ipouts",
+          "h",
+          "er",
+          "hr",
+          "bb",
+          "so",
+          "baopp",
+          "era",
+          "ibb",
+          "wp",
+          "hbp",
+          "bk",
+          "bfp",
+          "gf",
+          "r",
+          "sh",
+          "sf",
+          "g_idp"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "salary",
+        "columns": [
+          "year",
+          "team_id",
+          "league_id",
+          "player_id",
+          "salary"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "college",
+        "columns": [
+          "college_id",
+          "name_full",
+          "city",
+          "state",
+          "country"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "postseason",
+        "columns": [
+          "year",
+          "round",
+          "team_id_winner",
+          "league_id_winner",
+          "team_id_loser",
+          "league_id_loser",
+          "wins",
+          "losses",
+          "ties"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "team",
+        "columns": [
+          "year",
+          "league_id",
+          "team_id",
+          "franchise_id",
+          "div_id",
+          "rank",
+          "g",
+          "ghome",
+          "w",
+          "l",
+          "div_win",
+          "wc_win",
+          "lg_win",
+          "ws_win",
+          "r",
+          "ab",
+          "h",
+          "double",
+          "triple",
+          "hr",
+          "bb",
+          "so",
+          "sb",
+          "cs",
+          "hbp",
+          "sf",
+          "ra",
+          "er",
+          "era",
+          "cg",
+          "sho",
+          "sv",
+          "ipouts",
+          "ha",
+          "hra",
+          "bba",
+          "soa",
+          "e",
+          "dp",
+          "fp",
+          "name",
+          "park",
+          "attendance",
+          "bpf",
+          "ppf",
+          "team_id_br",
+          "team_id_lahman45",
+          "team_id_retro"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "team_franchise",
+        "columns": [
+          "franchise_id",
+          "franchise_name",
+          "active",
+          "na_assoc"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "team_half",
+        "columns": [
+          "year",
+          "league_id",
+          "team_id",
+          "half",
+          "div_id",
+          "div_win",
+          "rank",
+          "g",
+          "w",
+          "l"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 26,
+    "total_column_count": 352
+  },
+  {
+    "database": "northwind",
+    "tables": [
+      {
+        "table": "categories",
+        "columns": [
+          "categoryid",
+          "categoryname",
+          "description",
+          "picture"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "customercustomerdemo",
+        "columns": [
+          "customerid",
+          "customertypeid"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "customerdemographics",
+        "columns": [
+          "customertypeid",
+          "customerdesc"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "customers",
+        "columns": [
+          "customerid",
+          "companyname",
+          "contactname",
+          "contacttitle",
+          "address",
+          "city",
+          "region",
+          "postalcode",
+          "country",
+          "phone",
+          "fax"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "employees",
+        "columns": [
+          "employeeid",
+          "lastname",
+          "firstname",
+          "title",
+          "titleofcourtesy",
+          "birthdate",
+          "hiredate",
+          "address",
+          "city",
+          "region",
+          "postalcode",
+          "country",
+          "homephone",
+          "extension",
+          "photo",
+          "notes",
+          "reportsto",
+          "photopath"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "employeeterritories",
+        "columns": [
+          "employeeid",
+          "territoryid"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "order_details",
+        "columns": [
+          "orderid",
+          "productid",
+          "unitprice",
+          "quantity",
+          "discount"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "orders",
+        "columns": [
+          "orderid",
+          "customerid",
+          "employeeid",
+          "orderdate",
+          "requireddate",
+          "shippeddate",
+          "shipvia",
+          "freight",
+          "shipname",
+          "shipaddress",
+          "shipcity",
+          "shipregion",
+          "shippostalcode",
+          "shipcountry"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "products",
+        "columns": [
+          "productid",
+          "productname",
+          "supplierid",
+          "categoryid",
+          "quantityperunit",
+          "unitprice",
+          "unitsinstock",
+          "unitsonorder",
+          "reorderlevel",
+          "discontinued"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "region",
+        "columns": [
+          "regionid",
+          "regiondescription"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "shippers",
+        "columns": [
+          "shipperid",
+          "companyname",
+          "phone"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "suppliers",
+        "columns": [
+          "supplierid",
+          "companyname",
+          "contactname",
+          "contacttitle",
+          "address",
+          "city",
+          "region",
+          "postalcode",
+          "country",
+          "phone",
+          "fax",
+          "homepage"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "territories",
+        "columns": [
+          "territoryid",
+          "territorydescription",
+          "regionid"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "usstates",
+        "columns": [
+          "stateid",
+          "statename",
+          "stateabbr",
+          "stateregion"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "customergroupthreshold",
+        "columns": [
+          "groupname",
+          "rangebottom",
+          "rangetop"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [],
+    "foreign_key_count": 0,
+    "table_count": 15,
+    "total_column_count": 95
+  },
+  {
+    "database": "BowlingLeague",
+    "tables": [
+      {
+        "table": "Bowler_Scores",
+        "columns": [
+          "MatchID",
+          "GameNumber",
+          "BowlerID",
+          "RawScore",
+          "HandiCapScore",
+          "WonGame"
+        ],
+        "primary_keys": [
+          "MatchID",
+          "GameNumber",
+          "BowlerID"
+        ]
+      },
+      {
+        "table": "Bowler_Scores_Archive",
+        "columns": [
+          "MatchID",
+          "GameNumber",
+          "BowlerID",
+          "RawScore",
+          "HandiCapScore",
+          "WonGame"
+        ],
+        "primary_keys": [
+          "MatchID",
+          "GameNumber",
+          "BowlerID"
+        ]
+      },
+      {
+        "table": "Bowlers",
+        "columns": [
+          "BowlerID",
+          "BowlerLastName",
+          "BowlerFirstName",
+          "BowlerMiddleInit",
+          "BowlerAddress",
+          "BowlerCity",
+          "BowlerState",
+          "BowlerZip",
+          "BowlerPhoneNumber",
+          "TeamID",
+          "BowlerTotalPins",
+          "BowlerGamesBowled",
+          "BowlerCurrentAverage",
+          "BowlerCurrentHcp"
+        ],
+        "primary_keys": [
+          "BowlerID"
+        ]
+      },
+      {
+        "table": "Match_Games",
+        "columns": [
+          "MatchID",
+          "GameNumber",
+          "WinningTeamID"
+        ],
+        "primary_keys": [
+          "MatchID",
+          "GameNumber"
+        ]
+      },
+      {
+        "table": "Match_Games_Archive",
+        "columns": [
+          "MatchID",
+          "GameNumber",
+          "WinningTeamID"
+        ],
+        "primary_keys": [
+          "MatchID",
+          "GameNumber"
+        ]
+      },
+      {
+        "table": "Teams",
+        "columns": [
+          "TeamID",
+          "TeamName",
+          "CaptainID"
+        ],
+        "primary_keys": [
+          "TeamID"
+        ]
+      },
+      {
+        "table": "Tournaments",
+        "columns": [
+          "TourneyID",
+          "TourneyDate",
+          "TourneyLocation"
+        ],
+        "primary_keys": [
+          "TourneyID"
+        ]
+      },
+      {
+        "table": "Tournaments_Archive",
+        "columns": [
+          "TourneyID",
+          "TourneyDate",
+          "TourneyLocation"
+        ],
+        "primary_keys": [
+          "TourneyID"
+        ]
+      },
+      {
+        "table": "Tourney_Matches",
+        "columns": [
+          "MatchID",
+          "TourneyID",
+          "Lanes",
+          "OddLaneTeamID",
+          "EvenLaneTeamID"
+        ],
+        "primary_keys": [
+          "MatchID"
+        ]
+      },
+      {
+        "table": "Tourney_Matches_Archive",
+        "columns": [
+          "MatchID",
+          "TourneyID",
+          "Lanes",
+          "OddLaneTeamID",
+          "EvenLaneTeamID"
+        ],
+        "primary_keys": [
+          "MatchID"
+        ]
+      },
+      {
+        "table": "WAZips",
+        "columns": [
+          "ZIP",
+          "City",
+          "State"
+        ],
+        "primary_keys": [
+          "ZIP"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "Bowler_Scores",
+          "Match_Games"
+        ],
+        "column": [
+          "MatchID",
+          "MatchID"
+        ]
+      },
+      {
+        "table": [
+          "Bowler_Scores",
+          "Match_Games"
+        ],
+        "column": [
+          "GameNumber",
+          "GameNumber"
+        ]
+      },
+      {
+        "table": [
+          "Bowler_Scores",
+          "Bowlers"
+        ],
+        "column": [
+          "BowlerID",
+          "BowlerID"
+        ]
+      },
+      {
+        "table": [
+          "Bowler_Scores_Archive",
+          "Match_Games_Archive"
+        ],
+        "column": [
+          "MatchID",
+          "MatchID"
+        ]
+      },
+      {
+        "table": [
+          "Bowler_Scores_Archive",
+          "Match_Games_Archive"
+        ],
+        "column": [
+          "GameNumber",
+          "GameNumber"
+        ]
+      },
+      {
+        "table": [
+          "Bowlers",
+          "Teams"
+        ],
+        "column": [
+          "TeamID",
+          "TeamID"
+        ]
+      },
+      {
+        "table": [
+          "Tourney_Matches",
+          "Tournaments"
+        ],
+        "column": [
+          "TourneyID",
+          "TourneyID"
+        ]
+      },
+      {
+        "table": [
+          "Tourney_Matches",
+          "Teams"
+        ],
+        "column": [
+          "OddLaneTeamID",
+          "TeamID"
+        ]
+      },
+      {
+        "table": [
+          "Tourney_Matches",
+          "Teams"
+        ],
+        "column": [
+          "EvenLaneTeamID",
+          "TeamID"
+        ]
+      },
+      {
+        "table": [
+          "Tourney_Matches_Archive",
+          "Tournaments_Archive"
+        ],
+        "column": [
+          "TourneyID",
+          "TourneyID"
+        ]
+      }
+    ],
+    "foreign_key_count": 10,
+    "table_count": 11,
+    "total_column_count": 54
+  },
+  {
+    "database": "chinook",
+    "tables": [
+      {
+        "table": "albums",
+        "columns": [
+          "AlbumId",
+          "Title",
+          "ArtistId"
+        ],
+        "primary_keys": [
+          "AlbumId"
+        ]
+      },
+      {
+        "table": "artists",
+        "columns": [
+          "ArtistId",
+          "Name"
+        ],
+        "primary_keys": [
+          "ArtistId"
+        ]
+      },
+      {
+        "table": "customers",
+        "columns": [
+          "CustomerId",
+          "FirstName",
+          "LastName",
+          "Company",
+          "Address",
+          "City",
+          "State",
+          "Country",
+          "PostalCode",
+          "Phone",
+          "Fax",
+          "Email",
+          "SupportRepId"
+        ],
+        "primary_keys": [
+          "CustomerId"
+        ]
+      },
+      {
+        "table": "employees",
+        "columns": [
+          "EmployeeId",
+          "LastName",
+          "FirstName",
+          "Title",
+          "ReportsTo",
+          "BirthDate",
+          "HireDate",
+          "Address",
+          "City",
+          "State",
+          "Country",
+          "PostalCode",
+          "Phone",
+          "Fax",
+          "Email"
+        ],
+        "primary_keys": [
+          "EmployeeId"
+        ]
+      },
+      {
+        "table": "genres",
+        "columns": [
+          "GenreId",
+          "Name"
+        ],
+        "primary_keys": [
+          "GenreId"
+        ]
+      },
+      {
+        "table": "invoices",
+        "columns": [
+          "InvoiceId",
+          "CustomerId",
+          "InvoiceDate",
+          "BillingAddress",
+          "BillingCity",
+          "BillingState",
+          "BillingCountry",
+          "BillingPostalCode",
+          "Total"
+        ],
+        "primary_keys": [
+          "InvoiceId"
+        ]
+      },
+      {
+        "table": "invoice_items",
+        "columns": [
+          "InvoiceLineId",
+          "InvoiceId",
+          "TrackId",
+          "UnitPrice",
+          "Quantity"
+        ],
+        "primary_keys": [
+          "InvoiceLineId"
+        ]
+      },
+      {
+        "table": "media_types",
+        "columns": [
+          "MediaTypeId",
+          "Name"
+        ],
+        "primary_keys": [
+          "MediaTypeId"
+        ]
+      },
+      {
+        "table": "playlists",
+        "columns": [
+          "PlaylistId",
+          "Name"
+        ],
+        "primary_keys": [
+          "PlaylistId"
+        ]
+      },
+      {
+        "table": "playlist_track",
+        "columns": [
+          "PlaylistId",
+          "TrackId"
+        ],
+        "primary_keys": [
+          "PlaylistId",
+          "TrackId"
+        ]
+      },
+      {
+        "table": "tracks",
+        "columns": [
+          "TrackId",
+          "Name",
+          "AlbumId",
+          "MediaTypeId",
+          "GenreId",
+          "Composer",
+          "Milliseconds",
+          "Bytes",
+          "UnitPrice"
+        ],
+        "primary_keys": [
+          "TrackId"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "albums",
+          "artists"
+        ],
+        "column": [
+          "ArtistId",
+          "ArtistId"
+        ]
+      },
+      {
+        "table": [
+          "customers",
+          "employees"
+        ],
+        "column": [
+          "SupportRepId",
+          "EmployeeId"
+        ]
+      },
+      {
+        "table": [
+          "invoices",
+          "customers"
+        ],
+        "column": [
+          "CustomerId",
+          "CustomerId"
+        ]
+      },
+      {
+        "table": [
+          "invoice_items",
+          "tracks"
+        ],
+        "column": [
+          "TrackId",
+          "TrackId"
+        ]
+      },
+      {
+        "table": [
+          "invoice_items",
+          "invoices"
+        ],
+        "column": [
+          "InvoiceId",
+          "InvoiceId"
+        ]
+      },
+      {
+        "table": [
+          "playlist_track",
+          "tracks"
+        ],
+        "column": [
+          "TrackId",
+          "TrackId"
+        ]
+      },
+      {
+        "table": [
+          "playlist_track",
+          "playlists"
+        ],
+        "column": [
+          "PlaylistId",
+          "PlaylistId"
+        ]
+      },
+      {
+        "table": [
+          "tracks",
+          "media_types"
+        ],
+        "column": [
+          "MediaTypeId",
+          "MediaTypeId"
+        ]
+      },
+      {
+        "table": [
+          "tracks",
+          "genres"
+        ],
+        "column": [
+          "GenreId",
+          "GenreId"
+        ]
+      },
+      {
+        "table": [
+          "tracks",
+          "albums"
+        ],
+        "column": [
+          "AlbumId",
+          "AlbumId"
+        ]
+      }
+    ],
+    "foreign_key_count": 10,
+    "table_count": 11,
+    "total_column_count": 64
+  }
+]

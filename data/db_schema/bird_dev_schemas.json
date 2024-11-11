@@ -1,0 +1,2542 @@
+[
+  {
+    "database": "european_football_2",
+    "tables": [
+      {
+        "table": "Player_Attributes",
+        "columns": [
+          "id",
+          "player_fifa_api_id",
+          "player_api_id",
+          "date",
+          "overall_rating",
+          "potential",
+          "preferred_foot",
+          "attacking_work_rate",
+          "defensive_work_rate",
+          "crossing",
+          "finishing",
+          "heading_accuracy",
+          "short_passing",
+          "volleys",
+          "dribbling",
+          "curve",
+          "free_kick_accuracy",
+          "long_passing",
+          "ball_control",
+          "acceleration",
+          "sprint_speed",
+          "agility",
+          "reactions",
+          "balance",
+          "shot_power",
+          "jumping",
+          "stamina",
+          "strength",
+          "long_shots",
+          "aggression",
+          "interceptions",
+          "positioning",
+          "vision",
+          "penalties",
+          "marking",
+          "standing_tackle",
+          "sliding_tackle",
+          "gk_diving",
+          "gk_handling",
+          "gk_kicking",
+          "gk_positioning",
+          "gk_reflexes"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Player",
+        "columns": [
+          "id",
+          "player_api_id",
+          "player_name",
+          "player_fifa_api_id",
+          "birthday",
+          "height",
+          "weight"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "League",
+        "columns": [
+          "id",
+          "country_id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Country",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Team",
+        "columns": [
+          "id",
+          "team_api_id",
+          "team_fifa_api_id",
+          "team_long_name",
+          "team_short_name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Team_Attributes",
+        "columns": [
+          "id",
+          "team_fifa_api_id",
+          "team_api_id",
+          "date",
+          "buildUpPlaySpeed",
+          "buildUpPlaySpeedClass",
+          "buildUpPlayDribbling",
+          "buildUpPlayDribblingClass",
+          "buildUpPlayPassing",
+          "buildUpPlayPassingClass",
+          "buildUpPlayPositioningClass",
+          "chanceCreationPassing",
+          "chanceCreationPassingClass",
+          "chanceCreationCrossing",
+          "chanceCreationCrossingClass",
+          "chanceCreationShooting",
+          "chanceCreationShootingClass",
+          "chanceCreationPositioningClass",
+          "defencePressure",
+          "defencePressureClass",
+          "defenceAggression",
+          "defenceAggressionClass",
+          "defenceTeamWidth",
+          "defenceTeamWidthClass",
+          "defenceDefenderLineClass"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "Match",
+        "columns": [
+          "id",
+          "country_id",
+          "league_id",
+          "season",
+          "stage",
+          "date",
+          "match_api_id",
+          "home_team_api_id",
+          "away_team_api_id",
+          "home_team_goal",
+          "away_team_goal",
+          "home_player_X1",
+          "home_player_X2",
+          "home_player_X3",
+          "home_player_X4",
+          "home_player_X5",
+          "home_player_X6",
+          "home_player_X7",
+          "home_player_X8",
+          "home_player_X9",
+          "home_player_X10",
+          "home_player_X11",
+          "away_player_X1",
+          "away_player_X2",
+          "away_player_X3",
+          "away_player_X4",
+          "away_player_X5",
+          "away_player_X6",
+          "away_player_X7",
+          "away_player_X8",
+          "away_player_X9",
+          "away_player_X10",
+          "away_player_X11",
+          "home_player_Y1",
+          "home_player_Y2",
+          "home_player_Y3",
+          "home_player_Y4",
+          "home_player_Y5",
+          "home_player_Y6",
+          "home_player_Y7",
+          "home_player_Y8",
+          "home_player_Y9",
+          "home_player_Y10",
+          "home_player_Y11",
+          "away_player_Y1",
+          "away_player_Y2",
+          "away_player_Y3",
+          "away_player_Y4",
+          "away_player_Y5",
+          "away_player_Y6",
+          "away_player_Y7",
+          "away_player_Y8",
+          "away_player_Y9",
+          "away_player_Y10",
+          "away_player_Y11",
+          "home_player_1",
+          "home_player_2",
+          "home_player_3",
+          "home_player_4",
+          "home_player_5",
+          "home_player_6",
+          "home_player_7",
+          "home_player_8",
+          "home_player_9",
+          "home_player_10",
+          "home_player_11",
+          "away_player_1",
+          "away_player_2",
+          "away_player_3",
+          "away_player_4",
+          "away_player_5",
+          "away_player_6",
+          "away_player_7",
+          "away_player_8",
+          "away_player_9",
+          "away_player_10",
+          "away_player_11",
+          "goal",
+          "shoton",
+          "shotoff",
+          "foulcommit",
+          "card",
+          "cross",
+          "corner",
+          "possession",
+          "B365H",
+          "B365D",
+          "B365A",
+          "BWH",
+          "BWD",
+          "BWA",
+          "IWH",
+          "IWD",
+          "IWA",
+          "LBH",
+          "LBD",
+          "LBA",
+          "PSH",
+          "PSD",
+          "PSA",
+          "WHH",
+          "WHD",
+          "WHA",
+          "SJH",
+          "SJD",
+          "SJA",
+          "VCH",
+          "VCD",
+          "VCA",
+          "GBH",
+          "GBD",
+          "GBA",
+          "BSH",
+          "BSD",
+          "BSA"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "Player_Attributes",
+          "Player"
+        ],
+        "column": [
+          "player_api_id",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Player_Attributes",
+          "Player"
+        ],
+        "column": [
+          "player_fifa_api_id",
+          "player_fifa_api_id"
+        ]
+      },
+      {
+        "table": [
+          "League",
+          "country"
+        ],
+        "column": [
+          "country_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "Team_Attributes",
+          "Team"
+        ],
+        "column": [
+          "team_api_id",
+          "team_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Team_Attributes",
+          "Team"
+        ],
+        "column": [
+          "team_fifa_api_id",
+          "team_fifa_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_11",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_10",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_9",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_8",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_7",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_6",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_5",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_4",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_3",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_2",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "away_player_1",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_11",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_10",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_9",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_8",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_7",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_6",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_5",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_4",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_3",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_2",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Player"
+        ],
+        "column": [
+          "home_player_1",
+          "player_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Team"
+        ],
+        "column": [
+          "away_team_api_id",
+          "team_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Team"
+        ],
+        "column": [
+          "home_team_api_id",
+          "team_api_id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "League"
+        ],
+        "column": [
+          "league_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "Match",
+          "Country"
+        ],
+        "column": [
+          "country_id",
+          "id"
+        ]
+      }
+    ],
+    "foreign_key_count": 31,
+    "table_count": 7,
+    "total_column_count": 199
+  },
+  {
+    "database": "student_club",
+    "tables": [
+      {
+        "table": "event",
+        "columns": [
+          "event_id",
+          "event_name",
+          "event_date",
+          "type",
+          "notes",
+          "location",
+          "status"
+        ],
+        "primary_keys": [
+          "event_id"
+        ]
+      },
+      {
+        "table": "major",
+        "columns": [
+          "major_id",
+          "major_name",
+          "department",
+          "college"
+        ],
+        "primary_keys": [
+          "major_id"
+        ]
+      },
+      {
+        "table": "zip_code",
+        "columns": [
+          "zip_code",
+          "type",
+          "city",
+          "county",
+          "state",
+          "short_state"
+        ],
+        "primary_keys": [
+          "zip_code"
+        ]
+      },
+      {
+        "table": "attendance",
+        "columns": [
+          "link_to_event",
+          "link_to_member"
+        ],
+        "primary_keys": [
+          "link_to_event",
+          "link_to_member"
+        ]
+      },
+      {
+        "table": "budget",
+        "columns": [
+          "budget_id",
+          "category",
+          "spent",
+          "remaining",
+          "amount",
+          "event_status",
+          "link_to_event"
+        ],
+        "primary_keys": [
+          "budget_id"
+        ]
+      },
+      {
+        "table": "expense",
+        "columns": [
+          "expense_id",
+          "expense_description",
+          "expense_date",
+          "cost",
+          "approved",
+          "link_to_member",
+          "link_to_budget"
+        ],
+        "primary_keys": [
+          "expense_id"
+        ]
+      },
+      {
+        "table": "income",
+        "columns": [
+          "income_id",
+          "date_received",
+          "amount",
+          "source",
+          "notes",
+          "link_to_member"
+        ],
+        "primary_keys": [
+          "income_id"
+        ]
+      },
+      {
+        "table": "member",
+        "columns": [
+          "member_id",
+          "first_name",
+          "last_name",
+          "email",
+          "position",
+          "t_shirt_size",
+          "phone",
+          "zip",
+          "link_to_major"
+        ],
+        "primary_keys": [
+          "member_id"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "attendance",
+          "member"
+        ],
+        "column": [
+          "link_to_member",
+          "member_id"
+        ]
+      },
+      {
+        "table": [
+          "attendance",
+          "event"
+        ],
+        "column": [
+          "link_to_event",
+          "event_id"
+        ]
+      },
+      {
+        "table": [
+          "budget",
+          "event"
+        ],
+        "column": [
+          "link_to_event",
+          "event_id"
+        ]
+      },
+      {
+        "table": [
+          "expense",
+          "member"
+        ],
+        "column": [
+          "link_to_member",
+          "member_id"
+        ]
+      },
+      {
+        "table": [
+          "expense",
+          "budget"
+        ],
+        "column": [
+          "link_to_budget",
+          "budget_id"
+        ]
+      },
+      {
+        "table": [
+          "income",
+          "member"
+        ],
+        "column": [
+          "link_to_member",
+          "member_id"
+        ]
+      },
+      {
+        "table": [
+          "member",
+          "zip_code"
+        ],
+        "column": [
+          "zip",
+          "zip_code"
+        ]
+      },
+      {
+        "table": [
+          "member",
+          "major"
+        ],
+        "column": [
+          "link_to_major",
+          "major_id"
+        ]
+      }
+    ],
+    "foreign_key_count": 8,
+    "table_count": 8,
+    "total_column_count": 48
+  },
+  {
+    "database": "financial",
+    "tables": [
+      {
+        "table": "account",
+        "columns": [
+          "account_id",
+          "district_id",
+          "frequency",
+          "date"
+        ],
+        "primary_keys": [
+          "account_id"
+        ]
+      },
+      {
+        "table": "card",
+        "columns": [
+          "card_id",
+          "disp_id",
+          "type",
+          "issued"
+        ],
+        "primary_keys": [
+          "card_id"
+        ]
+      },
+      {
+        "table": "client",
+        "columns": [
+          "client_id",
+          "gender",
+          "birth_date",
+          "district_id"
+        ],
+        "primary_keys": [
+          "client_id"
+        ]
+      },
+      {
+        "table": "disp",
+        "columns": [
+          "disp_id",
+          "client_id",
+          "account_id",
+          "type"
+        ],
+        "primary_keys": [
+          "disp_id"
+        ]
+      },
+      {
+        "table": "district",
+        "columns": [
+          "district_id",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A6",
+          "A7",
+          "A8",
+          "A9",
+          "A10",
+          "A11",
+          "A12",
+          "A13",
+          "A14",
+          "A15",
+          "A16"
+        ],
+        "primary_keys": [
+          "district_id"
+        ]
+      },
+      {
+        "table": "loan",
+        "columns": [
+          "loan_id",
+          "account_id",
+          "date",
+          "amount",
+          "duration",
+          "payments",
+          "status"
+        ],
+        "primary_keys": [
+          "loan_id"
+        ]
+      },
+      {
+        "table": "order",
+        "columns": [
+          "order_id",
+          "account_id",
+          "bank_to",
+          "account_to",
+          "amount",
+          "k_symbol"
+        ],
+        "primary_keys": [
+          "order_id"
+        ]
+      },
+      {
+        "table": "trans",
+        "columns": [
+          "trans_id",
+          "account_id",
+          "date",
+          "type",
+          "operation",
+          "amount",
+          "balance",
+          "k_symbol",
+          "bank",
+          "account"
+        ],
+        "primary_keys": [
+          "trans_id"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "account",
+          "district"
+        ],
+        "column": [
+          "district_id",
+          "district_id"
+        ]
+      },
+      {
+        "table": [
+          "card",
+          "disp"
+        ],
+        "column": [
+          "disp_id",
+          "disp_id"
+        ]
+      },
+      {
+        "table": [
+          "client",
+          "district"
+        ],
+        "column": [
+          "district_id",
+          "district_id"
+        ]
+      },
+      {
+        "table": [
+          "disp",
+          "client"
+        ],
+        "column": [
+          "client_id",
+          "client_id"
+        ]
+      },
+      {
+        "table": [
+          "disp",
+          "account"
+        ],
+        "column": [
+          "account_id",
+          "account_id"
+        ]
+      },
+      {
+        "table": [
+          "loan",
+          "account"
+        ],
+        "column": [
+          "account_id",
+          "account_id"
+        ]
+      },
+      {
+        "table": [
+          "order",
+          "account"
+        ],
+        "column": [
+          "account_id",
+          "account_id"
+        ]
+      },
+      {
+        "table": [
+          "trans",
+          "account"
+        ],
+        "column": [
+          "account_id",
+          "account_id"
+        ]
+      }
+    ],
+    "foreign_key_count": 8,
+    "table_count": 8,
+    "total_column_count": 55
+  },
+  {
+    "database": "superhero",
+    "tables": [
+      {
+        "table": "alignment",
+        "columns": [
+          "id",
+          "alignment"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "attribute",
+        "columns": [
+          "id",
+          "attribute_name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "colour",
+        "columns": [
+          "id",
+          "colour"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "gender",
+        "columns": [
+          "id",
+          "gender"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "publisher",
+        "columns": [
+          "id",
+          "publisher_name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "race",
+        "columns": [
+          "id",
+          "race"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "superhero",
+        "columns": [
+          "id",
+          "superhero_name",
+          "full_name",
+          "gender_id",
+          "eye_colour_id",
+          "hair_colour_id",
+          "skin_colour_id",
+          "race_id",
+          "publisher_id",
+          "alignment_id",
+          "height_cm",
+          "weight_kg"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "hero_attribute",
+        "columns": [
+          "hero_id",
+          "attribute_id",
+          "attribute_value"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "superpower",
+        "columns": [
+          "id",
+          "power_name"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "hero_power",
+        "columns": [
+          "hero_id",
+          "power_id"
+        ],
+        "primary_keys": []
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "superhero",
+          "colour"
+        ],
+        "column": [
+          "skin_colour_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "superhero",
+          "race"
+        ],
+        "column": [
+          "race_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "superhero",
+          "publisher"
+        ],
+        "column": [
+          "publisher_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "superhero",
+          "colour"
+        ],
+        "column": [
+          "hair_colour_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "superhero",
+          "gender"
+        ],
+        "column": [
+          "gender_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "superhero",
+          "colour"
+        ],
+        "column": [
+          "eye_colour_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "superhero",
+          "alignment"
+        ],
+        "column": [
+          "alignment_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "hero_attribute",
+          "superhero"
+        ],
+        "column": [
+          "hero_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "hero_attribute",
+          "attribute"
+        ],
+        "column": [
+          "attribute_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "hero_power",
+          "superpower"
+        ],
+        "column": [
+          "power_id",
+          "id"
+        ]
+      },
+      {
+        "table": [
+          "hero_power",
+          "superhero"
+        ],
+        "column": [
+          "hero_id",
+          "id"
+        ]
+      }
+    ],
+    "foreign_key_count": 11,
+    "table_count": 10,
+    "total_column_count": 31
+  },
+  {
+    "database": "card_games",
+    "tables": [
+      {
+        "table": "cards",
+        "columns": [
+          "id",
+          "artist",
+          "asciiName",
+          "availability",
+          "borderColor",
+          "cardKingdomFoilId",
+          "cardKingdomId",
+          "colorIdentity",
+          "colorIndicator",
+          "colors",
+          "convertedManaCost",
+          "duelDeck",
+          "edhrecRank",
+          "faceConvertedManaCost",
+          "faceName",
+          "flavorName",
+          "flavorText",
+          "frameEffects",
+          "frameVersion",
+          "hand",
+          "hasAlternativeDeckLimit",
+          "hasContentWarning",
+          "hasFoil",
+          "hasNonFoil",
+          "isAlternative",
+          "isFullArt",
+          "isOnlineOnly",
+          "isOversized",
+          "isPromo",
+          "isReprint",
+          "isReserved",
+          "isStarter",
+          "isStorySpotlight",
+          "isTextless",
+          "isTimeshifted",
+          "keywords",
+          "layout",
+          "leadershipSkills",
+          "life",
+          "loyalty",
+          "manaCost",
+          "mcmId",
+          "mcmMetaId",
+          "mtgArenaId",
+          "mtgjsonV4Id",
+          "mtgoFoilId",
+          "mtgoId",
+          "multiverseId",
+          "name",
+          "number",
+          "originalReleaseDate",
+          "originalText",
+          "originalType",
+          "otherFaceIds",
+          "power",
+          "printings",
+          "promoTypes",
+          "purchaseUrls",
+          "rarity",
+          "scryfallId",
+          "scryfallIllustrationId",
+          "scryfallOracleId",
+          "setCode",
+          "side",
+          "subtypes",
+          "supertypes",
+          "tcgplayerProductId",
+          "text",
+          "toughness",
+          "type",
+          "types",
+          "uuid",
+          "variations",
+          "watermark"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "foreign_data",
+        "columns": [
+          "id",
+          "flavorText",
+          "language",
+          "multiverseid",
+          "name",
+          "text",
+          "type",
+          "uuid"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "legalities",
+        "columns": [
+          "id",
+          "format",
+          "status",
+          "uuid"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "sets",
+        "columns": [
+          "id",
+          "baseSetSize",
+          "block",
+          "booster",
+          "code",
+          "isFoilOnly",
+          "isForeignOnly",
+          "isNonFoilOnly",
+          "isOnlineOnly",
+          "isPartialPreview",
+          "keyruneCode",
+          "mcmId",
+          "mcmIdExtras",
+          "mcmName",
+          "mtgoCode",
+          "name",
+          "parentCode",
+          "releaseDate",
+          "tcgplayerGroupId",
+          "totalSetSize",
+          "type"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "set_translations",
+        "columns": [
+          "id",
+          "language",
+          "setCode",
+          "translation"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      },
+      {
+        "table": "rulings",
+        "columns": [
+          "id",
+          "date",
+          "text",
+          "uuid"
+        ],
+        "primary_keys": [
+          "id"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "foreign_data",
+          "cards"
+        ],
+        "column": [
+          "uuid",
+          "uuid"
+        ]
+      },
+      {
+        "table": [
+          "legalities",
+          "cards"
+        ],
+        "column": [
+          "uuid",
+          "uuid"
+        ]
+      },
+      {
+        "table": [
+          "set_translations",
+          "sets"
+        ],
+        "column": [
+          "setCode",
+          "code"
+        ]
+      },
+      {
+        "table": [
+          "rulings",
+          "cards"
+        ],
+        "column": [
+          "uuid",
+          "uuid"
+        ]
+      }
+    ],
+    "foreign_key_count": 4,
+    "table_count": 6,
+    "total_column_count": 115
+  },
+  {
+    "database": "codebase_community",
+    "tables": [
+      {
+        "table": "badges",
+        "columns": [
+          "Id",
+          "UserId",
+          "Name",
+          "Date"
+        ],
+        "primary_keys": [
+          "Id"
+        ]
+      },
+      {
+        "table": "comments",
+        "columns": [
+          "Id",
+          "PostId",
+          "Score",
+          "Text",
+          "CreationDate",
+          "UserId",
+          "UserDisplayName"
+        ],
+        "primary_keys": [
+          "Id"
+        ]
+      },
+      {
+        "table": "postHistory",
+        "columns": [
+          "Id",
+          "PostHistoryTypeId",
+          "PostId",
+          "RevisionGUID",
+          "CreationDate",
+          "UserId",
+          "Text",
+          "Comment",
+          "UserDisplayName"
+        ],
+        "primary_keys": [
+          "Id"
+        ]
+      },
+      {
+        "table": "postLinks",
+        "columns": [
+          "Id",
+          "CreationDate",
+          "PostId",
+          "RelatedPostId",
+          "LinkTypeId"
+        ],
+        "primary_keys": [
+          "Id"
+        ]
+      },
+      {
+        "table": "posts",
+        "columns": [
+          "Id",
+          "PostTypeId",
+          "AcceptedAnswerId",
+          "CreaionDate",
+          "Score",
+          "ViewCount",
+          "Body",
+          "OwnerUserId",
+          "LasActivityDate",
+          "Title",
+          "Tags",
+          "AnswerCount",
+          "CommentCount",
+          "FavoriteCount",
+          "LastEditorUserId",
+          "LastEditDate",
+          "CommunityOwnedDate",
+          "ParentId",
+          "ClosedDate",
+          "OwnerDisplayName",
+          "LastEditorDisplayName"
+        ],
+        "primary_keys": [
+          "Id"
+        ]
+      },
+      {
+        "table": "tags",
+        "columns": [
+          "Id",
+          "TagName",
+          "Count",
+          "ExcerptPostId",
+          "WikiPostId"
+        ],
+        "primary_keys": [
+          "Id"
+        ]
+      },
+      {
+        "table": "users",
+        "columns": [
+          "Id",
+          "Reputation",
+          "CreationDate",
+          "DisplayName",
+          "LastAccessDate",
+          "WebsiteUrl",
+          "Location",
+          "AboutMe",
+          "Views",
+          "UpVotes",
+          "DownVotes",
+          "AccountId",
+          "Age",
+          "ProfileImageUrl"
+        ],
+        "primary_keys": [
+          "Id"
+        ]
+      },
+      {
+        "table": "votes",
+        "columns": [
+          "Id",
+          "PostId",
+          "VoteTypeId",
+          "CreationDate",
+          "UserId",
+          "BountyAmount"
+        ],
+        "primary_keys": [
+          "Id"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "badges",
+          "users"
+        ],
+        "column": [
+          "UserId",
+          "Id"
+        ]
+      },
+      {
+        "table": [
+          "comments",
+          "users"
+        ],
+        "column": [
+          "UserId",
+          "Id"
+        ]
+      },
+      {
+        "table": [
+          "comments",
+          "posts"
+        ],
+        "column": [
+          "PostId",
+          "Id"
+        ]
+      },
+      {
+        "table": [
+          "postHistory",
+          "users"
+        ],
+        "column": [
+          "UserId",
+          "Id"
+        ]
+      },
+      {
+        "table": [
+          "postHistory",
+          "posts"
+        ],
+        "column": [
+          "PostId",
+          "Id"
+        ]
+      },
+      {
+        "table": [
+          "postLinks",
+          "posts"
+        ],
+        "column": [
+          "RelatedPostId",
+          "Id"
+        ]
+      },
+      {
+        "table": [
+          "postLinks",
+          "posts"
+        ],
+        "column": [
+          "PostId",
+          "Id"
+        ]
+      },
+      {
+        "table": [
+          "posts",
+          "users"
+        ],
+        "column": [
+          "OwnerUserId",
+          "Id"
+        ]
+      },
+      {
+        "table": [
+          "posts",
+          "users"
+        ],
+        "column": [
+          "LastEditorUserId",
+          "Id"
+        ]
+      },
+      {
+        "table": [
+          "tags",
+          "posts"
+        ],
+        "column": [
+          "ExcerptPostId",
+          "Id"
+        ]
+      },
+      {
+        "table": [
+          "votes",
+          "users"
+        ],
+        "column": [
+          "UserId",
+          "Id"
+        ]
+      },
+      {
+        "table": [
+          "votes",
+          "posts"
+        ],
+        "column": [
+          "PostId",
+          "Id"
+        ]
+      }
+    ],
+    "foreign_key_count": 12,
+    "table_count": 8,
+    "total_column_count": 71
+  },
+  {
+    "database": "california_schools",
+    "tables": [
+      {
+        "table": "frpm",
+        "columns": [
+          "CDSCode",
+          "Academic Year",
+          "County Code",
+          "District Code",
+          "School Code",
+          "County Name",
+          "District Name",
+          "School Name",
+          "District Type",
+          "School Type",
+          "Educational Option Type",
+          "NSLP Provision Status",
+          "Charter School (Y/N)",
+          "Charter School Number",
+          "Charter Funding Type",
+          "IRC",
+          "Low Grade",
+          "High Grade",
+          "Enrollment (K-12)",
+          "Free Meal Count (K-12)",
+          "Percent (%) Eligible Free (K-12)",
+          "FRPM Count (K-12)",
+          "Percent (%) Eligible FRPM (K-12)",
+          "Enrollment (Ages 5-17)",
+          "Free Meal Count (Ages 5-17)",
+          "Percent (%) Eligible Free (Ages 5-17)",
+          "FRPM Count (Ages 5-17)",
+          "Percent (%) Eligible FRPM (Ages 5-17)",
+          "2013-14 CALPADS Fall 1 Certification Status"
+        ],
+        "primary_keys": [
+          "CDSCode"
+        ]
+      },
+      {
+        "table": "satscores",
+        "columns": [
+          "cds",
+          "rtype",
+          "sname",
+          "dname",
+          "cname",
+          "enroll12",
+          "NumTstTakr",
+          "AvgScrRead",
+          "AvgScrMath",
+          "AvgScrWrite",
+          "NumGE1500"
+        ],
+        "primary_keys": [
+          "cds"
+        ]
+      },
+      {
+        "table": "schools",
+        "columns": [
+          "CDSCode",
+          "NCESDist",
+          "NCESSchool",
+          "StatusType",
+          "County",
+          "District",
+          "School",
+          "Street",
+          "StreetAbr",
+          "City",
+          "Zip",
+          "State",
+          "MailStreet",
+          "MailStrAbr",
+          "MailCity",
+          "MailZip",
+          "MailState",
+          "Phone",
+          "Ext",
+          "Website",
+          "OpenDate",
+          "ClosedDate",
+          "Charter",
+          "CharterNum",
+          "FundingType",
+          "DOC",
+          "DOCType",
+          "SOC",
+          "SOCType",
+          "EdOpsCode",
+          "EdOpsName",
+          "EILCode",
+          "EILName",
+          "GSoffered",
+          "GSserved",
+          "Virtual",
+          "Magnet",
+          "Latitude",
+          "Longitude",
+          "AdmFName1",
+          "AdmLName1",
+          "AdmEmail1",
+          "AdmFName2",
+          "AdmLName2",
+          "AdmEmail2",
+          "AdmFName3",
+          "AdmLName3",
+          "AdmEmail3",
+          "LastUpdate"
+        ],
+        "primary_keys": [
+          "CDSCode"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "frpm",
+          "schools"
+        ],
+        "column": [
+          "CDSCode",
+          "CDSCode"
+        ]
+      },
+      {
+        "table": [
+          "satscores",
+          "schools"
+        ],
+        "column": [
+          "cds",
+          "CDSCode"
+        ]
+      }
+    ],
+    "foreign_key_count": 2,
+    "table_count": 3,
+    "total_column_count": 89
+  },
+  {
+    "database": "formula_1",
+    "tables": [
+      {
+        "table": "circuits",
+        "columns": [
+          "circuitId",
+          "circuitRef",
+          "name",
+          "location",
+          "country",
+          "lat",
+          "lng",
+          "alt",
+          "url"
+        ],
+        "primary_keys": [
+          "circuitId"
+        ]
+      },
+      {
+        "table": "constructors",
+        "columns": [
+          "constructorId",
+          "constructorRef",
+          "name",
+          "nationality",
+          "url"
+        ],
+        "primary_keys": [
+          "constructorId"
+        ]
+      },
+      {
+        "table": "drivers",
+        "columns": [
+          "driverId",
+          "driverRef",
+          "number",
+          "code",
+          "forename",
+          "surname",
+          "dob",
+          "nationality",
+          "url"
+        ],
+        "primary_keys": [
+          "driverId"
+        ]
+      },
+      {
+        "table": "seasons",
+        "columns": [
+          "year",
+          "url"
+        ],
+        "primary_keys": [
+          "year"
+        ]
+      },
+      {
+        "table": "races",
+        "columns": [
+          "raceId",
+          "year",
+          "round",
+          "circuitId",
+          "name",
+          "date",
+          "time",
+          "url"
+        ],
+        "primary_keys": [
+          "raceId"
+        ]
+      },
+      {
+        "table": "constructorResults",
+        "columns": [
+          "constructorResultsId",
+          "raceId",
+          "constructorId",
+          "points",
+          "status"
+        ],
+        "primary_keys": [
+          "constructorResultsId"
+        ]
+      },
+      {
+        "table": "constructorStandings",
+        "columns": [
+          "constructorStandingsId",
+          "raceId",
+          "constructorId",
+          "points",
+          "position",
+          "positionText",
+          "wins"
+        ],
+        "primary_keys": [
+          "constructorStandingsId"
+        ]
+      },
+      {
+        "table": "driverStandings",
+        "columns": [
+          "driverStandingsId",
+          "raceId",
+          "driverId",
+          "points",
+          "position",
+          "positionText",
+          "wins"
+        ],
+        "primary_keys": [
+          "driverStandingsId"
+        ]
+      },
+      {
+        "table": "lapTimes",
+        "columns": [
+          "raceId",
+          "driverId",
+          "lap",
+          "position",
+          "time",
+          "milliseconds"
+        ],
+        "primary_keys": [
+          "raceId",
+          "driverId",
+          "lap"
+        ]
+      },
+      {
+        "table": "pitStops",
+        "columns": [
+          "raceId",
+          "driverId",
+          "stop",
+          "lap",
+          "time",
+          "duration",
+          "milliseconds"
+        ],
+        "primary_keys": [
+          "raceId",
+          "driverId",
+          "stop"
+        ]
+      },
+      {
+        "table": "qualifying",
+        "columns": [
+          "qualifyId",
+          "raceId",
+          "driverId",
+          "constructorId",
+          "number",
+          "position",
+          "q1",
+          "q2",
+          "q3"
+        ],
+        "primary_keys": [
+          "qualifyId"
+        ]
+      },
+      {
+        "table": "status",
+        "columns": [
+          "statusId",
+          "status"
+        ],
+        "primary_keys": [
+          "statusId"
+        ]
+      },
+      {
+        "table": "results",
+        "columns": [
+          "resultId",
+          "raceId",
+          "driverId",
+          "constructorId",
+          "number",
+          "grid",
+          "position",
+          "positionText",
+          "positionOrder",
+          "points",
+          "laps",
+          "time",
+          "milliseconds",
+          "fastestLap",
+          "rank",
+          "fastestLapTime",
+          "fastestLapSpeed",
+          "statusId"
+        ],
+        "primary_keys": [
+          "resultId"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "races",
+          "circuits"
+        ],
+        "column": [
+          "circuitId",
+          "circuitId"
+        ]
+      },
+      {
+        "table": [
+          "races",
+          "seasons"
+        ],
+        "column": [
+          "year",
+          "year"
+        ]
+      },
+      {
+        "table": [
+          "constructorResults",
+          "constructors"
+        ],
+        "column": [
+          "constructorId",
+          "constructorId"
+        ]
+      },
+      {
+        "table": [
+          "constructorResults",
+          "races"
+        ],
+        "column": [
+          "raceId",
+          "raceId"
+        ]
+      },
+      {
+        "table": [
+          "constructorStandings",
+          "constructors"
+        ],
+        "column": [
+          "constructorId",
+          "constructorId"
+        ]
+      },
+      {
+        "table": [
+          "constructorStandings",
+          "races"
+        ],
+        "column": [
+          "raceId",
+          "raceId"
+        ]
+      },
+      {
+        "table": [
+          "driverStandings",
+          "drivers"
+        ],
+        "column": [
+          "driverId",
+          "driverId"
+        ]
+      },
+      {
+        "table": [
+          "driverStandings",
+          "races"
+        ],
+        "column": [
+          "raceId",
+          "raceId"
+        ]
+      },
+      {
+        "table": [
+          "lapTimes",
+          "drivers"
+        ],
+        "column": [
+          "driverId",
+          "driverId"
+        ]
+      },
+      {
+        "table": [
+          "lapTimes",
+          "races"
+        ],
+        "column": [
+          "raceId",
+          "raceId"
+        ]
+      },
+      {
+        "table": [
+          "pitStops",
+          "drivers"
+        ],
+        "column": [
+          "driverId",
+          "driverId"
+        ]
+      },
+      {
+        "table": [
+          "pitStops",
+          "races"
+        ],
+        "column": [
+          "raceId",
+          "raceId"
+        ]
+      },
+      {
+        "table": [
+          "qualifying",
+          "constructors"
+        ],
+        "column": [
+          "constructorId",
+          "constructorId"
+        ]
+      },
+      {
+        "table": [
+          "qualifying",
+          "drivers"
+        ],
+        "column": [
+          "driverId",
+          "driverId"
+        ]
+      },
+      {
+        "table": [
+          "qualifying",
+          "races"
+        ],
+        "column": [
+          "raceId",
+          "raceId"
+        ]
+      },
+      {
+        "table": [
+          "results",
+          "status"
+        ],
+        "column": [
+          "statusId",
+          "statusId"
+        ]
+      },
+      {
+        "table": [
+          "results",
+          "constructors"
+        ],
+        "column": [
+          "constructorId",
+          "constructorId"
+        ]
+      },
+      {
+        "table": [
+          "results",
+          "drivers"
+        ],
+        "column": [
+          "driverId",
+          "driverId"
+        ]
+      },
+      {
+        "table": [
+          "results",
+          "races"
+        ],
+        "column": [
+          "raceId",
+          "raceId"
+        ]
+      }
+    ],
+    "foreign_key_count": 19,
+    "table_count": 13,
+    "total_column_count": 94
+  },
+  {
+    "database": "toxicology",
+    "tables": [
+      {
+        "table": "atom",
+        "columns": [
+          "atom_id",
+          "molecule_id",
+          "element"
+        ],
+        "primary_keys": [
+          "atom_id"
+        ]
+      },
+      {
+        "table": "bond",
+        "columns": [
+          "bond_id",
+          "molecule_id",
+          "bond_type"
+        ],
+        "primary_keys": [
+          "bond_id"
+        ]
+      },
+      {
+        "table": "connected",
+        "columns": [
+          "atom_id",
+          "atom_id2",
+          "bond_id"
+        ],
+        "primary_keys": [
+          "atom_id",
+          "atom_id2"
+        ]
+      },
+      {
+        "table": "molecule",
+        "columns": [
+          "molecule_id",
+          "label"
+        ],
+        "primary_keys": [
+          "molecule_id"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "atom",
+          "molecule"
+        ],
+        "column": [
+          "molecule_id",
+          "molecule_id"
+        ]
+      },
+      {
+        "table": [
+          "bond",
+          "molecule"
+        ],
+        "column": [
+          "molecule_id",
+          "molecule_id"
+        ]
+      },
+      {
+        "table": [
+          "connected",
+          "bond"
+        ],
+        "column": [
+          "bond_id",
+          "bond_id"
+        ]
+      },
+      {
+        "table": [
+          "connected",
+          "atom"
+        ],
+        "column": [
+          "atom_id2",
+          "atom_id"
+        ]
+      },
+      {
+        "table": [
+          "connected",
+          "atom"
+        ],
+        "column": [
+          "atom_id",
+          "atom_id"
+        ]
+      }
+    ],
+    "foreign_key_count": 5,
+    "table_count": 4,
+    "total_column_count": 11
+  },
+  {
+    "database": "thrombosis_prediction",
+    "tables": [
+      {
+        "table": "Examination",
+        "columns": [
+          "ID",
+          "Examination Date",
+          "aCL IgG",
+          "aCL IgM",
+          "ANA",
+          "ANA Pattern",
+          "aCL IgA",
+          "Diagnosis",
+          "KCT",
+          "RVVT",
+          "LAC",
+          "Symptoms",
+          "Thrombosis"
+        ],
+        "primary_keys": []
+      },
+      {
+        "table": "Patient",
+        "columns": [
+          "ID",
+          "SEX",
+          "Birthday",
+          "Description",
+          "First Date",
+          "Admission",
+          "Diagnosis"
+        ],
+        "primary_keys": [
+          "ID"
+        ]
+      },
+      {
+        "table": "Laboratory",
+        "columns": [
+          "ID",
+          "Date",
+          "GOT",
+          "GPT",
+          "LDH",
+          "ALP",
+          "TP",
+          "ALB",
+          "UA",
+          "UN",
+          "CRE",
+          "T-BIL",
+          "T-CHO",
+          "TG",
+          "CPK",
+          "GLU",
+          "WBC",
+          "RBC",
+          "HGB",
+          "HCT",
+          "PLT",
+          "PT",
+          "APTT",
+          "FG",
+          "PIC",
+          "TAT",
+          "TAT2",
+          "U-PRO",
+          "IGG",
+          "IGA",
+          "IGM",
+          "CRP",
+          "RA",
+          "RF",
+          "C3",
+          "C4",
+          "RNP",
+          "SM",
+          "SC170",
+          "SSA",
+          "SSB",
+          "CENTROMEA",
+          "DNA",
+          "DNA-II"
+        ],
+        "primary_keys": [
+          "ID",
+          "Date"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "Examination",
+          "Patient"
+        ],
+        "column": [
+          "ID",
+          "ID"
+        ]
+      },
+      {
+        "table": [
+          "Laboratory",
+          "Patient"
+        ],
+        "column": [
+          "ID",
+          "ID"
+        ]
+      }
+    ],
+    "foreign_key_count": 2,
+    "table_count": 3,
+    "total_column_count": 64
+  },
+  {
+    "database": "debit_card_specializing",
+    "tables": [
+      {
+        "table": "customers",
+        "columns": [
+          "CustomerID",
+          "Segment",
+          "Currency"
+        ],
+        "primary_keys": [
+          "CustomerID"
+        ]
+      },
+      {
+        "table": "gasstations",
+        "columns": [
+          "GasStationID",
+          "ChainID",
+          "Country",
+          "Segment"
+        ],
+        "primary_keys": [
+          "GasStationID"
+        ]
+      },
+      {
+        "table": "products",
+        "columns": [
+          "ProductID",
+          "Description"
+        ],
+        "primary_keys": [
+          "ProductID"
+        ]
+      },
+      {
+        "table": "transactions_1k",
+        "columns": [
+          "TransactionID",
+          "Date",
+          "Time",
+          "CustomerID",
+          "CardID",
+          "GasStationID",
+          "ProductID",
+          "Amount",
+          "Price"
+        ],
+        "primary_keys": [
+          "TransactionID"
+        ]
+      },
+      {
+        "table": "yearmonth",
+        "columns": [
+          "CustomerID",
+          "Date",
+          "Consumption"
+        ],
+        "primary_keys": [
+          "CustomerID",
+          "Date"
+        ]
+      }
+    ],
+    "foreign_keys": [
+      {
+        "table": [
+          "yearmonth",
+          "customers"
+        ],
+        "column": [
+          "CustomerID",
+          "CustomerID"
+        ]
+      }
+    ],
+    "foreign_key_count": 1,
+    "table_count": 5,
+    "total_column_count": 21
+  }
+]

@@ -6,3 +6,10 @@
 **/*.pt
 
 !config/*.json
+!data/db_schema/*.json
+!data/gold_schema_linking/*.json
+!data/labeled_schema_linking_dataset/*.json
+!data/nl_embedding/*.json
+
+!gnn/results/*.json
+!llm/results/*.json
