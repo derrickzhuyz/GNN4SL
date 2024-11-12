@@ -61,18 +61,19 @@ class SchemaLinkingHomoGraphDataset(Dataset):
         torch.save(data_list, processed_path)
 
     def _create_graph(self, example: Dict) -> Data:
-        # Create nodes for tables and columns
-        nodes = []  # List of (name, is_table) tuples
+        # Create nodes (combining tables and columns into a single list)
+        nodes = []  # List of node names
         node_labels = []  # Relevance labels for nodes
         
-        # Add table nodes
+        # Add all nodes (tables and columns) to a single list
         for table in example['tables']:
-            nodes.append((table['name'].lower(), True))  # True indicates it's a table
+            # Add table node
+            nodes.append(table['name'].lower())
             node_labels.append(table['relevant'])
             
-            # Add column nodes for this table
+            # Add column nodes
             for col in table['columns']:
-                nodes.append((col['name'].lower(), False))  # False indicates it's a column
+                nodes.append(col['name'].lower())
                 node_labels.append(col['relevant'])
 
         # Create node features (one-hot encoding)
@@ -82,20 +83,18 @@ class SchemaLinkingHomoGraphDataset(Dataset):
         # Create edges
         edge_index = []
         
-        # Add contains edges (table -> column)
-        for table_idx, (table_name, is_table) in enumerate(nodes):
-            if is_table:  # if it's a table node
-                table_columns = next(t['columns'] for t in example['tables'] 
-                                  if t['name'].lower() == table_name)
-                
-                # Find corresponding column indices
-                for col in table_columns:
-                    try:
-                        col_idx = nodes.index((col['name'].lower(), False))
-                        edge_index.append([table_idx, col_idx])
-                        edge_index.append([col_idx, table_idx])  # Make it bidirectional
-                    except ValueError:
-                        continue
+        # Add schema structure edges
+        for table_idx, table in enumerate(example['tables']):
+            table_name = table['name'].lower()
+            # Connect table with its columns
+            for col in table['columns']:
+                try:
+                    col_idx = nodes.index(col['name'].lower())
+                    # Add bidirectional edges
+                    edge_index.append([table_idx, col_idx])
+                    edge_index.append([col_idx, table_idx])
+                except ValueError:
+                    continue
 
         # Add foreign key edges
         if 'foreign_keys' in example:
@@ -106,9 +105,8 @@ class SchemaLinkingHomoGraphDataset(Dataset):
                 
                 try:
                     # Find indices of the two columns
-                    col1_name, col2_name = [c.lower() for c in fk['column']]
-                    col1_idx = nodes.index((col1_name, False))
-                    col2_idx = nodes.index((col2_name, False))
+                    col1_idx = nodes.index(fk['column'][0].lower())
+                    col2_idx = nodes.index(fk['column'][1].lower())
                     
                     # Add bidirectional edges
                     edge_index.append([col1_idx, col2_idx])
