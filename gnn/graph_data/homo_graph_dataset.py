@@ -90,9 +90,9 @@ class SchemaLinkingHomoGraphDataset(Dataset):
             for col in table['columns']:
                 try:
                     col_idx = nodes.index(col['name'].lower())
-                    # Add bidirectional edges
+                    # Add edges for table containing column
                     edge_index.append([table_idx, col_idx])
-                    edge_index.append([col_idx, table_idx])
+                    # edge_index.append([col_idx, table_idx])
                 except ValueError:
                     continue
 
@@ -107,10 +107,9 @@ class SchemaLinkingHomoGraphDataset(Dataset):
                     # Find indices of the two columns
                     col1_idx = nodes.index(fk['column'][0].lower())
                     col2_idx = nodes.index(fk['column'][1].lower())
-                    
-                    # Add bidirectional edges
+                    # Add edges for foreign key relationship between two columns
                     edge_index.append([col1_idx, col2_idx])
-                    edge_index.append([col2_idx, col1_idx])
+                    # edge_index.append([col2_idx, col1_idx])
                 except ValueError:
                     continue
 
