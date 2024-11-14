@@ -84,12 +84,12 @@ def inspect_homo_graph(graph: Data, idx: int) -> None:
     num_edges = edge_index.size(1)
     print(f"Total number of edges: {num_edges}")
     
-    # Print first 10 edges as example
-    print("\nFirst 10 edges:")
-    for i in range(min(10, edge_index.size(1))):
+    # Print all edges
+    print("\nEdges:")
+    for i in range(edge_index.size(1)):
         src_idx = edge_index[0][i].item()
         dst_idx = edge_index[1][i].item()
-        print(f"Node {src_idx} -> Node {dst_idx}")
+        print(f"Node {src_idx} <-> Node {dst_idx}")
     
     # Print some statistics
     print("\nGraph Statistics:")

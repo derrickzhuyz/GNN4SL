@@ -126,7 +126,7 @@ class NLEmbedder:
     :param embed_method: str, the embedding method to use
     :return: dict, the embedded schema data
     """
-    def _deprecated_embed_name_and_question(self, schema_data: dict, embed_method: str = 'mock') -> dict:
+    def _deprecated_embed_name_and_question(self, schema_data: dict, embed_method: str = 'api_mock') -> dict:
         embedding_methods = {
             'api_mock': self.embed_with_openai_mock,
             'api_small': self.embed_with_openai_small,
@@ -182,7 +182,7 @@ class NLEmbedder:
     :param embed_method: str, the embedding method to use
     :return: dict, the embedded schema data
     """
-    def embed_question(self, schema_data: dict, embed_method: str = 'mock') -> dict:
+    def embed_question(self, schema_data: dict, embed_method: str = 'api_mock') -> dict:
         embedding_methods = {
             'api_mock': self.embed_with_openai_mock,
             'api_small': self.embed_with_openai_small,
@@ -212,7 +212,7 @@ class NLEmbedder:
     :param embed_method: str, the embedding method to use
     :return: dict, the embedded schema data
     """
-    def embed_schema_element_names(self, schema_data: dict, embed_method: str = 'mock') -> dict:
+    def embed_schema_element_names(self, schema_data: dict, embed_method: str = 'api_mock') -> dict:
         embedding_methods = {
             'api_mock': self.embed_with_openai_mock,
             'api_small': self.embed_with_openai_small,
@@ -232,19 +232,19 @@ class NLEmbedder:
         
         try:
             # Add database name embedding
-            embedded_schema['database_embedding'] = embed_func(schema_data['database']).tolist()
+            embedded_schema['database_name_embedding'] = embed_func(schema_data['database']).tolist()
             
             # Add embeddings for tables and columns while preserving original structure
             for table in embedded_schema['tables']:
                 # Add table name embedding
-                table['table_embedding'] = embed_func(table['table']).tolist()
+                table['table_name_embedding'] = embed_func(table['table']).tolist()
                 
                 # Add column embeddings
-                table['column_embeddings'] = {}
+                table['column_name_embeddings'] = {}
                 for column in table['columns']:
                     # Create context-aware column name by combining table and column
                     column_context = f"{table['table']}.{column}"
-                    table['column_embeddings'][column] = embed_func(column_context).tolist()
+                    table['column_name_embeddings'][column] = embed_func(column_context).tolist()
                 
         except Exception as e:
             if 'remarks' not in embedded_schema:
@@ -254,12 +254,8 @@ class NLEmbedder:
         return embedded_schema
 
 
-
-
-
 # Example usage
-# if __name__ == "__main__":
-
+if __name__ == "__main__":
     # api_key=os.getenv("OPENAI_API_KEY")
     # base_url=os.getenv("OPENAI_BASE_URL")
 
@@ -281,3 +277,5 @@ class NLEmbedder:
 
     # vector_openai_mock = embedder.embed_with_openai_mock(question)
     # print("OpenAI API Mock Vector:", vector_openai_mock)
+
+    pass

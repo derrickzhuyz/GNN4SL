@@ -12,10 +12,10 @@ Results example:
 === Inspecting Homogeneous Graph: 0 ===
 
 Graph Structure:
-Data(x=[25, 25], edge_index=[2, 48], y=[25])
+Data(x=[25, 3], edge_index=[2, 24], y=[25])
 
 Number of nodes: 25
-Node feature dimension: 25
+Node feature dimension: 3
 
 Node labels (1=relevant, 0=not relevant):
 Node 0: label=0
@@ -45,22 +45,36 @@ Node 23: label=0
 Node 24: label=0
 
 Edges:
-Total number of edges: 48
+Total number of edges: 24
 
-First 10 edges:
-Node 0 -> Node 1
-Node 1 -> Node 0
-Node 0 -> Node 2
-Node 2 -> Node 0
-Node 0 -> Node 3
-Node 3 -> Node 0
-Node 0 -> Node 4
-Node 4 -> Node 0
-Node 0 -> Node 5
-Node 5 -> Node 0
+Edges:
+Node 0 <-> Node 1
+Node 0 <-> Node 2
+Node 0 <-> Node 3
+Node 0 <-> Node 4
+Node 0 <-> Node 5
+Node 0 <-> Node 6
+Node 0 <-> Node 7
+Node 1 <-> Node 9
+Node 1 <-> Node 3
+Node 1 <-> Node 11
+Node 1 <-> Node 12
+Node 1 <-> Node 13
+Node 1 <-> Node 14
+Node 1 <-> Node 15
+Node 2 <-> Node 17
+Node 2 <-> Node 18
+Node 2 <-> Node 19
+Node 2 <-> Node 1
+Node 2 <-> Node 21
+Node 3 <-> Node 17
+Node 3 <-> Node 9
+Node 1 <-> Node 1
+Node 9 <-> Node 9
+Node 17 <-> Node 17
 
 Graph Statistics:
-Average node degree: 1.92
+Average node degree: 0.96
 Number of relevant nodes: 1
 Percentage of relevant nodes: 4.00%
 ```

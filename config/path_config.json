@@ -40,7 +40,7 @@
         "spider2_lite_schemas": "data/db_schema/spider2_lite_schemas.json"
     },
     "labeled_dataset_paths": {
-        "labeled_dataset_base": "data/labeled_schema_linking",
+        "labeled_dataset_base": "data/labeled_schema_linking_dataset",
         "spider_train": "data/labeled_schema_linking_dataset/spider_train_labeled.json",
         "spider_dev": "data/labeled_schema_linking_dataset/spider_dev_labeled.json",
         "bird_train": "data/labeled_schema_linking_dataset/bird_train_labeled.json",
