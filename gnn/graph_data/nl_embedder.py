@@ -120,12 +120,13 @@ class NLEmbedder:
 
 
     """
+    NOTE: Deprecated! This function is deprecated for lots of embedding of names in databases will be stored repeatedly.
     Embed the schema data: table names, column names, and question
     :param schema_data: dict, the schema data to embed
     :param embed_method: str, the embedding method to use
     :return: dict, the embedded schema data
     """
-    def embed_name_and_question(self, schema_data: dict, embed_method: str = 'mock') -> dict:
+    def _deprecated_embed_name_and_question(self, schema_data: dict, embed_method: str = 'mock') -> dict:
         embedding_methods = {
             'api_mock': self.embed_with_openai_mock,
             'api_small': self.embed_with_openai_small,
@@ -211,7 +212,7 @@ class NLEmbedder:
     :param embed_method: str, the embedding method to use
     :return: dict, the embedded schema data
     """
-    def embed_schema_elements(self, schema_data: dict, embed_method: str = 'mock') -> dict:
+    def embed_schema_element_names(self, schema_data: dict, embed_method: str = 'mock') -> dict:
         embedding_methods = {
             'api_mock': self.embed_with_openai_mock,
             'api_small': self.embed_with_openai_small,

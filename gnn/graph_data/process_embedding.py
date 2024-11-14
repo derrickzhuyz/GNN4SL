@@ -97,7 +97,7 @@ def database_schema_embedding(input_file: str, output_dir: str, vector_dim: int 
                 logger.info(f"[i] Skipping already processed database {schema['database']}")
                 continue
             
-            embedded_schema = embedder.embed_schema_elements(schema, embed_method='api_mock')
+            embedded_schema = embedder.embed_schema_element_names(schema, embed_method='api_mock')
             processed_schemas.append(embedded_schema)
             
             # Save after each schema
