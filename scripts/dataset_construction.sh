@@ -42,7 +42,6 @@ echo "[INFO] Schema extraction completed! Now you can run db_schema_stats.ipynb 
 echo "[INFO] Schema extraction log: logs/extraction.log"
 
 
-
 echo "[INFO] Running extract_labeled_dataset.py..."
 python extraction/extract_labeled_dataset.py
 if [ $? -ne 0 ]; then
@@ -51,11 +50,26 @@ if [ $? -ne 0 ]; then
 fi
 
 
-# Schema to graph
-echo "[INFO] Running graph_dataset.py..."
-python gnn/model/graph_dataset.py
+# -------------------------------------------------------------------------------
+
+
+# Run NL embedding processor
+echo "[INFO] Running nl_embedding_processor.py..."
+python gnn/graph_data/nl_embedding_processor.py
 if [ $? -ne 0 ]; then
-    echo "[! Error] graph_dataset.py failed."
+    echo "[! Error] embedding.py failed."
+    exit 1
+fi
+
+
+# Embedding log
+echo "[INFO] Embedding log: logs/embedding.log"
+
+# Run homo graph dataset construction
+echo "[INFO] Running homo_graph_dataset.py..."
+python gnn/graph_data/homo_graph_dataset.py
+if [ $? -ne 0 ]; then
+    echo "[! Error] homo_graph_dataset.py failed."
     exit 1
 fi
 
