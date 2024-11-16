@@ -32,6 +32,13 @@ class SchemaLinkingHomoGraphDataset(Dataset):
         self.dataset_type = dataset_type
         self.split = split
         self.graph_data_dir = os.path.join(root, 'homo_graph_schema_linking_dataset')
+        
+        # Load raw data during initialization
+        path_config = self._load_json('config/path_config.json')
+        labeled_path = os.path.join(path_config['labeled_dataset_paths']['labeled_dataset_base'], 
+                                  f'{dataset_type}_{split}_labeled.json')
+        self.raw_data = self._load_json(labeled_path)
+        
         super().__init__(root, transform)
 
     @property
