@@ -1,19 +1,17 @@
 import torch
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
-from gnn.model.homo_model import SchemaLinkingHomoGNN
-from gnn.graph_data.homo_graph_dataset import SchemaLinkingHomoGraphDataset
+from gnn.model.node_level_model import NodeLevelGNN
+from gnn.graph_data.node_level_graph_dataset import NodeLevelGraphDataset
 import numpy as np
 from loguru import logger
 from tqdm import tqdm
-import json
-import copy
 import time
 from pathlib import Path
 from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
 
-logger.add("logs/homo_training.log", rotation="1 MB", level="INFO",
+logger.add("logs/node_level_training.log", rotation="1 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
 
 
@@ -25,7 +23,7 @@ Train one epoch
 :param device: device to train on
 :return: average loss
 """
-def train_epoch(model: SchemaLinkingHomoGNN, loader: DataLoader, optimizer: torch.optim.Optimizer, device: torch.device) -> float:
+def train_epoch(model: NodeLevelGNN, loader: DataLoader, optimizer: torch.optim.Optimizer, device: torch.device) -> float:
     epoch_start_time = time.time()
     model.train()
     total_loss = 0
@@ -63,7 +61,7 @@ Training loop for the model
 :param device: device to train on
 :return: None
 """
-def train(model: SchemaLinkingHomoGNN, train_loader: DataLoader, num_epochs: int, optimizer: torch.optim.Optimizer, device: torch.device) -> None:
+def train(model: NodeLevelGNN, train_loader: DataLoader, num_epochs: int, optimizer: torch.optim.Optimizer, device: torch.device) -> None:
     logger.info("[i] Starting training...")
     start_time = time.time()
     best_loss = float('inf')
@@ -134,8 +132,8 @@ def main():
 
     # Load datasets
     logger.info("[i] Loading datasets...")
-    spider_train = SchemaLinkingHomoGraphDataset(root='data/', dataset_type='spider', split='train')
-    # bird_train = SchemaLinkingHomoGraphDataset(root='data/', dataset_type='bird', split='train')
+    spider_train = NodeLevelGraphDataset(root='data/schema_linking_graph_dataset/', dataset_type='spider', split='train')
+    # bird_train = NodeLevelGraphDataset(root='data/schema_linking_graph_dataset/', dataset_type='bird', split='train')
     
     # Create data loaders
     # train_loader = DataLoader(spider_train + bird_train, batch_size=batch_size, shuffle=True) # For multi-dataset training
@@ -143,7 +141,7 @@ def main():
     
     # Initialize model
     logger.info("[i] Initializing model...")
-    model = SchemaLinkingHomoGNN(
+    model = NodeLevelGNN(
         input_dim=input_dim,
         hidden_channels=hidden_channels,
         num_layers=num_layers

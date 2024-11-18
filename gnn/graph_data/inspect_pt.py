@@ -1,124 +1,204 @@
 import torch
+import networkx as nx
+import matplotlib.pyplot as plt
 from torch_geometric.data import HeteroData, Data
 import os
 from torch.serialization import add_safe_globals
 from torch_geometric.data.storage import BaseStorage, NodeStorage, EdgeStorage
 from torch_geometric.data.hetero_data import HeteroData
 from torch_geometric.data.data import DataEdgeAttr, DataTensorAttr
-
+from typing import Optional
 
 # Add PyTorch Geometric classes to safe globals
 add_safe_globals([BaseStorage, NodeStorage, EdgeStorage, HeteroData, Data, DataEdgeAttr, DataTensorAttr])
 
 
 """
-Inspect the heterogeneous graph data in the .pt file
-:param graph: HeteroData object
-:param idx: index of the graph to inspect
-:return: None
+Visualize a node-level NetworkX graph with node labels and relevance information
+:param G: NetworkX graph
+:param title: title of the graph
+:param save_path: path to save the graph
 """
-def inspect_hetero_graph(graph: HeteroData, idx: int) -> None:
-    # Print basic graph info
-    print(f"\n=== Inspecting Heterogeneous Graph: {idx} ===")
+def visualize_node_level_graph(G: nx.Graph, title: str, save_path: Optional[str] = None):
+
+    plt.figure(figsize=(15, 10))
+    
+    # Use a better layout for visualization
+    pos = nx.kamada_kawai_layout(G)  # or spring_layout with adjusted parameters
+    
+    # Separate nodes by type and relevance
+    table_nodes = [n for n, attr in G.nodes(data=True) if attr['type'] == 'table']
+    column_nodes = [n for n, attr in G.nodes(data=True) if attr['type'] == 'column']
+    relevant_nodes = [n for n in G.nodes() if G.nodes[n]['relevant'] == 1]
+    
+    # Draw table nodes (light blue)
+    nx.draw_networkx_nodes(G, pos,
+                          nodelist=[n for n in table_nodes if n not in relevant_nodes],
+                          node_color='lightblue',
+                          node_size=1000,
+                          alpha=0.75)
+    
+    # Draw column nodes (light green)
+    nx.draw_networkx_nodes(G, pos,
+                          nodelist=[n for n in column_nodes if n not in relevant_nodes],
+                          node_color='lightgreen',
+                          node_size=1000,
+                          alpha=0.75)
+    
+    # Draw relevant table nodes (light blue with red border)
+    relevant_table_nodes = [n for n in relevant_nodes if G.nodes[n]['type'] == 'table']
+    nx.draw_networkx_nodes(G, pos,
+                          nodelist=relevant_table_nodes,
+                          node_color='lightblue',
+                          node_size=1000,
+                          edgecolors='red',
+                          linewidths=3,
+                          alpha=0.75)
+    
+    # Draw relevant column nodes (light green with red border)
+    relevant_column_nodes = [n for n in relevant_nodes if G.nodes[n]['type'] == 'column']
+    nx.draw_networkx_nodes(G, pos,
+                          nodelist=relevant_column_nodes,
+                          node_color='lightgreen',
+                          node_size=1000,
+                          edgecolors='red',
+                          linewidths=3,
+                          alpha=0.75)
+    
+    # Draw edges
+    nx.draw_networkx_edges(G, pos,
+                          edge_color='gray',
+                          width=1,
+                          alpha=0.8)
+    
+    # Prepare node labels with more information
+    labels = {}
+    for node in G.nodes():
+        # Get the first embedding value and format it to 3 decimal places
+        first_embedding_value = G.nodes[node]['embedding'][0]  # Get the first embedding value
+        label = f"{G.nodes[node]['name']}\n"
+        label += f"({G.nodes[node]['type']})\n"
+        label += f"Rel: {G.nodes[node]['relevant']}\n"
+        label += f"Emb: {first_embedding_value:.3f}"  # Format to 3 decimal places
+        labels[node] = label
+    
+    # Draw labels with white background for better visibility
+    nx.draw_networkx_labels(G, pos, labels,
+                          font_size=8,
+                          bbox=dict(facecolor='white',
+                                  edgecolor='none',
+                                  alpha=0.2,
+                                  pad=0.5))
+    
+    # Add legend
+    legend_elements = [
+        plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='lightblue', 
+                   markersize=12, label='Table Node'),
+        plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='lightgreen', 
+                   markersize=12, label='Column Node'),
+        plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='white',
+                   markeredgecolor='red', markeredgewidth=3,
+                   markersize=9, label='Relevant Node')
+    ]
+    plt.legend(handles=legend_elements, loc='upper left')
+    plt.title(title)
+    plt.axis('off')
+    
+    # Add graph information as text
+    info_text = (f"Total Nodes: {G.number_of_nodes()}\n"
+                f"  - Tables: {len(table_nodes)}\n"
+                f"  - Columns: {len(column_nodes)}\n"
+                f"Total Relevant Nodes: {len(relevant_nodes)}\n"
+                f"  - Relevant Tables: {len(relevant_table_nodes)}\n"
+                f"  - Relevant Columns: {len(relevant_column_nodes)}\n"
+                f"Total Edges: {G.number_of_edges()}\n"
+                f"Note: Emb is the 1st value of embedding vector.")
+    plt.text(0.0, 0.02, info_text,
+             transform=plt.gca().transAxes,
+             bbox=dict(facecolor='white', edgecolor='none', alpha=0.7),
+             verticalalignment='top')
+    
+    if save_path:
+        plt.savefig(save_path, bbox_inches='tight', dpi=300)
+    plt.show()
+
+
+"""
+Inspect the node-level graph data created by NetworkX
+:param graph: PyG Data object
+:param idx: index of the graph
+:param visualize: whether to visualize the graph
+"""
+def inspect_node_level_graph(graph: Data, idx: int, visualize: bool = True, dataset: str = '', split: str = '') -> None:
+    print(f"\n=== Inspecting Node-level Graph: {idx} ===")
     print("\nGraph Structure:")
     print(graph)
-
-    # Inspect table nodes
-    print("\nTable Nodes:")
-    num_tables = graph['table'].x.size(0)
-    print(f"Number of tables: {num_tables}")
-    print("Table labels (1=relevant, 0=not relevant):")
-    for i in range(num_tables):
-        print(f"Table {i}: label={graph['table'].y[i].item()}")
     
-    # Inspect column nodes
-    print("\nColumn Nodes:")
-    num_columns = graph['column'].x.size(0)
-    print(f"Number of columns: {num_columns}")
-    print("Column labels (1=relevant, 0=not relevant):")
-    for i in range(num_columns):
-        print(f"Column {i}: label={graph['column'].y[i].item()}")
+    # Convert PyG graph to NetworkX for inspection
+    edge_index = graph.edge_index.numpy()
+    G = nx.Graph()
     
-    # Inspect contains edges
-    print("\nContains Edges (table -> column):")
-    contains_edges = graph['table', 'contains', 'column'].edge_index
-    for i in range(contains_edges.size(1)):
-        table_idx = contains_edges[0][i].item()
-        col_idx = contains_edges[1][i].item()
-        print(f"Table {table_idx} contains Column {col_idx}")
-    
-    # Inspect foreign key edges
-    if ('column', 'foreign_key', 'column') in graph.edge_types:
-        print("\nForeign Key Edges (column <-> column):")
-        fk_edges = graph['column', 'foreign_key', 'column'].edge_index
-        for i in range(fk_edges.size(1)):
-            col1_idx = fk_edges[0][i].item()
-            col2_idx = fk_edges[1][i].item()
-            print(f"Column {col1_idx} <-> Column {col2_idx}")
-
-
-"""
-Inspect the homogeneous graph data in the .pt file
-:param graph: Data object
-:param idx: index of the graph to inspect
-:return: None
-"""
-def inspect_homo_graph(graph: Data, idx: int) -> None:
-    # Print basic graph info
-    print(f"\n=== Inspecting Homogeneous Graph: {idx} ===")
-    print("\nGraph Structure:")
-    print(graph)
-    
-    # Inspect nodes
+    # Add nodes with their features, labels, and names
     num_nodes = graph.x.size(0)
-    print(f"\nNumber of nodes: {num_nodes}")
-    print(f"Node feature dimension: {graph.x.size(1)}")
-    
-    print("\nNode labels (1=relevant, 0=not relevant):")
     for i in range(num_nodes):
-        print(f"Node {i}: label={graph.y[i].item()}")
+        G.add_node(i, 
+                  embedding=graph.x[i].numpy(),
+                  relevant=graph.y[i].item(),
+                  name=graph.node_names[i],
+                  type=graph.node_types[i])
     
-    # Inspect edges
-    print("\nEdges:")
-    edge_index = graph.edge_index
-    num_edges = edge_index.size(1)
-    print(f"Total number of edges: {num_edges}")
+    # Add edges
+    for i in range(edge_index.shape[1]):
+        src, dst = edge_index[0, i], edge_index[1, i]
+        G.add_edge(src, dst)
     
-    # Print all edges
-    print("\nEdges:")
-    for i in range(edge_index.size(1)):
-        src_idx = edge_index[0][i].item()
-        dst_idx = edge_index[1][i].item()
-        print(f"Node {src_idx} <-> Node {dst_idx}")
-    
-    # Print some statistics
+    # Print statistics
     print("\nGraph Statistics:")
-    print(f"Average node degree: {num_edges/num_nodes:.2f}")
+    print(f"Number of nodes: {G.number_of_nodes()}")
+    print(f"Number of edges: {G.number_of_edges()}")
+    print(f"Average degree: {sum(dict(G.degree()).values()) / G.number_of_nodes():.2f}")
     print(f"Number of relevant nodes: {graph.y.sum().item()}")
     print(f"Percentage of relevant nodes: {(graph.y.sum().item()/num_nodes)*100:.2f}%")
+    
+    # Print detailed node information
+    print("\nNode Information:")
+    for node in G.nodes():
+        node_data = G.nodes[node]
+        embedding_values = node_data['embedding'][:3]  # Get the first three embedding values
+        print(f"Node {node}: {node_data['name']} ({node_data['type']})")
+        print(f"  - Relevant: {node_data['relevant']}")
+        print(f"  - Embedding (first three values): {embedding_values}")  # Print the first three embedding values directly
+    
+    # Print edge information with node names
+    print("\nEdge Information:")
+    for edge in G.edges():
+        src_name = G.nodes[edge[0]]['name']
+        dst_name = G.nodes[edge[1]]['name']
+        print(f"Edge: {edge[0]}({src_name}) <-> {edge[1]}({dst_name})")
+    
+    # Analyze graph properties
+    print("\nGraph Properties:")
+    print(f"Is connected: {nx.is_connected(G)}")
+    print(f"Number of connected components: {nx.number_connected_components(G)}")
+    
+    if visualize:
+        visualize_node_level_graph(G, title=f"Graph Structure for {dataset} {split}: Example No. {idx}", 
+                           save_path=f"data/schema_linking_graph_dataset/visualizations/graph_{dataset}_{split}_idx_{idx}.png")
 
 
 
 if __name__ == "__main__":
-
-    # Load processed graph data
-    dataset_type = 'spider'  # or 'bird'
-    split = 'dev'  # or 'train'
+    # Create visualization directory
+    os.makedirs("visualizations", exist_ok=True)
     
-    # Inspect heterogeneous graphs
-    hetero_path = f'data/hetero_graph_schema_linking_dataset/{dataset_type}_{split}_schema_linking.pt'
-    if os.path.exists(hetero_path):
-        hetero_graphs = torch.load(hetero_path, weights_only=True)
-        num_inspect = 1
-        for i in range(min(num_inspect, len(hetero_graphs))):
-            inspect_hetero_graph(hetero_graphs[i], i)
-
-    print("\n*******************************************************")
-
-    # Inspect homogeneous graphs
-    homo_path = f'data/homo_graph_schema_linking_dataset/{dataset_type}_{split}_schema_linking_homo.pt'
-    if os.path.exists(homo_path):
-        homo_graphs = torch.load(homo_path, weights_only=False)
-        num_inspect = 1
-        for i in range(min(num_inspect, len(homo_graphs))):
-            inspect_homo_graph(homo_graphs[i], i)
+    dataset_type = 'spider'  # 'spider' or 'bird'
+    split_type = 'train'  # 'dev' or 'train'
+    idx_to_inspect = 8650
+    
+    # Inspect and compare node-level graphs
+    nx_node_path = f'data/schema_linking_graph_dataset/node_level_graph_dataset/{dataset_type}_{split_type}_node_level_graph.pt'
+    
+    if os.path.exists(nx_node_path):
+        # Inspect NetworkX-based graphs
+        nx_graphs = torch.load(nx_node_path, weights_only=False)
+        inspect_node_level_graph(graph=nx_graphs[idx_to_inspect], idx=idx_to_inspect, visualize=True, dataset=dataset_type, split=split_type)

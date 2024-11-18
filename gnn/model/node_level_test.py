@@ -1,15 +1,15 @@
 from typing import Tuple, Dict, List, Any
 import torch
 from torch_geometric.loader import DataLoader
-from gnn.model.homo_model import SchemaLinkingHomoGNN
-from gnn.graph_data.homo_graph_dataset import SchemaLinkingHomoGraphDataset
+from gnn.model.node_level_model import NodeLevelGNN
+from gnn.graph_data.node_level_graph_dataset import NodeLevelGraphDataset
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
 import json
 from loguru import logger
 from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
 
-logger.add("logs/homo_testing.log", rotation="1 MB", level="INFO",
+logger.add("logs/node_level_testing.log", rotation="1 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
 
 
@@ -23,7 +23,7 @@ Evaluate model on dev set and save predictions
 """
 @torch.no_grad()
 def evaluate(
-    model: SchemaLinkingHomoGNN, loader: DataLoader, device: torch.device, dataset: SchemaLinkingHomoGraphDataset
+    model: NodeLevelGNN, loader: DataLoader, device: torch.device, dataset: NodeLevelGraphDataset
 ) -> Tuple[Dict[str, float], List[Dict[str, Any]]]:
     model.eval()  
     preds, labels = [], []
@@ -84,6 +84,7 @@ def evaluate(
     
     return metrics, predictions_json
 
+
 def main():
     # Hyperparameters
     input_dim = 3
@@ -100,12 +101,12 @@ def main():
     
     # Load datasets
     logger.info("[i] Loading datasets...")
-    spider_test = SchemaLinkingHomoGraphDataset(root='data/', dataset_type='spider', split='dev')
+    spider_test = NodeLevelGraphDataset(root='data/schema_linking_graph_dataset/', dataset_type='spider', split='dev')
     test_loader = DataLoader(spider_test, batch_size=batch_size)
     
     # Initialize model
     logger.info("[i] Initializing model...")
-    model = SchemaLinkingHomoGNN(
+    model = NodeLevelGNN(
         input_dim=input_dim,
         hidden_channels=hidden_channels,
         num_layers=num_layers
@@ -142,6 +143,8 @@ def main():
     
     # Close the TensorBoard writer
     writer.close()
+
+
 
 if __name__ == '__main__':
     main() 

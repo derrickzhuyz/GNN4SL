@@ -8,19 +8,15 @@ from loguru import logger
 from typing import Dict, List, Tuple
 from torch_geometric.data import Data, Dataset
 
-logger.add("logs/schema2graph_dataset_nx.log", rotation="1 MB", level="INFO",
+logger.add("logs/schema2graph_dataset.log", rotation="1 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
 
 
-# Add PyTorch Geometric classes to safe globals
-add_safe_globals([BaseStorage, NodeStorage, EdgeStorage, Data, DataEdgeAttr, DataTensorAttr])
 
-
-
-class SchemaLinkingHomoGraphDatasetNX(Dataset):
+class NodeLevelGraphDataset(Dataset):
     """
-    A homogeneous graph dataset where all nodes (tables and columns) and edges 
-    (contains and foreign keys) are treated as single types.
+    A node-level graph dataset where each node (table and column) are labeled with 
+    their relevance (0 or 1) to the question.
     
     Args:
         root: Root directory where the dataset should be saved
@@ -31,7 +27,7 @@ class SchemaLinkingHomoGraphDatasetNX(Dataset):
     def __init__(self, root, dataset_type='spider', split='train', transform=None):
         self.dataset_type = dataset_type
         self.split = split
-        self.graph_data_dir = os.path.join(root, 'homo_graph_schema_linking_dataset_nx')
+        self.graph_data_dir = os.path.join(root, 'node_level_graph_dataset')
         
         # Load raw data during initialization
         path_config = self._load_json('config/path_config.json')
@@ -43,7 +39,7 @@ class SchemaLinkingHomoGraphDatasetNX(Dataset):
 
     @property
     def processed_file_names(self) -> List[str]:
-        return [f'{self.dataset_type}_{self.split}_schema_linking_homo_nx.pt']
+        return [f'{self.dataset_type}_{self.split}_node_level_graph.pt']
 
     @property
     def processed_dir(self) -> str:
@@ -81,7 +77,8 @@ class SchemaLinkingHomoGraphDatasetNX(Dataset):
             G.add_node(node_idx, 
                       name=table_name, 
                       type='table',
-                      embedding=table_embedding.numpy())
+                      embedding=table_embedding.numpy(),
+                      relevant=table['relevant'])
             table_idx = node_idx
             node_idx += 1
             
@@ -99,7 +96,9 @@ class SchemaLinkingHomoGraphDatasetNX(Dataset):
                 G.add_node(node_idx,
                           name=col_name,
                           type='column',
-                          embedding=col_embedding.numpy())
+                          table=table_name,
+                          embedding=col_embedding.numpy(),
+                          relevant=col['relevant'])
                 
                 # Add edge between table and column
                 G.add_edge(table_idx, node_idx, edge_type='contains')
@@ -108,20 +107,36 @@ class SchemaLinkingHomoGraphDatasetNX(Dataset):
         # Add foreign key edges
         if 'foreign_keys' in example:
             for fk in example['foreign_keys']:
-                if fk['column'] is None or any(c is None for c in fk['column']):
-                    logger.warning(f"[* Warning] Skipping invalid foreign key: {fk}")
+                if fk['column'] is None or any(c is None for c in fk['column']) or any(t is None for t in fk['table']):
+                    logger.warning(f"[* Warning] ({self.dataset_type}_{self.split}) Skipping invalid foreign key: {fk}")
                     continue
-                
                 try:
-                    # Find indices of the two columns
+                    # Get both table and column names
+                    table1_name = fk['table'][0].lower()
+                    table2_name = fk['table'][1].lower()
                     col1_name = fk['column'][0].lower()
                     col2_name = fk['column'][1].lower()
-                    col1_idx = [i for i, n in enumerate(nodes) if n == col1_name][0]
-                    col2_idx = [i for i, n in enumerate(nodes) if n == col2_name][0]
+                    # Find the correct node indices by matching both table and column
+                    col1_idx = None
+                    col2_idx = None
                     
-                    # Add foreign key edge
-                    G.add_edge(col1_idx, col2_idx, edge_type='foreign_key')
-                except (IndexError, ValueError):
+                    for i, attr in G.nodes(data=True):
+                        if (attr['type'] == 'column' and 
+                            attr['name'] == col1_name and 
+                            attr['table'] == table1_name):
+                            col1_idx = i
+                        elif (attr['type'] == 'column' and 
+                              attr['name'] == col2_name and 
+                              attr['table'] == table2_name):
+                            col2_idx = i
+                    
+                    if col1_idx is not None and col2_idx is not None:
+                        # Add foreign key edge
+                        G.add_edge(col1_idx, col2_idx, edge_type='foreign_key')
+                    else:
+                        logger.warning(f"[* Warning] ({self.dataset_type}_{self.split}) Could not find matching columns for foreign key: {fk}")
+                except Exception as e:
+                    logger.warning(f"[* Warning] ({self.dataset_type}_{self.split}) Error adding foreign key edge in {database_name}: {str(e)}")
                     continue
 
         # Convert node embeddings and labels to tensors
@@ -140,7 +155,7 @@ class SchemaLinkingHomoGraphDatasetNX(Dataset):
                                   f'{self.dataset_type}_{self.split}_labeled.json')
         labeled_data = self._load_json(labeled_path)
 
-        logger.info(f"[i] Processing {len(labeled_data)} examples for {self.dataset_type}_{self.split}")
+        logger.info(f"[i] Processing {len(labeled_data)} examples for {self.dataset_type}_{self.split} ...")
         data_list = []
         
         for example in tqdm(labeled_data, desc=f"Creating {self.dataset_type}_{self.split} graphs"):
@@ -150,21 +165,29 @@ class SchemaLinkingHomoGraphDatasetNX(Dataset):
                 # Convert NetworkX graph to edge_index format
                 edge_index = torch.tensor(list(G.edges)).t().contiguous()
                 
-                # Create PyG Data object
-                data = Data(x=x, edge_index=edge_index, y=y)
+                # Store node names and types as lists
+                node_names = [G.nodes[i]['name'] for i in range(len(G.nodes))]
+                node_types = [G.nodes[i]['type'] for i in range(len(G.nodes))]
+                
+                # Create PyG Data object with additional attributes
+                data = Data(x=x, 
+                          edge_index=edge_index, 
+                          y=y,
+                          node_names=node_names,
+                          node_types=node_types)
                 data_list.append(data)
                 
             except Exception as e:
-                logger.error(f"[! Error] Error processing example {example.get('question_id', 'unknown')}: {str(e)}")
+                logger.error(f"[✗] ({self.dataset_type}_{self.split}) Error processing example {example.get('question_id', 'unknown')}: {str(e)}")
                 continue
 
-        logger.info(f"Successfully created {len(data_list)} graphs")
+        logger.info(f"[✓] ({self.dataset_type}_{self.split}) Successfully created {len(data_list)} graphs")
         
         # Save processed data
         processed_path = os.path.join(self.graph_data_dir, self.processed_file_names[0])
         os.makedirs(self.graph_data_dir, exist_ok=True)
         torch.save(data_list, processed_path)
-        logger.info(f"[i] Saved processed data to {processed_path}")
+        logger.info(f"[✓] ({self.dataset_type}_{self.split}) Saved processed data to {processed_path}")
 
 
     """
@@ -244,7 +267,7 @@ class SchemaLinkingHomoGraphDatasetNX(Dataset):
 
 if __name__ == "__main__":
     # Create datasets using NetworkX version
-    # spider_train = SchemaLinkingHomoGraphDatasetNX(root='data/', dataset_type='spider', split='train')
-    spider_dev = SchemaLinkingHomoGraphDatasetNX(root='data/', dataset_type='spider', split='dev')
-    # bird_train = SchemaLinkingHomoGraphDatasetNX(root='data/', dataset_type='bird', split='train')
-    # bird_dev = SchemaLinkingHomoGraphDatasetNX(root='data/', dataset_type='bird', split='dev') 
+    spider_train = NodeLevelGraphDataset(root='data/schema_linking_graph_dataset/', dataset_type='spider', split='train')
+    spider_dev = NodeLevelGraphDataset(root='data/schema_linking_graph_dataset/', dataset_type='spider', split='dev')
+    bird_train = NodeLevelGraphDataset(root='data/schema_linking_graph_dataset/', dataset_type='bird', split='train')
+    bird_dev = NodeLevelGraphDataset(root='data/schema_linking_graph_dataset/', dataset_type='bird', split='dev') 

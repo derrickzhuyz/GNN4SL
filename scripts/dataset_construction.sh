@@ -65,10 +65,10 @@ fi
 echo "[INFO] Embedding log: logs/embedding.log"
 
 # Run homo graph dataset construction
-echo "[INFO] Running homo_graph_dataset.py..."
-python gnn/graph_data/homo_graph_dataset.py
+echo "[INFO] Running node_level_graph_dataset.py..."
+python gnn/graph_data/node_level_graph_dataset.py
 if [ $? -ne 0 ]; then
-    echo "[! Error] homo_graph_dataset.py failed."
+    echo "[! Error] node_level_graph_dataset.py failed."
     exit 1
 fi
 

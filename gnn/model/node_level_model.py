@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch_geometric.nn import SAGEConv, Linear
 from typing import Dict, List
 
-class SchemaLinkingHomoGNN(nn.Module):
+class NodeLevelGNN(nn.Module):
     def __init__(self, input_dim: int, hidden_channels: int, num_layers: int):
         super().__init__()
         
