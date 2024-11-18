@@ -3,7 +3,6 @@ import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 from gnn.model.homo_model import SchemaLinkingHomoGNN
 from gnn.graph_data.homo_graph_dataset import SchemaLinkingHomoGraphDataset
-from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
 import numpy as np
 from loguru import logger
 from tqdm import tqdm
@@ -11,6 +10,8 @@ import json
 import copy
 import time
 from pathlib import Path
+from datetime import datetime
+from torch.utils.tensorboard import SummaryWriter
 
 logger.add("logs/homo_training.log", rotation="1 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
@@ -24,7 +25,8 @@ Train one epoch
 :param device: device to train on
 :return: average loss
 """
-def train_epoch(model, loader, optimizer, device):
+def train_epoch(model: SchemaLinkingHomoGNN, loader: DataLoader, optimizer: torch.optim.Optimizer, device: torch.device) -> float:
+    epoch_start_time = time.time()
     model.train()
     total_loss = 0
     progress_bar = tqdm(loader, desc='Training', leave=False)
@@ -47,24 +49,58 @@ def train_epoch(model, loader, optimizer, device):
         # Update progress bar description with current loss
         progress_bar.set_description(f'Training (loss={loss.item():.4f})')
     
+    epoch_time = time.time() - epoch_start_time
+    logger.info(f"[i] Epoch time: {epoch_time:.2f} seconds")
     return total_loss / len(loader)
 
 
-
-
-def train(model, train_loader, num_epochs, optimizer, device):
-    """
-    Training loop for the model
-    """
+"""
+Training loop for the model
+:param model: model to train
+:param train_loader: data loader for training
+:param num_epochs: number of epochs to train
+:param optimizer: optimizer
+:param device: device to train on
+:return: None
+"""
+def train(model: SchemaLinkingHomoGNN, train_loader: DataLoader, num_epochs: int, optimizer: torch.optim.Optimizer, device: torch.device) -> None:
     logger.info("[i] Starting training...")
-    start_time = time.time()  # Start time tracking
+    start_time = time.time()
+    best_loss = float('inf')
+    
+    # Initialize TensorBoard
+    writer = SummaryWriter(log_dir='logs/tensorboard')
+
+    # Create checkpoints directory if it doesn't exist
+    checkpoint_dir = Path('checkpoints')
+    checkpoint_dir.mkdir(exist_ok=True)
+    
     for epoch in range(num_epochs):
         loss = train_epoch(model, train_loader, optimizer, device)
         logger.info(f'[i] Epoch {epoch:03d}, Loss: {loss:.4f}')
+        
+        # Log loss to TensorBoard
+        writer.add_scalar('Training/Loss', loss, epoch)
+
+        # Save checkpoint if loss improved
+        if loss < best_loss:
+            best_loss = loss
+            current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+            checkpoint_path = checkpoint_dir / f'model_epoch_{epoch}_loss_{loss:.4f}_{current_time}.pt'
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': loss,
+            }, checkpoint_path)
+            logger.info(f'[i] New best loss: {loss:.4f}. Saved checkpoint to {checkpoint_path}')
     
-    end_time = time.time()  # End time tracking
-    elapsed_time = end_time - start_time  # Calculate elapsed time
-    logger.info(f"[i] Training completed in {elapsed_time:.2f} seconds")  # Log elapsed time
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    logger.info(f"[i] Training completed in {elapsed_time:.2f} seconds")
+    
+    # Close the TensorBoard writer
+    writer.close()
 
 
 
@@ -72,10 +108,10 @@ def train(model, train_loader, num_epochs, optimizer, device):
 def main():
     # Hyperparameters
     input_dim = 3  # Should match embedding dimension
-    hidden_channels = 256
-    num_layers = 3
-    batch_size = 64
-    num_epochs = 3
+    hidden_channels = 64
+    num_layers = 2
+    batch_size = 128
+    num_epochs = 1
     lr = 0.001
     # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # Set the device to use GPUs 4, 5, 6, and 7
@@ -86,7 +122,7 @@ def main():
     #     logger.info(f"[i] Using GPUs: {device_ids}")
     
     # Modified device setup
-    device_ids = [1, 2]
+    device_ids = [7]
     device = torch.device(f'cuda:{device_ids[0]}' if torch.cuda.is_available() else 'cpu')
     if torch.cuda.is_available():
         torch.cuda.set_device(device_ids[0])
@@ -99,18 +135,11 @@ def main():
     # Load datasets
     logger.info("[i] Loading datasets...")
     spider_train = SchemaLinkingHomoGraphDataset(root='data/', dataset_type='spider', split='train')
-    spider_test = SchemaLinkingHomoGraphDataset(root='data/', dataset_type='spider', split='dev')  # dev set used as test set
-    # spider_dev = SchemaLinkingHomoGraphDataset(root='data/', dataset_type='spider', split='dev')
     # bird_train = SchemaLinkingHomoGraphDataset(root='data/', dataset_type='bird', split='train')
-    # bird_dev = SchemaLinkingHomoGraphDataset(root='data/', dataset_type='bird', split='dev')
     
     # Create data loaders
-    # train_loader = DataLoader(spider_train + bird_train, batch_size=batch_size, shuffle=True)
-    # train_loader = DataLoader(spider_train + bird_train, batch_size=batch_size, shuffle=True)
-    # spider_dev_loader = DataLoader(spider_dev, batch_size=batch_size)
-    # bird_dev_loader = DataLoader(bird_dev, batch_size=batch_size)
-    train_loader = DataLoader(spider_train, batch_size=batch_size, shuffle=True)
-    # test_loader = DataLoader(spider_test, batch_size=batch_size)
+    # train_loader = DataLoader(spider_train + bird_train, batch_size=batch_size, shuffle=True) # For multi-dataset training
+    train_loader = DataLoader(spider_train, batch_size=batch_size, shuffle=True) # For single-dataset training on Spider training set
     
     # Initialize model
     logger.info("[i] Initializing model...")
@@ -119,17 +148,18 @@ def main():
         hidden_channels=hidden_channels,
         num_layers=num_layers
     ).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
     # # Move model to primary GPU first, then wrap with DataParallel
     # model = model.to(device)
     # if len(device_ids) > 1:
     #     model = torch.nn.DataParallel(model, device_ids=device_ids)
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     # model = torch.nn.DataParallel(model, device_ids=device_ids)
     # optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     # Create results directory if it doesn't exist
-    results_dir = Path('gnn/results')
-    results_dir.mkdir(exist_ok=True)
+    # results_dir = Path('gnn/results')
+    # results_dir.mkdir(exist_ok=True)
     
     # Train the model
     train(model, train_loader, num_epochs, optimizer, device)

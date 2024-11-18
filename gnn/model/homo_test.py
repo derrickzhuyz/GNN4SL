@@ -1,3 +1,4 @@
+from typing import Tuple, Dict, List, Any
 import torch
 from torch_geometric.loader import DataLoader
 from gnn.model.homo_model import SchemaLinkingHomoGNN
@@ -6,6 +7,7 @@ from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_sc
 import json
 from loguru import logger
 from pathlib import Path
+from torch.utils.tensorboard import SummaryWriter
 
 logger.add("logs/homo_testing.log", rotation="1 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
@@ -20,8 +22,10 @@ Evaluate model on dev set and save predictions
 :return: metrics dictionary and predictions
 """
 @torch.no_grad()
-def evaluate(model, loader, device, dataset):
-    model.eval()
+def evaluate(
+    model: SchemaLinkingHomoGNN, loader: DataLoader, device: torch.device, dataset: SchemaLinkingHomoGraphDataset
+) -> Tuple[Dict[str, float], List[Dict[str, Any]]]:
+    model.eval()  
     preds, labels = [], []
     predictions_json = []
     batch_start_idx = 0  # Track the starting index for each batch
@@ -83,13 +87,16 @@ def evaluate(model, loader, device, dataset):
 def main():
     # Hyperparameters
     input_dim = 3
-    hidden_channels = 256
-    num_layers = 3
-    batch_size = 64
-    model_path = 'checkpoints/final_model.pt'
+    hidden_channels = 64
+    num_layers = 2
+    batch_size = 128
+    model_path = 'checkpoints/model_epoch_0_loss_0.4089_20241118_083841.pt'
     
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    
+    # Initialize TensorBoard
+    writer = SummaryWriter(log_dir='logs/tensorboard')
     
     # Load datasets
     logger.info("[i] Loading datasets...")
@@ -104,9 +111,10 @@ def main():
         num_layers=num_layers
     ).to(device)
     
-    # Load model weights
-    model.load_state_dict(torch.load(model_path))
-    logger.info("[i] Model weights loaded.")
+    # Load model weights - Modified this part
+    checkpoint = torch.load(model_path)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    logger.info(f"[i] Model weights loaded from epoch {checkpoint['epoch']}")
     
     # Evaluate the model
     metrics, predictions = evaluate(model, test_loader, device, spider_test)
@@ -118,6 +126,12 @@ def main():
     logger.info(f'    Recall:    {metrics["recall"]:.4f}')
     logger.info(f'    F1:        {metrics["f1"]:.4f}')
     
+    # Log metrics to TensorBoard
+    writer.add_scalar('Test/Accuracy', metrics['accuracy'])
+    writer.add_scalar('Test/Precision', metrics['precision'])
+    writer.add_scalar('Test/Recall', metrics['recall'])
+    writer.add_scalar('Test/F1', metrics['f1'])
+    
     # Save predictions
     results_dir = Path('gnn/results')
     results_dir.mkdir(exist_ok=True)
@@ -125,6 +139,9 @@ def main():
         json.dump(predictions, f, indent=2)
     
     logger.info(f'Predictions saved to {results_dir}/predictions.json')
+    
+    # Close the TensorBoard writer
+    writer.close()
 
 if __name__ == '__main__':
     main() 

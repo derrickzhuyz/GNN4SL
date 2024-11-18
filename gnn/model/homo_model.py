@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch_geometric.nn import SAGEConv, Linear
 from typing import Dict, List
 
-class SchemaLinkingHomoGNN(torch.nn.Module):
+class SchemaLinkingHomoGNN(nn.Module):
     def __init__(self, input_dim: int, hidden_channels: int, num_layers: int):
         super().__init__()
         
@@ -12,7 +12,7 @@ class SchemaLinkingHomoGNN(torch.nn.Module):
         self.node_encoder = Linear(input_dim, hidden_channels)
         
         # Stack of graph convolution layers
-        self.convs = torch.nn.ModuleList()
+        self.convs = nn.ModuleList()
         for _ in range(num_layers):
             conv = SAGEConv(hidden_channels, hidden_channels)
             self.convs.append(conv)

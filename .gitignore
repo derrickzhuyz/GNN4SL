@@ -4,7 +4,10 @@
 **/*.log
 **/*.sql
 **/*.pt
+**/logs/**
 
+
+# Exclude specific files
 !config/*.json
 !data/db_schema/*.json
 !data/gold_schema_linking/*.json
