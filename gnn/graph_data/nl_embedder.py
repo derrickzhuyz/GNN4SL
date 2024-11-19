@@ -8,7 +8,7 @@ from transformers import BertTokenizer, BertModel
 
 
 class NLEmbedder:
-    def __init__(self, model_name='all-MiniLM-L6-v2', vector_dim=1536, openai_api_key=None, base_url=None):
+    def __init__(self, model_name='all-MiniLM-L6-v2', vector_dim=384, openai_api_key=None, base_url=None):
         # Load the local SentenceTransformer model
         self.sentence_model = SentenceTransformer(model_name)
         self.vector_dim = vector_dim

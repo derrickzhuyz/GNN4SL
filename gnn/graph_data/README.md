@@ -4,7 +4,7 @@ To construct graph datasets for schema linking tasks
 
 * **nl_embedder.py:** 
   * a class to embed natrual language like names or questions into vectors, which are used as the node features (initial features to be upgraded by GNN).
-* **nl_embedding_processor:** 
+* **nl_embedding_processor.py:** 
   * to process and conduct embedding, and store properly.
 * **node_level_graph_dataset.py:**
   * treat schema linking as node-level classification task, each node (table/column) has a label denoting if it is relevant to current question;
