@@ -77,9 +77,9 @@ def visualize_node_level_graph(G: nx.Graph, title: str, save_path: Optional[str]
         # Get the first embedding value and format it to 3 decimal places
         first_embedding_value = G.nodes[node]['embedding'][0]  # Get the first embedding value
         label = f"{G.nodes[node]['name']}\n"
-        label += f"({G.nodes[node]['type']})\n"
+        # label += f"({G.nodes[node]['type']})\n"
         label += f"Rel: {G.nodes[node]['relevant']}\n"
-        label += f"Emb: {first_embedding_value:.3f}"  # Format to 3 decimal places
+        label += f"Emb: \n{first_embedding_value:.3f}"  # Format to 3 decimal places
         labels[node] = label
     
     # Draw labels with white background for better visibility
@@ -120,7 +120,6 @@ def visualize_node_level_graph(G: nx.Graph, title: str, save_path: Optional[str]
     
     if save_path:
         plt.savefig(save_path, bbox_inches='tight', dpi=300)
-    plt.show()
 
 
 """
@@ -182,8 +181,8 @@ def inspect_node_level_graph(graph: Data, idx: int, visualize: bool = True, data
     print(f"Number of connected components: {nx.number_connected_components(G)}")
     
     if visualize:
-        visualize_node_level_graph(G, title=f"Graph Structure for {dataset} {split}: Example No. {idx}", 
-                           save_path=f"data/schema_linking_graph_dataset/visualizations/graph_{dataset}_{split}_idx_{idx}.png")
+        visualize_node_level_graph(G, title=f"Graph structure for {dataset} {split}: Example No. {idx}", 
+                           save_path=f"data/schema_linking_graph_dataset/visualizations/node_graph_{dataset}_{split}_idx_{idx}.png")
 
 
 
@@ -193,7 +192,7 @@ if __name__ == "__main__":
     
     dataset_type = 'spider'  # 'spider' or 'bird'
     split_type = 'train'  # 'dev' or 'train'
-    idx_to_inspect = 8650
+    idx_to_inspect = 0
     
     # Inspect and compare node-level graphs
     nx_node_path = f'data/schema_linking_graph_dataset/node_level_graph_dataset/{dataset_type}_{split_type}_node_level_graph.pt'
