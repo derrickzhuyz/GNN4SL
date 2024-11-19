@@ -23,7 +23,7 @@ def get_response(prompt):
     )
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo", #'gpt-4o-mini'
-        # model="gpt-4", #'gpt-4o-2024-08-06'
+        #model="gpt-4", #'gpt-4o-2024-08-06'
         messages=[{'role': 'system', 'content': 'You are an expert in database.'},
                   {'role': 'user', 'content': prompt},]
         )
@@ -37,7 +37,7 @@ Remove the code block tags from the response
 """
 def remove_code_block_tags(text):
     # Check that the string starts with '''' JSON and ends with '''
-    if text.startswith("```json") and text.endswith("```"):
+    if text.startswith("```json") and (text.endswith("```") or text.endswith("``` ")):
         logger.info("[i] Handled the json formatting issue")
         return text[7:-3].strip()  # Remove the ''' json at the beginning and the ''' at the end
     return text
@@ -48,6 +48,15 @@ def remove_braces(text):
         logger.info("[i] Handled the braces formatting issue")
         return text[1:-1].strip()  # Remove the ''' json at the beginning and the ''' at the end
     return text
+
+def is_valid_json(content_pre):
+    content = '{' + content_pre + '}'
+    try:
+        json.loads(content)  # 尝试解析为JSON
+        return True
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON 格式错误: {e}")  # 输出错误信息
+        return False
 
 
 if __name__ == '__main__':
@@ -62,9 +71,16 @@ if __name__ == '__main__':
     # Iterate over each object
     cnt = 0
     cost = 0.0
+    # flag = False
     for item in tqdm(data, desc="Schema Linking Progress" ):
         database = item.get('database')
         question = item.get('question')
+
+        # if(question == 'Return the type code of the template type with the description \"Book\".'):
+        #     flag = True
+
+        # if(flag == False):
+        #     continue
 
         with open('data/db_schema/bird_dev_schemas.json', 'r', encoding='utf-8') as file:
             schemas = json.load(file)
@@ -85,13 +101,20 @@ if __name__ == '__main__':
         cost += response.consume
         linked_schema = remove_braces(remove_code_block_tags(response.choices[0].message.content))
 
+        round_cnt = 0
+        while(is_valid_json(linked_schema) == False and round_cnt < 3):
+            response = get_response(formatted_prompt)
+            cost += response.consume
+            linked_schema = remove_braces(remove_code_block_tags(response.choices[0].message.content))
+            round_cnt += 1
+
 
         with open("linked_schema.json", "a", encoding="utf-8") as file:
             file.write("{\n")
             file.write(f'"database": "{database}",\n')
             file.write(linked_schema)
             file.write(",\n")
-            file.write(f'"question": "{question.replace("\"", "\\\"")}"\n')
+            file.write(f'"question": "{question.replace("\"", "\\\"").replace("\n", "\\n")}"\n')
             file.write('},\n')
         cnt+=1
         logger.info(f"[+] Successfully processed {cnt} items, cost {cost} CNY")
