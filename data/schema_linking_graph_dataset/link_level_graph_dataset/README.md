@@ -2,7 +2,7 @@ Link-level graph datasets: for each dataset, the number of generated graphs equa
 
 Inspection Example:
 
-```json
+```
 === Inspecting Link-level Graph: 0 ===
 
 Graph Structure:
