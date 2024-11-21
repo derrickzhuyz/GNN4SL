@@ -24,16 +24,22 @@ class LinkLevelGraphDataset(Dataset):
         root: Root directory where the dataset should be saved
         dataset_type: One of ['spider', 'bird'] to specify which dataset to use
         split: One of ['train', 'dev'] to specify train or dev split
+        embed_method: To specify which embedding method used, to store the graph data in the corresponding subdirectory
         transform: Optional transform to be applied on a sample
     """
-    def __init__(self, root, dataset_type='spider', split='train', transform=None):
+    def __init__(self, root, dataset_type='spider', split='train', embed_method: str = None, transform=None):
         self.dataset_type = dataset_type
         self.split = split
-        self.graph_data_dir = os.path.join(root, 'link_level_graph_dataset')
+        self.embed_method = embed_method
+        self.graph_data_dir = os.path.join(root, 'link_level_graph_dataset', embed_method)
+        
+        # Create the graph data directory if it doesn't exist
+        os.makedirs(self.graph_data_dir, exist_ok=True)
         
         # Load raw data with question embeddings during initialization
         path_config = self._load_json('config/path_config.json')
         labeled_path = os.path.join(path_config['embed_question_paths']['embed_question_base'],
+                              embed_method,
                               f'{dataset_type}_{split}_labeled.json')
         self.raw_data = self._load_json(labeled_path)
         
@@ -63,7 +69,8 @@ class LinkLevelGraphDataset(Dataset):
         schema_filename = ('spider_schemas.json' if self.dataset_type == 'spider' 
                           else f'{self.dataset_type}_{self.split}_schemas.json')
         schema_path = os.path.join(
-            path_config['embed_db_schema_paths']['embed_db_schema_base'], 
+            path_config['embed_db_schema_paths']['embed_db_schema_base'],
+            self.embed_method,
             schema_filename
         )
         schemas = self._load_json(schema_path)
@@ -262,7 +269,20 @@ class LinkLevelGraphDataset(Dataset):
 
 if __name__ == "__main__":
     # Create datasets
-    spider_train = LinkLevelGraphDataset(root='data/schema_linking_graph_dataset/', dataset_type='spider', split='train')
-    spider_dev = LinkLevelGraphDataset(root='data/schema_linking_graph_dataset/', dataset_type='spider', split='dev')
-    bird_train = LinkLevelGraphDataset(root='data/schema_linking_graph_dataset/', dataset_type='bird', split='train')
-    bird_dev = LinkLevelGraphDataset(root='data/schema_linking_graph_dataset/', dataset_type='bird', split='dev')
+    used_embed_method = 'sentence_transformer' # To store graph data in the subdirectory named by embedding method
+    spider_train = LinkLevelGraphDataset(root='data/schema_linking_graph_dataset/', 
+                                       dataset_type='spider', 
+                                       split='train',
+                                       embed_method=used_embed_method)
+    spider_dev = LinkLevelGraphDataset(root='data/schema_linking_graph_dataset/', 
+                                     dataset_type='spider', 
+                                     split='dev',
+                                     embed_method=used_embed_method)
+    bird_train = LinkLevelGraphDataset(root='data/schema_linking_graph_dataset/', 
+                                     dataset_type='bird', 
+                                     split='train',
+                                     embed_method=used_embed_method)
+    bird_dev = LinkLevelGraphDataset(root='data/schema_linking_graph_dataset/', 
+                                   dataset_type='bird', 
+                                   split='dev',
+                                   embed_method=used_embed_method)

@@ -8,9 +8,9 @@ from transformers import BertTokenizer, BertModel
 
 
 class NLEmbedder:
-    def __init__(self, model_name='all-MiniLM-L6-v2', vector_dim=384, openai_api_key=None, base_url=None):
+    def __init__(self, vector_dim=384, openai_api_key=None, base_url=None):
         # Load the local SentenceTransformer model
-        self.sentence_model = SentenceTransformer(model_name)
+        self.sentence_model = SentenceTransformer('all-MiniLM-L6-v2')
         self.vector_dim = vector_dim
         
         # Load the BERT model and tokenizer
@@ -120,7 +120,8 @@ class NLEmbedder:
 
 
     """
-    NOTE: Deprecated! This function is deprecated for lots of embedding of names in databases will be stored repeatedly.
+    NOTE: Deprecated! This function is deprecated for lots of embedding of names in databases will be stored repeatedly. 
+        Now we use the function embed_schema_element_names() to embed the schema data.
     Embed the schema data: table names, column names, and question
     :param schema_data: dict, the schema data to embed
     :param embed_method: str, the embedding method to use
@@ -140,7 +141,6 @@ class NLEmbedder:
                             f"Choose from {list(embedding_methods.keys())}")
         
         embed_func = embedding_methods[embed_method]
-        
         embedded_schema = {
             'database': schema_data['database'],
             'question': schema_data['question'],
@@ -207,6 +207,7 @@ class NLEmbedder:
 
 
     """
+    NOTE: Now we use this function to embed the schema data: database name, table names, and column names
     Embed database schema: database name, table names, and column names
     :param schema_data: dict, the database schema to embed
     :param embed_method: str, the embedding method to use
@@ -224,7 +225,9 @@ class NLEmbedder:
         if embed_method not in embedding_methods:
             raise ValueError(f"[! Error] Unsupported embedding method: {embed_method}. "
                             f"Choose from {list(embedding_methods.keys())}")
-        
+        else:
+            print(f"[INFO] {embed_method} is used for embedding method.")
+
         embed_func = embedding_methods[embed_method]
         
         # Create a deep copy of the original schema
@@ -260,7 +263,7 @@ if __name__ == "__main__":
     # base_url=os.getenv("OPENAI_BASE_URL")
 
     # embedder = NLEmbedder(openai_api_key=api_key, base_url=base_url)
-    # question = "What is the capital of France?"
+    # question = "How many singers do we have?"
 
     # Get embeddings from different methods
     # vector_sentence_transformer = embedder.embed_with_sentence_transformer(question)
