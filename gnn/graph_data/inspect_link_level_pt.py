@@ -74,7 +74,7 @@ def visualize_link_level_graph(G: nx.Graph, title: str, save_path: Optional[str]
     for node in G.nodes():
         first_embedding_value = G.nodes[node]['embedding'][0]
         node_name = G.nodes[node]['name']
-        label = f"{node_name[:20]}{'..' if len(node_name) > 20 else ''}\n"
+        label = f"{node_name[:80]}{'..' if len(node_name) > 80 else ''}\n"
         label += f"Emb: \n{first_embedding_value:.3f}"
         labels[node] = label
     
@@ -207,11 +207,13 @@ if __name__ == "__main__":
     os.makedirs("data/schema_linking_graph_dataset/visualizations", exist_ok=True)
     
     dataset_type = 'spider'  # 'spider' or 'bird'
-    split_type = 'train'  # 'dev' or 'train'
+    split_type = 'dev'  # 'dev' or 'train'
     idx_to_inspect = 0
+
+    embedding_method = 'sentence_transformer'
     
     # Path to the link-level graph dataset
-    nx_link_path = f'data/schema_linking_graph_dataset/link_level_graph_dataset/{dataset_type}_{split_type}_link_level_graph.pt'
+    nx_link_path = f'data/schema_linking_graph_dataset/link_level_graph_dataset/{embedding_method}/{dataset_type}_{split_type}_link_level_graph.pt'
     
     # Inspect link-level graphs if the file exists
     if os.path.exists(nx_link_path):
