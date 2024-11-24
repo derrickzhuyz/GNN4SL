@@ -10,7 +10,7 @@ from tqdm import tqdm
 import os
 from loguru import logger
 
-logger.add("logs/train_link_level_model.log", rotation="1 MB", level="INFO",
+logger.add("logs/link_level_train.log", rotation="1 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
 
 class LinkLevelGNNRunner:
@@ -329,7 +329,7 @@ class LinkLevelGNNRunner:
             # Save checkpoint if validation F1 improved
             if val_metrics['f1'] > best_f1:
                 best_f1 = val_metrics['f1']
-                self.save_checkpoint(checkpoint_dir, 'best_model.pt')
+                self.save_checkpoint(checkpoint_dir, 'link_level_model_best.pt')
                 logger.info(f"Saved new best model with F1: {best_f1:.4f}")
         
         # Close TensorBoard writer

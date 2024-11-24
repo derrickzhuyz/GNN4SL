@@ -66,7 +66,7 @@ if __name__ == "__main__":
     )
     
     # Load the best model checkpoint
-    checkpoint_path = 'checkpoints/link_level_model/best_model.pt'
+    checkpoint_path = 'checkpoints/link_level_model/link_level_model_best.pt'
     if os.path.exists(checkpoint_path):
         checkpoint = torch.load(checkpoint_path, weights_only=False)
         model.load_state_dict(checkpoint['model_state_dict'])

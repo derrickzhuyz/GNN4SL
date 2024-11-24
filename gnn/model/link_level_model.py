@@ -33,7 +33,7 @@ class LinkLevelGNN(nn.Module):
         )
         
         # Middle GAT layers
-        for _ in range(num_layers - 2):
+        for _ in range(max(num_layers - 2, 1)):
             self.convs.append(
                 GATConv(hidden_channels, hidden_channels // num_heads, heads=num_heads, dropout=dropout)
             )
