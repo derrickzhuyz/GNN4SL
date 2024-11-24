@@ -11,7 +11,7 @@ from loguru import logger
 logger.add("logs/link_level_model.log", rotation="1 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
 
-class LinkLevelModel(nn.Module):
+class LinkLevelGNN(nn.Module):
     def __init__(self, in_channels: int = 384, hidden_channels: int = 256, num_heads: int = 4, num_layers: int = 3, dropout: float = 0.1):
         """
         Link prediction model using Graph Attention Networks
