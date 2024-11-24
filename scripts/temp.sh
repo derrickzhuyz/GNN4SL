@@ -7,8 +7,10 @@
 export CUDA_VISIBLE_DEVICES='1,2'
 
 # Train the link-level model
-echo "Starting training of the link-level model..."
-python -m gnn.model.link_level_train
+# echo "Starting training of the link-level model..."
+# python -m gnn.model.link_level_train
+
+python -m gnn.model.link_level_test
 
 # # Test the link-level model
 # echo "Starting evaluation of the link-level model..."

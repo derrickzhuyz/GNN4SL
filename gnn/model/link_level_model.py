@@ -64,93 +64,142 @@ class LinkLevelModel(nn.Module):
 
     def predict_links(self, data: Data) -> Tuple[List[Dict], torch.Tensor]:
         """
-        Predict relevance between question nodes and schema nodes
+        Predict relevance between question nodes and schema nodes (tables and columns)
         
         Args:
-            data: PyG Data object containing the graph
-            
+            data: PyG Data object containing:
+                - node_types: List of node types ('question', 'table', 'column')
+                - node_names: Optional list of node names
+                - edge_index: Tensor of shape [2, num_edges] containing edge connections
+                - x: Node feature matrix
+        
         Returns:
-            predictions: List of dictionaries containing predictions for each question
-            scores: Tensor of prediction scores
+            predictions: List of dictionaries with structure:
+                {
+                    'question_idx': int,  # Index of the question node
+                    'question': str,      # Question text or ID
+                    'tables': [           # List of relevant tables
+                        {
+                            'name': str,      # Table name
+                            'relevant': bool,  # Whether table is relevant
+                            'score': float,    # Prediction score
+                            'columns': [       # List of columns in this table
+                                {
+                                    'name': str,      # Column name
+                                    'relevant': bool,  # Whether column is relevant
+                                    'score': float,    # Prediction score
+                                },
+                                ...
+                            ]
+                        },
+                        ...
+                    ]
+                }
+            scores: Tensor containing all prediction scores
         """
-        self.eval()  # Set the model to evaluation mode
+        self.eval()  # Set model to evaluation mode
         with torch.no_grad():  # Disable gradient calculation for inference
-            # Get node embeddings
+            # Get node embeddings through GAT layers
             node_embeddings = self.forward(data.x, data.edge_index)
+            scores_list = []  # Store all prediction scores
+            predictions = []  # Store structured predictions
             
-            predictions = []  # Initialize list to store predictions for each question
-            scores_list = []  # Initialize list to store prediction scores
+            # Find all question nodes in the graph
+            question_indices = [i for i, type_ in enumerate(data.node_types[0]) if type_ == 'question']
+            logger.info(f"Found {len(question_indices)} question nodes")
             
-            # Find question nodes
-            question_indices = [i for i, type_ in enumerate(data.node_types) if type_ == 'question']
+            # Create a dictionary to group columns by their parent tables
+            tables = {}  # Format: {table_idx: {'name': str, 'columns': List[Dict]}}
             
-            # For each question node
+            # First pass: identify all tables
+            for i, type_ in enumerate(data.node_types[0]):
+                if type_ == 'table':
+                    # Store table info with a default name if node_names not provided
+                    tables[i] = {
+                        'name': data.node_names[0][i] if hasattr(data, 'node_names') else f'table_{i}',
+                        'columns': []
+                    }
+            
+            # Second pass: associate columns with their tables using edge information
+            for i, type_ in enumerate(data.node_types[0]):
+                if type_ == 'column':
+                    # Find all edges connected to this column
+                    edge_mask = (data.edge_index[0] == i) | (data.edge_index[1] == i)
+                    connected_edges = data.edge_index[:, edge_mask]
+                    
+                    # Look for a table connection in the edges
+                    for edge_idx in range(connected_edges.shape[1]):
+                        src, dst = connected_edges[:, edge_idx]
+                        other_node = dst if src == i else src
+                        # If the connected node is a table, associate column with it
+                        if data.node_types[0][other_node] == 'table':
+                            if other_node in tables:
+                                tables[other_node]['columns'].append({
+                                    'idx': i,  # Store column index for later embedding lookup
+                                    'name': data.node_names[0][i] if hasattr(data, 'node_names') else f'column_{i}'
+                                })
+                            break
+            
+            # Process each question to generate predictions
             for q_idx in question_indices:
-                question_name = data.node_names[q_idx]  # Get the name of the question node
-                q_embedding = node_embeddings[q_idx]  # Get the embedding for the question node
+                q_embedding = node_embeddings[q_idx]  # Get question node embedding
                 
+                # Create prediction structure for this question
                 question_pred = {
-                    'question': question_name,
-                    'database': data.database_name,
-                    'tables': [],  # Initialize list to store table predictions
+                    'question_idx': q_idx,
+                    'question': data.node_names[0][q_idx] if hasattr(data, 'node_names') else f'question_{q_idx}',
+                    'tables': []
                 }
                 
-                # Group schema nodes by table
-                table_columns = {}  # Dictionary to hold table names and their corresponding columns
-                for i, (name, type_) in enumerate(zip(data.node_names, data.node_types)):
-                    if type_ == 'table':
-                        table_columns[name] = {'idx': i, 'columns': []}  # Initialize entry for table
-                    elif type_ == 'column':
-                        table_name = None
-                        # Find the connected table node
-                        for edge_idx in range(data.edge_index.size(1)):
-                            src, dst = data.edge_index[:, edge_idx]
-                            # Check if the current column is connected to a table
-                            if (src == i and data.node_types[dst] == 'table') or \
-                               (dst == i and data.node_types[src] == 'table'):
-                                connected_idx = dst if src == i else src
-                                table_name = data.node_names[connected_idx]  # Get the name of the connected table
-                                break
-                        # If a table is found, add the column to the corresponding table entry
-                        if table_name and table_name in table_columns:
-                            table_columns[table_name]['columns'].append({'name': name, 'idx': i})
-                
-                # Predict relevance for each table and its columns
-                for table_name, table_info in table_columns.items():
+                # Process each table and its columns
+                for table_idx, table_info in tables.items():
                     # Predict table relevance
-                    table_embedding = node_embeddings[table_info['idx']]  # Get the embedding for the table
-                    pair_embedding = torch.cat([q_embedding, table_embedding])  # Concatenate question and table embeddings
-                    table_score = torch.sigmoid(self.link_predictor(pair_embedding))  # Get the relevance score for the table
-                    scores_list.append(table_score)  # Store the score
+                    table_embedding = node_embeddings[table_idx]
+                    pair_embedding = torch.cat([q_embedding, table_embedding])
+                    table_score = torch.sigmoid(self.link_predictor(pair_embedding))
+                    scores_list.append(table_score)
                     
+                    # Create prediction structure for this table
                     table_pred = {
-                        'name': table_name,
-                        'relevant': bool(table_score > 0.5),  # Determine if the table is relevant based on the score
-                        'score': float(table_score),  # Convert score to float for easier handling
-                        'columns': []  # Initialize list to store column predictions
+                        'name': table_info['name'],
+                        'relevant': bool(table_score > 0.5),  # Binary relevance threshold
+                        'score': float(table_score),
+                        'columns': []
                     }
                     
-                    # Predict column relevance
+                    # Process each column in the table
                     for col in table_info['columns']:
-                        col_embedding = node_embeddings[col['idx']]  # Get the embedding for the column
-                        pair_embedding = torch.cat([q_embedding, col_embedding])  # Concatenate question and column embeddings
-                        col_score = torch.sigmoid(self.link_predictor(pair_embedding))  # Get the relevance score for the column
-                        scores_list.append(col_score)  # Store the score
+                        # Predict column relevance
+                        col_embedding = node_embeddings[col['idx']]
+                        pair_embedding = torch.cat([q_embedding, col_embedding])
+                        col_score = torch.sigmoid(self.link_predictor(pair_embedding))
+                        scores_list.append(col_score)
                         
-                        # Add column prediction to the table prediction
+                        # Add column prediction
                         table_pred['columns'].append({
                             'name': col['name'],
-                            'relevant': bool(col_score > 0.5),  # Determine if the column is relevant based on the score
-                            'score': float(col_score)  # Convert score to float for easier handling
+                            'relevant': bool(col_score > 0.5),  # Binary relevance threshold
+                            'score': float(col_score)
                         })
                     
-                    question_pred['tables'].append(table_pred)  # Add the table prediction to the question prediction
+                    question_pred['tables'].append(table_pred)
                 
-                predictions.append(question_pred)  # Add the question prediction to the overall predictions
+                predictions.append(question_pred)
             
-            scores = torch.stack(scores_list)  # Stack all scores into a tensor
+            # Handle case where no predictions were generated
+            if not scores_list:
+                logger.warning("No scores generated for any question, returning empty predictions.")
+                return predictions, torch.tensor([], device=data.x.device)
             
-            return predictions, scores  # Return the predictions and scores
+            # Convert list of scores to tensor
+            try:
+                scores = torch.stack(scores_list)
+            except RuntimeError as e:
+                logger.error(f"Error stacking scores: {e}")
+                logger.error(f"Number of scores: {len(scores_list)}")
+                return predictions, torch.tensor([], device=data.x.device)
+            
+            return predictions, scores
 
     def save_predictions(self, predictions: List[Dict], output_dir: str, split: str, dataset_type: str):
         """Save predictions to JSON file"""

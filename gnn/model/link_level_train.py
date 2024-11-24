@@ -1,3 +1,4 @@
+from typing import Optional
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -14,8 +15,8 @@ logger.add("logs/train_link_level_model.log", rotation="1 MB", level="INFO",
 class LinkLevelTrainer:
     def __init__(self, 
                  model: LinkLevelModel,
-                 train_dataset: LinkLevelGraphDataset,
-                 test_dataset: LinkLevelGraphDataset,
+                 train_dataset: Optional[LinkLevelGraphDataset],
+                 test_dataset: Optional[LinkLevelGraphDataset],
                  device: torch.device,
                  val_ratio: float = 0.1,  # 10% of train set for validation
                  lr: float = 1e-4,
@@ -34,26 +35,35 @@ class LinkLevelTrainer:
         """
         self.model = model.to(device)
         self.device = device
-        
-        # Split training data into train and validation
-        train_size = len(train_dataset)
-        val_size = int(train_size * val_ratio)
-        train_size = train_size - val_size
-        
-        train_subset, val_subset = torch.utils.data.random_split(
-            train_dataset, 
-            [train_size, val_size],
-            generator=torch.Generator().manual_seed(42)  # For reproducibility
-        )
-        
-        self.train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True)
-        self.val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False)
-        self.test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+        if train_dataset is not None:
+            # Split training data into train and validation
+            train_size = len(train_dataset)
+            val_size = int(train_size * val_ratio)
+            train_size = train_size - val_size
+            
+            train_subset, val_subset = torch.utils.data.random_split(
+                train_dataset, 
+                [train_size, val_size],
+                generator=torch.Generator().manual_seed(42)  # For reproducibility
+            )
+            
+            self.train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True)
+            self.val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False)
+        else:
+            self.train_loader = None
+            self.val_loader = None
+
+        if test_dataset is not None:
+            self.test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+        else:
+            self.test_loader = None
         
         self.optimizer = optim.Adam(model.parameters(), lr=lr)
         self.criterion = nn.BCEWithLogitsLoss()
-        
-        logger.info(f"Dataset sizes - Train: {train_size}, Val: {val_size}, Test: {len(test_dataset)}")
+        if train_dataset is not None:
+            logger.info(f"Dataset sizes - Train: {train_size}, Val: {val_size}")
+        if test_dataset is not None:
+            logger.info(f"Dataset sizes - Test: {len(test_dataset)}")
 
     def _extract_labels(self, data):
         """Extract ground truth labels from graph data"""
@@ -371,13 +381,6 @@ def main():
         embed_method=embed_method
     )
     
-    test_dataset = LinkLevelGraphDataset(
-        root='data/schema_linking_graph_dataset/',
-        dataset_type='spider',
-        split='dev',  # This is our test set
-        embed_method=embed_method
-    )
-    
     # Initialize model
     model = LinkLevelModel(
         in_channels=384,
@@ -391,32 +394,18 @@ def main():
     trainer = LinkLevelTrainer(
         model=model,
         train_dataset=train_dataset,
-        test_dataset=test_dataset,  # Pass dev set as test set
+        test_dataset=None,
         device=device,
         val_ratio=0.1,  # Use 10% of train set for validation
         lr=1e-4,
-        batch_size=8
+        batch_size=1
     )
     
     # Train model
     checkpoint_dir = 'checkpoints/link_level_model/'
     trainer.train(num_epochs=1, checkpoint_dir=checkpoint_dir)
-    
-    # Test and save predictions
-    logger.info("Generating predictions for test set...")
-    predictions, test_loss, test_acc = trainer.test()
-    
-    # Save predictions
-    output_dir = 'outputs/schema_linking/'
-    model.save_predictions(
-        predictions=predictions,
-        output_dir=output_dir,
-        split='dev',
-        dataset_type='spider'
-    )
-    
-    logger.info(f"Final Test Metrics - Loss: {test_loss:.4f}, Accuracy: {test_acc:.4f}")
-    logger.info("Training and testing completed!")
+
+
 
 if __name__ == "__main__":
     main()
