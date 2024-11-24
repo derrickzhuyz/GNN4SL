@@ -167,7 +167,9 @@ def inspect_link_level_graph(graph: Data, idx: int, visualize: bool = True, data
     for node in G.nodes():
         node_data = G.nodes[node]
         embedding_values = node_data['embedding'][:3]
+        embedding_dim = len(node_data['embedding'])
         print(f"Node {node}: {node_data['name']} ({node_data['type']})")
+        print(f"  - Embedding dimension: {embedding_dim}")
         print(f"  - Embedding (first three values): {embedding_values}")
     
     # Print edge information
