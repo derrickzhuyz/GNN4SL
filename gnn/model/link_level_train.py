@@ -8,9 +8,11 @@ from gnn.model.link_level_model import LinkLevelGNN
 from gnn.graph_data.link_level_graph_dataset import LinkLevelGraphDataset
 from tqdm import tqdm
 import os
+import time
+from datetime import datetime, timedelta
 from loguru import logger
 
-logger.add("logs/link_level_train.log", rotation="1 MB", level="INFO",
+logger.add("logs/link_level_train.log", rotation="50 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
 
 class LinkLevelGNNRunner:
@@ -68,6 +70,12 @@ class LinkLevelGNNRunner:
             logger.info(f"Dataset sizes - Train: {train_size}, Val: {val_size}")
         if test_dataset is not None:
             logger.info(f"Dataset sizes - Test: {len(test_dataset)}")
+        self.training_start_time = None
+        self.epoch_start_time = None
+
+    def _format_time(self, seconds: float) -> str:
+        """Format seconds into human readable time string"""
+        return str(timedelta(seconds=int(seconds)))
 
     def _extract_labels(self, data):
         """Extract ground truth labels from graph data"""
@@ -143,13 +151,16 @@ class LinkLevelGNNRunner:
             self.writer.add_scalar(f'{prefix}/{name}', value, step)
 
     def train_epoch(self):
-        """Train for one epoch with TensorBoard logging"""
+        """Train for one epoch with time tracking"""
         self.model.train()
         total_metrics = {'loss': 0, 'accuracy': 0, 'precision': 0, 'recall': 0, 'f1': 0, 'pos_ratio': 0}
         num_batches = 0
         
+        epoch_start = time.time()
+        
         # Wrap the training loop with tqdm for progress bar
         for batch_idx, data in tqdm(enumerate(self.train_loader), total=len(self.train_loader), desc="Training"):
+            batch_start = time.time()
             logger.info(f"\nProcessing batch {batch_idx}")
             
             data = data.to(self.device)
@@ -221,10 +232,23 @@ class LinkLevelGNNRunner:
                 self._log_metrics(metrics, self.global_step, prefix='batch')
                 self.global_step += 1
                 
+                batch_time = time.time() - batch_start
+                logger.info(f"Batch {batch_idx} completed in {batch_time:.2f}s - "
+                          f"Loss: {loss.item():.4f}, F1: {metrics['f1']:.4f}")
+                
+                # Log batch time to TensorBoard
+                self.writer.add_scalar('time/batch_seconds', batch_time, self.global_step)
+                
             except Exception as e:
                 logger.error(f"Batch {batch_idx}: Error processing batch: {str(e)}")
-                logger.exception("Full traceback:")  # This will print the full traceback
+                logger.exception("Full traceback:")
                 continue
+        
+        epoch_time = time.time() - epoch_start
+        logger.info(f"Epoch completed in {self._format_time(epoch_time)}")
+        
+        # Log epoch time to TensorBoard
+        self.writer.add_scalar('time/epoch_seconds', epoch_time, self.current_epoch)
         
         if num_batches == 0:
             logger.error("No valid batches found in training epoch!")
@@ -233,7 +257,7 @@ class LinkLevelGNNRunner:
         # Calculate and log epoch averages
         avg_metrics = {k: v / max(num_batches, 1) for k, v in total_metrics.items()}
         self._log_metrics(avg_metrics, self.current_epoch, prefix='train')
-        return avg_metrics
+        return avg_metrics, epoch_time
     
     def validate(self):
         """Validate the model with TensorBoard logging"""
@@ -311,20 +335,35 @@ class LinkLevelGNNRunner:
         return avg_metrics
 
     def train(self, num_epochs: int, checkpoint_dir: str):
-        """Train the model with TensorBoard logging"""
+        """Train the model with time tracking"""
         best_f1 = 0.0
-        self.global_step = 0  # For batch-level logging
-        os.makedirs(checkpoint_dir, exist_ok=True)
+        self.global_step = 0
+        total_start_time = time.time()
         
+        os.makedirs(checkpoint_dir, exist_ok=True)
+        logger.info(f"Starting training at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        epoch_times = []
         for epoch in range(num_epochs):
             self.current_epoch = epoch
+            epoch_start_time = time.time()
+            
             logger.info(f"\nEpoch {epoch+1}/{num_epochs}")
             
             # Train and log metrics
-            train_metrics = self.train_epoch()
+            train_metrics, epoch_time = self.train_epoch()
+            epoch_times.append(epoch_time)
             
             # Validate and log metrics
             val_metrics = self.validate()
+            
+            # Calculate ETA
+            avg_epoch_time = sum(epoch_times) / len(epoch_times)
+            eta = avg_epoch_time * (num_epochs - epoch - 1)
+            
+            logger.info(f"Epoch {epoch+1} completed in {self._format_time(epoch_time)}")
+            logger.info(f"Average epoch time: {self._format_time(avg_epoch_time)}")
+            logger.info(f"Estimated time remaining: {self._format_time(eta)}")
             
             # Save checkpoint if validation F1 improved
             if val_metrics['f1'] > best_f1:
@@ -332,8 +371,37 @@ class LinkLevelGNNRunner:
                 self.save_checkpoint(checkpoint_dir, 'link_level_model_best.pt')
                 logger.info(f"Saved new best model with F1: {best_f1:.4f}")
         
+        total_time = time.time() - total_start_time
+        logger.info(f"\nTraining completed in {self._format_time(total_time)}")
+        logger.info(f"Average epoch time: {self._format_time(sum(epoch_times) / num_epochs)}")
+        
+        # Log final timing statistics to TensorBoard
+        self.writer.add_scalar('time/total_training_hours', total_time / 3600, 0)
+        self.writer.add_scalar('time/average_epoch_minutes', (sum(epoch_times) / num_epochs) / 60, 0)
+        
         # Close TensorBoard writer
         self.writer.close()
+        
+        # Save timing statistics to file
+        timing_stats = {
+            'total_training_time': self._format_time(total_time),
+            'average_epoch_time': self._format_time(sum(epoch_times) / num_epochs),
+            'epoch_times': [self._format_time(t) for t in epoch_times],
+            'start_time': datetime.fromtimestamp(total_start_time).strftime('%Y-%m-%d %H:%M:%S'),
+            'end_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        
+        timing_path = os.path.join(checkpoint_dir, 'training_timing.txt')
+        with open(timing_path, 'w') as f:
+            for key, value in timing_stats.items():
+                if key == 'epoch_times':
+                    f.write(f"Epoch times:\n")
+                    for i, t in enumerate(value, 1):
+                        f.write(f"  Epoch {i}: {t}\n")
+                else:
+                    f.write(f"{key}: {value}\n")
+        
+        logger.info(f"Saved timing statistics to {timing_path}")
     
     def save_checkpoint(self, checkpoint_dir: str, filename: str):
         """Save model checkpoint"""
