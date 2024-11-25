@@ -1,17 +1,24 @@
 import torch
 from gnn.model.link_level_model import LinkLevelGNN
 from gnn.graph_data.link_level_graph_dataset import LinkLevelGraphDataset
-from gnn.model.link_level_train import LinkLevelGNNRunner
+from gnn.model.link_level_runner import LinkLevelGNNRunner
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 import os
 from loguru import logger
+import datetime
+import argparse
 
 logger.add("logs/link_level_test.log", rotation="10 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
 
+
+"""
+Format metrics results for logging
+:param metrics: metrics results
+:return: formatted metrics results
+"""
 def format_metrics(metrics):
-    """Format metrics for logging"""
     return (
         f"Loss: {metrics['loss']:.4f}, "
         f"Accuracy: {metrics['accuracy']:.4f}, "
@@ -21,11 +28,25 @@ def format_metrics(metrics):
         f"Positive Ratio: {metrics['pos_ratio']:.4f}"
     )
 
-if __name__ == "__main__":
+
+"""
+Test the link-level model
+"""
+def main():
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     logger.info(f"Using device: {device}")
 
+    # Argument parsing for model checkpoint and model name
+    parser = argparse.ArgumentParser(description='Test Link Level Model')
+    parser.add_argument('--model_path', type=str, required=True, 
+                       help='Path to the model checkpoint to be tested')
+    args = parser.parse_args()
+
+    # Extract model name from the checkpoint path
+    model_name = os.path.splitext(os.path.basename(args.model_path))[0]
+    logger.info(f"Testing model: {model_name}")
+    
     # Model hyperparameters
     in_channels = 384
     hidden_channels = 256
@@ -66,11 +87,12 @@ if __name__ == "__main__":
     )
     
     # Load the best model checkpoint
-    checkpoint_path = 'checkpoints/link_level_model/link_level_model_best.pt'
-    if os.path.exists(checkpoint_path):
-        checkpoint = torch.load(checkpoint_path, weights_only=False)
+    if os.path.exists(args.model_path):
+        checkpoint = torch.load(args.model_path, weights_only=False)
         model.load_state_dict(checkpoint['model_state_dict'])
-        logger.info("Loaded model checkpoint.")
+        logger.info(f"Loaded model checkpoint from {args.model_path}")
+    else:
+        raise FileNotFoundError(f"Checkpoint not found at {args.model_path}")
 
     # Initialize trainer with TensorBoard support
     trainer = LinkLevelGNNRunner(
@@ -80,8 +102,8 @@ if __name__ == "__main__":
         device=device,
         val_ratio=None,
         lr=1e-4,
-        batch_size=1,
-        log_dir='gnn/tensorboard/link_level/test'
+        batch_size=16,
+        tensorboard_dir='gnn/tensorboard/link_level/test'
     )
 
     # Test and save predictions with error handling
@@ -99,14 +121,15 @@ if __name__ == "__main__":
                 predictions=predictions,
                 output_dir=output_dir,
                 split='dev',
-                dataset_type='spider'
+                dataset_type='spider',
+                model_name=model_name
             )
             
             # Log metrics
             logger.info(f"Final Test Metrics - {format_metrics(test_metrics)}")
             
             # Save metrics to file
-            metrics_path = os.path.join(output_dir, 'test_metrics.txt')
+            metrics_path = os.path.join(output_dir, f'test_metrics_{model_name}.txt')
             with open(metrics_path, 'w') as f:
                 f.write(format_metrics(test_metrics))
             logger.info(f"Saved metrics to {metrics_path}")
@@ -120,3 +143,8 @@ if __name__ == "__main__":
         raise
 
     logger.info("Testing completed!")
+
+
+
+if __name__ == "__main__":
+    main()

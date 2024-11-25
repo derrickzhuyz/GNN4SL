@@ -17,7 +17,7 @@ class LinkLevelGNN(nn.Module):
         Link prediction model using Graph Attention Networks
         
         Args:
-            in_channels: Input feature dimension (384 for your embeddings)
+            in_channels: Input feature dimension (such as 384 for sentence transformer embeddings)
             hidden_channels: Hidden layer dimension
             num_heads: Number of attention heads
             num_layers: Number of GAT layers
@@ -51,8 +51,14 @@ class LinkLevelGNN(nn.Module):
             nn.Linear(hidden_channels, 1)
         )
 
+
+    """
+    Forward pass through the model
+    :param x: node features
+    :param edge_index: edge indices
+    :return: node embeddings
+    """
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        """Forward pass through the model"""
         # Graph convolution layers
         for i in range(self.num_layers):
             x = self.convs[i](x, edge_index)
@@ -62,10 +68,13 @@ class LinkLevelGNN(nn.Module):
         
         return x
 
+
+    """
+    Predict relevance between question nodes and schema nodes (tables and columns)
+    :param data: graph data
+    :return: predictions and scores
+    """
     def predict_links(self, data: Data) -> Tuple[List[Dict], torch.Tensor]:
-        """
-        Predict relevance between question nodes and schema nodes (tables and columns)
-        """
         self.eval()
         with torch.no_grad():
             # Get node embeddings through GAT layers
@@ -191,11 +200,18 @@ class LinkLevelGNN(nn.Module):
             scores = torch.stack(scores_list)
             return predictions, scores
     
-    
-    def save_predictions(self, predictions: List[Dict], output_dir: str, split: str, dataset_type: str):
-        """Save predictions to JSON file"""
+
+    """
+    Save predictions to JSON file
+    :param predictions: predictions
+    :param output_dir: output directory
+    :param split: split name
+    :param dataset_type: dataset type
+    :param model_name: model name
+    """
+    def save_predictions(self, predictions: List[Dict], output_dir: str, split: str, dataset_type: str, model_name: str):
         os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, f'{dataset_type}_{split}_predictions.json')
+        output_path = os.path.join(output_dir, f'{dataset_type}_{split}_predictions_{model_name}.json')
         
         with open(output_path, 'w') as f:
             json.dump(predictions, f, indent=2)

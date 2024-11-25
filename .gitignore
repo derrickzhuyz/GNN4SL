@@ -5,6 +5,7 @@
 **/*.sql
 **/*.pt
 **/logs/**
+checkpoints/**
 
 
 # Exclude specific files
