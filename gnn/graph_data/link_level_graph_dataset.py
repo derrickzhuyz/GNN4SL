@@ -22,8 +22,8 @@ class LinkLevelGraphDataset(Dataset):
     
     Args:
         root: Root directory where the dataset should be saved
-        dataset_type: One of ['spider', 'bird'] to specify which dataset to use
-        split: One of ['train', 'dev'] to specify train or dev split
+        dataset_type: One of ['spider', 'bird', 'combined'] to specify which dataset to use
+        split: One of ['train', 'dev'] to specify train or dev split. Note that 'combined' only has 'train' split.
         embed_method: To specify which embedding method used, to store the graph data in the corresponding subdirectory
         transform: Optional transform to be applied on a sample
     """
@@ -36,12 +36,14 @@ class LinkLevelGraphDataset(Dataset):
         # Create the graph data directory if it doesn't exist
         os.makedirs(self.graph_data_dir, exist_ok=True)
         
-        # Load raw data with question embeddings during initialization
-        path_config = self._load_json('config/path_config.json')
-        labeled_path = os.path.join(path_config['embed_question_paths']['embed_question_base'],
-                              embed_method,
-                              f'{dataset_type}_{split}_labeled.json')
-        self.raw_data = self._load_json(labeled_path)
+        # Skip loading raw data for combined dataset type
+        if dataset_type != 'combined':
+            # Load raw data with question embeddings during initialization
+            path_config = self._load_json('config/path_config.json')
+            labeled_path = os.path.join(path_config['embed_question_paths']['embed_question_base'],
+                                  embed_method,
+                                  f'{dataset_type}_{split}_labeled.json')
+            self.raw_data = self._load_json(labeled_path)
         
         super().__init__(root, transform)
 
@@ -188,6 +190,11 @@ class LinkLevelGraphDataset(Dataset):
     containing all relevant question nodes
     """
     def process(self):
+        # Skip processing for combined dataset type as it's created in __main__
+        if self.dataset_type == 'combined':
+            logger.info("Skipping processing for combined dataset type")
+            return
+            
         logger.info(f"[i] Processing {len(self.raw_data)} examples for {self.dataset_type}_{self.split} ...")
         data_list = []
         
@@ -252,6 +259,10 @@ class LinkLevelGraphDataset(Dataset):
     """
     def len(self) -> int:
         processed_path = os.path.join(self.graph_data_dir, self.processed_file_names[0])
+        if not os.path.exists(processed_path):
+            if self.dataset_type == 'combined':
+                logger.error("Combined dataset file not found. Please run the main script to create it first.")
+            return 0
         data_list = torch.load(processed_path, weights_only=False)
         return len(data_list)
 
@@ -262,6 +273,8 @@ class LinkLevelGraphDataset(Dataset):
     """
     def get(self, idx: int) -> Data:
         processed_path = os.path.join(self.graph_data_dir, self.processed_file_names[0])
+        if not os.path.exists(processed_path):
+            raise FileNotFoundError(f"Processed file not found at {processed_path}")
         data_list = torch.load(processed_path, weights_only=False)
         return data_list[idx]
 
@@ -286,3 +299,20 @@ if __name__ == "__main__":
                                    dataset_type='bird', 
                                    split='dev',
                                    embed_method=used_embed_method)
+
+    # Combine and shuffle spider_train and bird_train
+    spider_train_data = torch.load(os.path.join(spider_train.graph_data_dir, spider_train.processed_file_names[0]))
+    bird_train_data = torch.load(os.path.join(bird_train.graph_data_dir, bird_train.processed_file_names[0]))
+    
+    # Combine the datasets
+    combined_train_data = spider_train_data + bird_train_data
+    
+    # Shuffle the combined dataset
+    random_indices = torch.randperm(len(combined_train_data))
+    combined_train_data = [combined_train_data[i] for i in random_indices]
+    
+    # Save the combined and shuffled dataset
+    combined_filename = 'combined_train_link_level_graph.pt'
+    combined_path = os.path.join(spider_train.graph_data_dir, combined_filename)
+    torch.save(combined_train_data, combined_path)
+    logger.info(f"[✓] Saved combined training dataset with {len(combined_train_data)} graphs to {combined_path}")

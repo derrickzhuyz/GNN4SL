@@ -208,8 +208,8 @@ if __name__ == "__main__":
     # Create visualization directory
     os.makedirs("data/schema_linking_graph_dataset/visualizations", exist_ok=True)
     
-    dataset_type = 'spider'  # 'spider' or 'bird'
-    split_type = 'dev'  # 'dev' or 'train'
+    dataset_type = 'combined'  # 'spider' or 'bird' or 'combined'
+    split_type = 'train'  # 'dev' or 'train' (NOTE: 'combined' only has 'train' split)
     idx_to_inspect = 0
 
     embedding_method = 'sentence_transformer'

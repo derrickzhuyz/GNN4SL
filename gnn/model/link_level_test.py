@@ -41,11 +41,18 @@ def main():
     parser = argparse.ArgumentParser(description='Test Link Level Model')
     parser.add_argument('--model_path', type=str, required=True, 
                        help='Path to the model checkpoint to be tested')
+    parser.add_argument('--dataset_type', type=str, choices=['spider', 'bird'], default='spider',
+                       help='Type of dataset to test on (spider or bird)')
+    parser.add_argument('--batch_size', type=int, default=1, help='Batch size')
+    parser.add_argument('--embed_method', type=str, 
+                        choices=['sentence_transformer', 'bert', 'api_small', 'api_large', 'api_mock'], 
+                        default='sentence_transformer',
+                        help='Embedding methods used to create the current graph dataset')
     args = parser.parse_args()
 
     # Extract model name from the checkpoint path
     model_name = os.path.splitext(os.path.basename(args.model_path))[0]
-    logger.info(f"Testing model: {model_name}")
+    logger.info(f"Testing model: {model_name} on {args.dataset_type} dataset")
     
     # Model hyperparameters
     in_channels = 384
@@ -55,15 +62,15 @@ def main():
     dropout = 0.1
     
     # Load datasets
-    embed_method = 'sentence_transformer'
+    embed_method = args.embed_method
     try:
         test_dataset = LinkLevelGraphDataset(
             root='data/schema_linking_graph_dataset/',
-            dataset_type='spider',
+            dataset_type=args.dataset_type,
             split='dev',
             embed_method=embed_method
         )
-        logger.info(f"Loaded test dataset with {len(test_dataset)} samples")
+        logger.info(f"Loaded {args.dataset_type} test dataset with {len(test_dataset)} samples")
         
         # Print sample data structure
         sample_data = test_dataset[0]
@@ -94,22 +101,22 @@ def main():
     else:
         raise FileNotFoundError(f"Checkpoint not found at {args.model_path}")
 
-    # Initialize trainer with TensorBoard support
-    trainer = LinkLevelGNNRunner(
+    # Initialize runner (for test)
+    runner = LinkLevelGNNRunner(
         model=model,
         train_dataset=None,
         test_dataset=test_dataset,
         device=device,
         val_ratio=None,
         lr=1e-4,
-        batch_size=16,
+        batch_size=args.batch_size,
         tensorboard_dir='gnn/tensorboard/link_level/test'
     )
 
     # Test and save predictions with error handling
     try:
         logger.info("Generating predictions for test set...")
-        predictions, test_metrics = trainer.test()
+        predictions, test_metrics = runner.test()
         
         if predictions:
             # Save predictions and metrics
@@ -121,7 +128,7 @@ def main():
                 predictions=predictions,
                 output_dir=output_dir,
                 split='dev',
-                dataset_type='spider',
+                dataset_type=args.dataset_type,
                 model_name=model_name
             )
             
@@ -129,7 +136,7 @@ def main():
             logger.info(f"Final Test Metrics - {format_metrics(test_metrics)}")
             
             # Save metrics to file
-            metrics_path = os.path.join(output_dir, f'test_metrics_{model_name}.txt')
+            metrics_path = os.path.join(output_dir, f'test_metrics_{args.dataset_type}_{model_name}.txt')
             with open(metrics_path, 'w') as f:
                 f.write(format_metrics(test_metrics))
             logger.info(f"Saved metrics to {metrics_path}")
