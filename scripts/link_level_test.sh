@@ -12,7 +12,7 @@ echo "[INFO] Start testing on Spider dev set..."
 python -m gnn.model.link_level_test \
     --model_path "${MODEL_PATH_0}" \
     --dataset_type "spider" \
-    --batch_size 16 \
+    --batch_size 8 \
     --embed_method "sentence_transformer"
 
 # Test the link-level model on BIRD dev set
@@ -20,5 +20,5 @@ echo "[INFO] Start testing on BIRD dev set..."
 python -m gnn.model.link_level_test \
     --model_path "${MODEL_PATH_0}" \
     --dataset_type "bird" \
-    --batch_size 16 \
+    --batch_size 8 \
     --embed_method "sentence_transformer"
