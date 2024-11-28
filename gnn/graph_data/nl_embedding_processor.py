@@ -5,6 +5,7 @@ from nl_embedder import NLEmbedder
 from loguru import logger
 from tqdm import tqdm
 from typing import List, Dict
+import argparse
 
 logger.add("logs/embedding.log", rotation="1 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
@@ -191,12 +192,21 @@ def _save_batch(new_batch: List[Dict], processed_data: List[Dict], curr_embed_me
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Process embeddings for questions and database schemas')
+    parser.add_argument('--vector_dim', type=int, default=384,
+                        help='Dimension of embedding vectors (default: 384 for sentence_transformer, 768 for bert, 1536 for text-embedding-3-small, 3072 for text-embedding-3-large)')
+    parser.add_argument('--embed_method', type=str, default='sentence_transformer',
+                        choices=['sentence_transformer', 'bert', 'api_small', 'api_large', 'api_mock'],
+                        help='Embedding method to use (default: sentence_transformer)')
+    
+    args = parser.parse_args()
+
     with open('config/path_config.json') as config_file:
         path_config = json.load(config_file)
 
-    # Uniform embedding dimension for all embedding files
-    uniform_vector_dim = 384
-    uniform_embed_method = 'sentence_transformer'
+    # Use command line arguments for embedding dimension and method
+    uniform_vector_dim = args.vector_dim
+    uniform_embed_method = args.embed_method
     
     # Question Embedding: Embed question for each example in labeled schema linking dataset
     dataset_question_embedding(input_file=path_config['labeled_dataset_paths']['spider_dev'], 

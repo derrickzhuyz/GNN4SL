@@ -1,6 +1,7 @@
 import json
 import torch
 import os
+import argparse
 import networkx as nx
 import numpy as np
 from tqdm import tqdm
@@ -281,8 +282,14 @@ class LinkLevelGraphDataset(Dataset):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Convert schema linking dataset to link-level graph dataset")
+    parser.add_argument('--embed_method', type=str, default='sentence_transformer', 
+                        choices=['sentence_transformer', 'bert', 'api_small', 'api_large', 'api_mock'], 
+                        help='Embedding method used, and store graph data in the subdirectory named by embedding method')
+    args = parser.parse_args()
+
     # Create datasets
-    used_embed_method = 'sentence_transformer' # To store graph data in the subdirectory named by embedding method
+    used_embed_method = args.embed_method # To store graph data in the subdirectory named by embedding method
     spider_train = LinkLevelGraphDataset(root='data/schema_linking_graph_dataset/', 
                                        dataset_type='spider', 
                                        split='train',

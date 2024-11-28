@@ -28,23 +28,23 @@ class NLEmbedder:
     """
     NOTE: By default, the length of the embedding vector will be 384 for all-MiniLM-L6-v2 before normalization
     Generate the embedding using SentenceTransformer
-    :param question: str, the question to embed
-    :return: np.ndarray, the embedding of the question
+    :param nl: str, the natural language to embed
+    :return: np.ndarray, the embedding of the natural language
     """
-    def embed_with_sentence_transformer(self, question: str) -> np.ndarray:
-        embedding = self.sentence_model.encode(question)
+    def embed_with_sentence_transformer(self, nl: str) -> np.ndarray:
+        embedding = self.sentence_model.encode(nl)
         return self._normalize_embedding_dimension(embedding)
 
 
     """
     NOTE: By default, the length of the embedding vector will be 768 for bert-base-uncased before normalization
     Generate the embedding using BERT
-    :param question: str, the question to embed
-    :return: np.ndarray, the embedding of the question
+    :param nl: str, the natural language to embed
+    :return: np.ndarray, the embedding of the natural language
     """
-    def embed_with_bert(self, question: str) -> np.ndarray:
+    def embed_with_bert(self, nl: str) -> np.ndarray:
         # Tokenize the input question
-        inputs = self.bert_tokenizer(question, return_tensors='pt', padding=True, truncation=True, max_length=512)
+        inputs = self.bert_tokenizer(nl, return_tensors='pt', padding=True, truncation=True, max_length=512)
 
         # Get the embeddings from BERT
         with torch.no_grad():
@@ -59,22 +59,22 @@ class NLEmbedder:
     """
     NOTE: By default, the length of the embedding vector will be 1536 for text-embedding-3-small or 3072 for text-embedding-3-large before normalization
     Generate the embedding using OpenAI API (small, large embedding model, and mock for testing)
-    :param question: str, the question to embed
-    :return: np.ndarray, the embedding of the question
+    :param nl: str, the natural language to embed
+    :return: np.ndarray, the embedding of the natural language
     """
-    def embed_with_openai_small(self, question: str) -> np.ndarray:
-        response = self.client.embeddings.create(input=question, model="text-embedding-3-small")
+    def embed_with_openai_small(self, nl: str) -> np.ndarray:
+        response = self.client.embeddings.create(input=nl, model="text-embedding-3-small")
         embedding = np.array(response.data[0].embedding)
         print('cost:', response.usage.total_tokens * 0.020 / 1000000) # $0.020 / 1M tokens
         return self._normalize_embedding_dimension(embedding)
     
-    def embed_with_openai_large(self, question: str) -> np.ndarray:
-        response = self.client.embeddings.create(input=question, model="text-embedding-3-large")
+    def embed_with_openai_large(self, nl: str) -> np.ndarray:
+        response = self.client.embeddings.create(input=nl, model="text-embedding-3-large")
         embedding = np.array(response.data[0].embedding)
         print('cost:', response.usage.total_tokens * 0.130 / 1000000) # $0.130 / 1M tokens
         return self._normalize_embedding_dimension(embedding)
     
-    def embed_with_openai_mock(self, question: str) -> np.ndarray:
+    def embed_with_openai_mock(self, nl: str) -> np.ndarray:
         # Mock the OpenAI API for testing purposes
         embedding = np.random.rand(self.vector_dim)
         return self._normalize_embedding_dimension(embedding)
