@@ -74,7 +74,7 @@ class LinkLevelGNN(nn.Module):
     :param data: graph data
     :return: predictions and scores
     """
-    def predict_links(self, data: Data) -> Tuple[List[Dict], torch.Tensor]:
+    def predict_links(self, data: Data, threshold: float = 0.5) -> Tuple[List[Dict], torch.Tensor]:
         self.eval()
         with torch.no_grad():
             # Get node embeddings through GAT layers
@@ -168,7 +168,7 @@ class LinkLevelGNN(nn.Module):
                             
                             table_pred = {
                                 'name': table_info['name'],
-                                'relevant': bool(table_score > 0.5),
+                                'relevant': bool(table_score > threshold),
                                 'score': float(table_score),
                                 'columns': []
                             }
@@ -182,7 +182,7 @@ class LinkLevelGNN(nn.Module):
                                 
                                 col_pred = {
                                     'name': col['name'],
-                                    'relevant': bool(col_score > 0.5),
+                                    'relevant': bool(col_score > threshold),
                                     'score': float(col_score)
                                 }
                                 table_pred['columns'].append(col_pred)

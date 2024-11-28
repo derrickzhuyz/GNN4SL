@@ -466,7 +466,7 @@ class LinkLevelGNNRunner:
                 data = data.to(self.device)
                 
                 # Get predictions using predict_links method
-                predictions, _ = self.model.predict_links(data)
+                predictions, _ = self.model.predict_links(data, threshold=0.5)
                 all_predictions.extend(predictions)
                 
                 # Calculate test metrics
