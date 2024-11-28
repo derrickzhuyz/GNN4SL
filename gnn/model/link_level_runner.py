@@ -39,6 +39,8 @@ class LinkLevelGNNRunner:
         self.model = model.to(device)
         self.device = device
         self.writer = SummaryWriter(tensorboard_dir)
+        self.global_step = 0
+        
         if train_dataset is not None:
             # Split training data into train and validation
             train_size = len(train_dataset)
@@ -175,16 +177,17 @@ class LinkLevelGNNRunner:
 
     """
     Train for one epoch with time tracking
+    :param current_epoch: current epoch number, to indicate the current progress
+    :param num_epochs: total number of epochs, to indicate the total progress
     """
-    def train_epoch(self):
+    def train_epoch(self, current_epoch: int, num_epochs: int):
         self.model.train()
         total_metrics = {'loss': 0, 'accuracy': 0, 'precision': 0, 'recall': 0, 'f1': 0, 'pos_ratio': 0}
         num_batches = 0
         
         epoch_start = time.time()
-        
-        # Wrap the training loop with tqdm for progress bar
-        for batch_idx, data in tqdm(enumerate(self.train_loader), total=len(self.train_loader), desc="Training"):
+        desc_info = f"Epoch {current_epoch + 1}/{num_epochs}"
+        for batch_idx, data in tqdm(enumerate(self.train_loader), total=len(self.train_loader), desc=desc_info):
             batch_start = time.time()
             logger.info(f"\nProcessing batch {batch_idx}")
             
@@ -368,24 +371,52 @@ class LinkLevelGNNRunner:
     :param num_epochs: number of epochs to train
     :param checkpoint_dir: directory to save checkpoints
     :param checkpoint_name: name of the checkpoint file
+    :param resume_from: path to checkpoint file to resume training from
     """
-    def train(self, num_epochs: int, checkpoint_dir: str, checkpoint_name: str):
+    def train(self, num_epochs: int, checkpoint_dir: str, checkpoint_name: str, resume_from: str = None):
+        # Load checkpoint if it is a resume training
+        start_epoch = 0
         best_f1 = 0.0
-        self.global_step = 0
+        if resume_from and os.path.exists(resume_from):
+            try:
+                logger.info(f"[IMPORTANT] Loading checkpoint from {resume_from} for resuming training: {num_epochs} epochs.")
+                checkpoint = torch.load(resume_from)
+                self.model.load_state_dict(checkpoint['model_state_dict'])
+                self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+                # Handle possible missing keys
+                start_epoch = checkpoint.get('epoch', 0)
+                best_f1 = checkpoint.get('best_f1', 0.0)
+                self.global_step = checkpoint.get('global_step', 0)
+                logger.info(f"[IMPORTANT] Resuming training with best F1: {best_f1:.4f}")
+                
+                # Modify checkpoint name to indicate it's a continuation
+                base_name, ext = os.path.splitext(checkpoint_name)
+                checkpoint_name = f"{base_name}_resume_{num_epochs}ep{ext}"
+                
+                if start_epoch == 0:
+                    logger.warning(f"No epoch information found in checkpoint, starting from epoch 0. Previous best F1 score is {best_f1:.4f}")
+            except Exception as e:
+                logger.error(f"Error loading checkpoint: {e}")
+                logger.warning("Starting training from scratch")
+                start_epoch = 0
+                best_f1 = 0.0
+                self.global_step = 0
+        
+        self.model = self.model.to(self.device)
         total_start_time = time.time()
         
         os.makedirs(checkpoint_dir, exist_ok=True)
-        logger.info(f"Starting training at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        logger.info(f"Starting/Resuming training at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
         epoch_times = []
-        for epoch in range(num_epochs):
+        for epoch in range(start_epoch, start_epoch + num_epochs):
             self.current_epoch = epoch
             epoch_start_time = time.time()
             
-            logger.info(f"\nEpoch {epoch+1}/{num_epochs}")
+            logger.info(f"\nEpoch {epoch+1}/{start_epoch + num_epochs}")
             
             # Train and log metrics
-            train_metrics, epoch_time = self.train_epoch()
+            train_metrics, epoch_time = self.train_epoch(current_epoch=epoch, num_epochs=num_epochs)
             epoch_times.append(epoch_time)
             
             # Validate and log metrics
@@ -393,7 +424,7 @@ class LinkLevelGNNRunner:
             
             # Calculate ETA
             avg_epoch_time = sum(epoch_times) / len(epoch_times)
-            eta = avg_epoch_time * (num_epochs - epoch - 1)
+            eta = avg_epoch_time * (start_epoch + num_epochs - epoch - 1)
             
             logger.info(f"Epoch {epoch+1} completed in {self._format_time(epoch_time)}")
             logger.info(f"Average epoch time: {self._format_time(avg_epoch_time)}")
@@ -402,7 +433,17 @@ class LinkLevelGNNRunner:
             # Save checkpoint if validation F1 improved
             if val_metrics['f1'] >= best_f1:
                 best_f1 = val_metrics['f1']
-                self.save_checkpoint(checkpoint_dir, checkpoint_name)
+                checkpoint = {
+                    'epoch': epoch + 1,  # Save the next epoch number
+                    'model_state_dict': self.model.state_dict(),
+                    'optimizer_state_dict': self.optimizer.state_dict(),
+                    'best_f1': best_f1,
+                    'global_step': self.global_step,
+                    'val_metrics': val_metrics,
+                    'train_metrics': train_metrics,
+                    'resumed_from': resume_from if resume_from else None  # Track original model
+                }
+                torch.save(checkpoint, os.path.join(checkpoint_dir, checkpoint_name))
                 logger.info(f"Saved new best model with F1: {best_f1:.4f}")
         
         total_time = time.time() - total_start_time

@@ -8,7 +8,7 @@ from gnn.model.link_level_runner import LinkLevelGNNRunner
 from datetime import datetime
 from loguru import logger
 
-logger.add("logs/link_level_training.log", rotation="50 MB", level="INFO",
+logger.add("logs/link_level_training.log", rotation="50 MB", level="WARNING",
            format="{time} {level} {message}", compression="zip")
 
 
@@ -30,6 +30,8 @@ def main():
                         choices=['sentence_transformer', 'bert', 'api_small', 'api_large', 'api_mock'], 
                         default='sentence_transformer', 
                         help='Embedding methods used to create the current graph dataset')
+    parser.add_argument('--resume_from', type=str, default=None,
+                       help='Path to checkpoint file to resume training from')
     args = parser.parse_args()
     
     # Set device
@@ -122,7 +124,7 @@ def main():
     # Train model
     checkpoint_dir = f'checkpoints/link_level_model/{embed_method}/'
     checkpoint_name = f'link_level_model_{args.dataset_type}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pt'
-    runner.train(num_epochs=num_epochs, checkpoint_dir=checkpoint_dir, checkpoint_name=checkpoint_name)
+    runner.train(num_epochs=num_epochs, checkpoint_dir=checkpoint_dir, checkpoint_name=checkpoint_name, resume_from=args.resume_from)
 
 
 

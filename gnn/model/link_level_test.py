@@ -9,7 +9,7 @@ from loguru import logger
 import datetime
 import argparse
 
-logger.add("logs/link_level_test.log", rotation="10 MB", level="INFO",
+logger.add("logs/link_level_test.log", rotation="10 MB", level="WARNING",
            format="{time} {level} {message}", compression="zip")
 
 
