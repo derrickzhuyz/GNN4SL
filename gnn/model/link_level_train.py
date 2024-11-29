@@ -32,6 +32,7 @@ def main():
                         help='Embedding methods used to create the current graph dataset')
     parser.add_argument('--resume_from', type=str, default=None,
                        help='Path to checkpoint file to resume training from')
+    parser.add_argument('--in_channels', type=int, default=384, help='Number of input channels, aligned with embedding dimension: 384 for sentence_transformer, 768 for bert, 1536 for text-embedding-3-small (api_small), 3072 for text-embedding-3-large (api_large).')
     args = parser.parse_args()
     
     # Set device
@@ -46,7 +47,7 @@ def main():
     lr = args.lr
 
     # Model hyperparameters
-    in_channels = 384
+    in_channels = args.in_channels
     hidden_channels = 256
     num_heads = 4
     num_layers = 5
@@ -118,7 +119,7 @@ def main():
         val_ratio=val_ratio,
         lr=lr,
         batch_size=batch_size,
-        tensorboard_dir=f'gnn/tensorboard/link_level/train_{args.dataset_type}'  # Add dataset type to tensorboard dir
+        tensorboard_dir=f'gnn/tensorboard/link_level/train_{args.dataset_type}/{embed_method}'  # Add subdirectory
     )
     
     # Train model

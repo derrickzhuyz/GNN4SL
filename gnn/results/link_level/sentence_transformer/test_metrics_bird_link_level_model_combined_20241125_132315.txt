@@ -1,0 +1,1 @@
+Loss: 0.8976, Accuracy: 0.6233, Precision: 0.2071, Recall: 0.8396, F1: 0.3154, Positive Ratio: 0.1141

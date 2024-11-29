@@ -22,7 +22,7 @@ class LinkLevelGNNRunner:
                  val_ratio: Optional[float] = 0.1,  # 10% of train set for validation
                  lr: float = 1e-4,
                  batch_size: int = 1,
-                 tensorboard_dir: str = 'gnn/tensorboard/link_level/train'):
+                 tensorboard_dir: str = 'gnn/tensorboard/link_level/'):
         """
         Runner for LinkLevelGNN: train, validate, and test
         

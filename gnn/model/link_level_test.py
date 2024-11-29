@@ -48,6 +48,8 @@ def main():
                         choices=['sentence_transformer', 'bert', 'api_small', 'api_large', 'api_mock'], 
                         default='sentence_transformer',
                         help='Embedding methods used to create the current graph dataset')
+    parser.add_argument('--in_channels', type=int, default=384,
+                        help='Number of input channels, aligned with embedding dimension: 384 for sentence_transformer, 768 for bert, 1536 for text-embedding-3-small (api_small), 3072 for text-embedding-3-large (api_large).')
     args = parser.parse_args()
 
     # Extract model name from the checkpoint path
@@ -55,7 +57,7 @@ def main():
     logger.info(f"Testing model: {model_name} on {args.dataset_type} dataset")
     
     # Model hyperparameters
-    in_channels = 384
+    in_channels = args.in_channels
     hidden_channels = 256
     num_heads = 4
     num_layers = 5
@@ -110,7 +112,7 @@ def main():
         val_ratio=None,
         lr=1e-4,
         batch_size=args.batch_size,
-        tensorboard_dir='gnn/tensorboard/link_level/test'
+        tensorboard_dir=f'gnn/tensorboard/link_level/test/{embed_method}/'
     )
 
     # Test and save predictions with error handling
@@ -120,7 +122,7 @@ def main():
         
         if predictions:
             # Save predictions and metrics
-            output_dir = 'gnn/results/link_level/'
+            output_dir = f'gnn/results/link_level/{embed_method}/'
             os.makedirs(output_dir, exist_ok=True)
             
             # Save predictions
