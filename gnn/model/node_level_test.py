@@ -9,7 +9,7 @@ from loguru import logger
 from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
 
-logger.add("logs/node_level_testing.log", rotation="1 MB", level="INFO",
+logger.add("logs/node_level_testing.log", rotation="50 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
 
 

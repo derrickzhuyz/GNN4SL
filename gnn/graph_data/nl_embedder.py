@@ -43,7 +43,7 @@ class NLEmbedder:
     :return: np.ndarray, the embedding of the natural language
     """
     def embed_with_bert(self, nl: str) -> np.ndarray:
-        # Tokenize the input question
+        # Tokenize the input natural language
         inputs = self.bert_tokenizer(nl, return_tensors='pt', padding=True, truncation=True, max_length=512)
 
         # Get the embeddings from BERT
@@ -257,28 +257,43 @@ class NLEmbedder:
         return embedded_schema
 
 
-# Example usage
+
+# Main function for testing
 if __name__ == "__main__":
-    # api_key=os.getenv("OPENAI_API_KEY")
-    # base_url=os.getenv("OPENAI_BASE_URL")
+    api_key=os.getenv("OPENAI_API_KEY")
+    base_url=os.getenv("OPENAI_BASE_URL")
 
-    # embedder = NLEmbedder(openai_api_key=api_key, base_url=base_url)
-    # question = "How many singers do we have?"
+    embedding_to_test = 'api_small'
+    nl_to_embed = "How many singers do we have?"
+    
+    vector_dimensions = {
+        'api_mock': 1536,
+        'api_small': 1536,
+        'api_large': 3072,
+        'sentence_transformer': 384,
+        'bert': 768
+    }
 
-    # Get embeddings from different methods
-    # vector_sentence_transformer = embedder.embed_with_sentence_transformer(question)
-    # print("Sentence Transformer Vector:", vector_sentence_transformer)
+    if embedding_to_test not in vector_dimensions:
+        raise ValueError(f"[! Error] Unsupported embedding method: {embedding_to_test}. "
+                         f"Choose from {list(vector_dimensions.keys())}")
 
-    # vector_bert = embedder.embed_with_bert(question)
-    # print("BERT Vector:", vector_bert)
+    vector_dim = vector_dimensions[embedding_to_test]
+    embedder = NLEmbedder(vector_dim=vector_dim, openai_api_key=api_key, base_url=base_url)
 
-    # vector_openai_small = embedder.embed_with_openai_small(question)
-    # print("OpenAI API Small Vector:", vector_openai_small)
+    embedding_methods = {
+        'sentence_transformer': embedder.embed_with_sentence_transformer,
+        'bert': embedder.embed_with_bert,
+        'api_small': embedder.embed_with_openai_small,
+        'api_large': embedder.embed_with_openai_large,
+        'api_mock': embedder.embed_with_openai_mock
+    }
 
-    # vector_openai_large = embedder.embed_with_openai_large(question)
-    # print("OpenAI API Large Vector:", vector_openai_large)
-
-    # vector_openai_mock = embedder.embed_with_openai_mock(question)
-    # print("OpenAI API Mock Vector:", vector_openai_mock)
+    if embedding_to_test in embedding_methods:
+        embedding_vector = embedding_methods[embedding_to_test](nl_to_embed)
+        print(f"Natural language texts to be embedded: {nl_to_embed}")
+        print(f"Embedding Vector ({embedding_to_test}):\n", embedding_vector, "\nEmbedding Dimension:", len(embedding_vector))
+    else:
+        raise ValueError(f"[! Error] Unsupported embedding method: {embedding_to_test}.")
 
     pass

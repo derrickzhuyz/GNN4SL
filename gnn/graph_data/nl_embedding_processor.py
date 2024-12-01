@@ -7,7 +7,7 @@ from tqdm import tqdm
 from typing import List, Dict
 import argparse
 
-logger.add("logs/embedding.log", rotation="1 MB", level="INFO",
+logger.add("logs/embedding.log", rotation="50 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
 
 

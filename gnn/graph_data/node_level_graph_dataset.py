@@ -8,7 +8,7 @@ from loguru import logger
 from typing import Dict, List, Tuple
 from torch_geometric.data import Data, Dataset
 
-logger.add("logs/node_level_graph_dataset.log", rotation="1 MB", level="INFO",
+logger.add("logs/node_level_graph_dataset.log", rotation="50 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
 
 

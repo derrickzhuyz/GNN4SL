@@ -8,7 +8,7 @@ import os
 from typing import Dict, List, Tuple
 from loguru import logger
 
-logger.add("logs/link_level_model.log", rotation="1 MB", level="INFO",
+logger.add("logs/link_level_model.log", rotation="50 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
 
 class LinkLevelGNN(nn.Module):

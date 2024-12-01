@@ -11,7 +11,7 @@ from pathlib import Path
 from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
 
-logger.add("logs/node_level_training.log", rotation="1 MB", level="INFO",
+logger.add("logs/node_level_training.log", rotation="50 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
 
 

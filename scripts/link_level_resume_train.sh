@@ -4,7 +4,7 @@
 # export VARIABLE_NAME=value
 
 # Set the visible GPU(s)
-export CUDA_VISIBLE_DEVICES='6,7'
+export CUDA_VISIBLE_DEVICES='3,7'
 
 # Resume training of the link-level model
 echo "[INFO] Start resuming training of the link-level model..."
