@@ -35,7 +35,7 @@ class LinkLevelGNNRunner:
                  val_ratio: Optional[float] = 0.1,  # proportion of train set for validation
                  val_dataset_type: str = 'combined',  # 'spider', 'bird', or 'combined'
                  lr: float = 1e-4,
-                 batch_size: int = 1,
+                 batch_size: int = 1,  # Force batch_size=1
                  tensorboard_dir: str = 'gnn/tensorboard/link_level/'):
         """
         Runner for LinkLevelGNN: train, validate, and test
@@ -62,7 +62,7 @@ class LinkLevelGNNRunner:
                 raise ValueError("val_dataset_type must be 'spider', 'bird', or 'combined'")
             
             # Filter validation data based on dataset type
-            all_data = train_dataset.data  # Assuming this contains all graphs
+            all_data = [train_dataset[i] for i in range(len(train_dataset))]  # Access data using indexing
             if val_dataset_type != 'combined':
                 # Filter graphs based on dataset type
                 filtered_indices = [i for i, data in enumerate(all_data) 
@@ -88,8 +88,8 @@ class LinkLevelGNNRunner:
                     generator=torch.Generator().manual_seed(42)  # For reproducibility
                 )
             
-            self.train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True)
-            self.val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False)
+            self.train_loader = DataLoader(train_subset, batch_size=1, shuffle=True)
+            self.val_loader = DataLoader(val_subset, batch_size=1, shuffle=False)
             
             logger.info(f"Dataset sizes - Training: {len(train_subset)}, "
                        f"Validation ({val_dataset_type}): {len(val_subset)}")
@@ -98,7 +98,7 @@ class LinkLevelGNNRunner:
             self.val_loader = None
 
         if test_dataset is not None:
-            self.test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+            self.test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
         else:
             self.test_loader = None
         
@@ -243,100 +243,95 @@ class LinkLevelGNNRunner:
             'pos_ratio': 0
         }
         num_batches = 0
-        
+
         epoch_start = time.time()
         desc_info = f"Epoch {current_epoch + 1}/{end_epoch}"
-        for batch_idx, data in tqdm(enumerate(self.train_loader), total=len(self.train_loader), desc=desc_info):
+        for data in tqdm(self.train_loader, total=len(self.train_loader), desc=desc_info):
             batch_start = time.time()
-            logger.info(f"\nProcessing batch {batch_idx}")
-            
+            logger.info("Processing batch")
+
             data = data.to(self.device)
             self.optimizer.zero_grad()
-            
+
             # Forward pass
             node_embeddings = self.model(data.x, data.edge_index)
-            
+
             # Find question nodes
-            question_indices = [i for i, type_ in enumerate(data.node_types[0]) 
-                              if type_ == 'question']
-            # logger.info(f"Found {len(question_indices)} question nodes")
-            
+            question_indices = [i for i, type_ in enumerate(data.node_types[0]) if type_ == 'question']
+
             # Find schema elements
-            schema_elements = [(i, type_) for i, type_ in enumerate(data.node_types[0]) 
-                              if type_ in ['table', 'column']]
-            # logger.info(f"Found {len(schema_elements)} schema elements")
-            
+            schema_elements = [(i, type_) for i, type_ in enumerate(data.node_types[0]) if type_ in ['table', 'column']]
+
             if not schema_elements:
-                logger.warning(f"Batch {batch_idx}: No schema elements found")
+                logger.warning("No schema elements found")
                 continue
-            
+
             if not question_indices:
-                logger.warning(f"Batch {batch_idx}: No question nodes found")
+                logger.warning("No question nodes found")
                 continue
-            
+
             # Get predictions
             predictions = []
             for q_idx in question_indices:
                 q_embedding = node_embeddings[q_idx]
-                
+
                 for i, type_ in schema_elements:
                     schema_embedding = node_embeddings[i]
                     pair_embedding = torch.cat([q_embedding, schema_embedding])
                     pred = self.model.link_predictor(pair_embedding)
                     predictions.append(pred)
-            
+
             if not predictions:
-                logger.warning(f"Batch {batch_idx}: No predictions generated")
+                logger.warning("No predictions generated")
                 continue
-            
+
             try:
                 predictions = torch.cat(predictions)
                 labels = self._extract_labels(data)
-                
+
                 logger.info(f"Predictions shape: {predictions.shape}")
                 logger.info(f"Labels shape: {labels.shape}")
-                
+
                 if predictions.size(0) != labels.size(0):
-                    logger.error(f"Batch {batch_idx}: Mismatch in predictions ({predictions.size(0)}) and labels ({labels.size(0)}) size")
+                    logger.error(f"Mismatch in predictions ({predictions.size(0)}) and labels ({labels.size(0)}) size")
                     continue
-                
+
                 # Calculate metrics
                 loss, metrics = self._calculate_metrics(predictions, labels)
-                
+
                 # Backward pass
                 loss.backward()
                 self.optimizer.step()
-                
+
                 # Update metrics
                 total_metrics['loss'] += loss.item()
                 for k, v in metrics.items():
                     total_metrics[k] += v
                 num_batches += 1
-                
-                logger.info(f"Batch {batch_idx} - Loss: {loss.item():.4f}, F1: {metrics['f1']:.4f}")
-                
+
+                logger.info(f"Loss: {loss.item():.4f}, F1: {metrics['f1']:.4f}")
+
                 # Log batch metrics
                 self._log_metrics(metrics, self.global_step, prefix='batch')
                 self.global_step += 1
-                
+
                 batch_time = time.time() - batch_start
-                logger.info(f"Batch {batch_idx} completed in {batch_time:.2f}s - "
-                          f"Loss: {loss.item():.4f}, F1: {metrics['f1']:.4f}")
-                
+                logger.info(f"Batch completed in {batch_time:.2f}s - Loss: {loss.item():.4f}, F1: {metrics['f1']:.4f}")
+
                 # Log batch time to TensorBoard
                 self.writer.add_scalar('time/batch_seconds', batch_time, self.global_step)
-                
+
             except Exception as e:
-                logger.error(f"Batch {batch_idx}: Error processing batch: {str(e)}")
+                logger.error(f"Error processing batch: {str(e)}")
                 logger.exception("Full traceback:")
                 continue
-        
+
         epoch_time = time.time() - epoch_start
         logger.info(f"Epoch completed in {self._format_time(epoch_time)}")
-        
+
         # Log epoch time to TensorBoard
         self.writer.add_scalar('time/epoch_seconds', epoch_time, self.current_epoch)
-        
+
         if num_batches == 0:
             logger.error("No valid batches found in training epoch!")
             return {k: 0.0 for k in total_metrics}

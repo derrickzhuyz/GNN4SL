@@ -276,7 +276,9 @@ class LinkLevelGraphDataset(Dataset):
         if not os.path.exists(processed_path):
             raise FileNotFoundError(f"Processed file not found at {processed_path}")
         data_list = torch.load(processed_path, weights_only=False)
-        return data_list[idx]
+        data = data_list[idx]
+        data.dataset_type = self.dataset_type
+        return data
 
 
 

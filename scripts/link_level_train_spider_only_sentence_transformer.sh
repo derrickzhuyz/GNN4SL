@@ -10,10 +10,10 @@ export CUDA_VISIBLE_DEVICES='6,7'
 echo "[INFO] Start training of the link-level model..."
 python -m gnn.model.link_level_train \
     --dataset_type "spider" \
-    --epochs 2 \
+    --epochs 1 \
     --batch_size 1 \
     --val_ratio 0.1 \
-    --val_dataset_type "combined" \
+    --val_dataset_type "spider" \
     --lr 1e-3 \
     --embed_method "sentence_transformer" \
     --in_channels 384

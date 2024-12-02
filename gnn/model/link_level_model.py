@@ -80,125 +80,103 @@ class LinkLevelGNN(nn.Module):
     def predict_links(self, data: Data, threshold: float = 0.5) -> Tuple[List[Dict], torch.Tensor]:
         self.eval()
         with torch.no_grad():
-            # Get node embeddings through GAT layers
+            # Get node embeddings through GCN layers
             node_embeddings = self.forward(data.x, data.edge_index)
             scores_list = []
             predictions = []
-            
-            # Handle batched data
-            if hasattr(data, 'batch'):
-                logger.info("Processing batched data")
-                batch_size = data.batch.max().item() + 1
-                for batch_idx in range(batch_size):
-                    # Get mask for current batch
-                    batch_mask = data.batch == batch_idx
-                    batch_node_types = [t for i, t in enumerate(data.node_types[0]) if i < len(batch_mask) and batch_mask[i]]
-                    batch_node_names = [n for i, n in enumerate(data.node_names[0]) if i < len(batch_mask) and batch_mask[i]]
-                    
-                    # Get node indices for this batch
-                    node_offset = batch_mask.nonzero()[0].item()
-                    num_nodes = batch_mask.sum().item()
-                    
-                    # Get edge mask for current batch
-                    edge_mask = (data.edge_index[0] >= node_offset) & (data.edge_index[0] < node_offset + num_nodes) & \
-                              (data.edge_index[1] >= node_offset) & (data.edge_index[1] < node_offset + num_nodes)
-                    batch_edges = data.edge_index[:, edge_mask]
-                    
-                    # Adjust edge indices to be relative to this batch
-                    batch_edges = batch_edges - node_offset
-                    
-                    # Find all question nodes in this batch
-                    question_indices = [i for i, type_ in enumerate(batch_node_types) if type_ == 'question']
-                    logger.info(f"Batch {batch_idx}: Found {len(question_indices)} question nodes")
-                    
-                    # Create a dictionary to group columns by their parent tables
-                    tables = {}
-                    column_to_table = {}
-                    
-                    # First pass: identify all tables
-                    for i, type_ in enumerate(batch_node_types):
-                        if type_ == 'table':
-                            table_name = batch_node_names[i] if batch_node_names else f'table_{i}'
-                            logger.info(f"Found table: {table_name} at index {i}")
-                            tables[i] = {
-                                'name': table_name,
-                                'columns': []
-                            }
-                    
-                    # Find column-table relationships from edge_index
-                    batch_edges_np = batch_edges.cpu().numpy()
-                    
-                    for i in range(batch_edges.shape[1]):
-                        src, dst = batch_edges_np[:, i]
-                        if src < len(batch_node_types) and dst < len(batch_node_types):
-                            src_type = batch_node_types[src]
-                            dst_type = batch_node_types[dst]
-                            
-                            # If this edge connects a column and a table
-                            if (src_type == 'column' and dst_type == 'table'):
-                                column_to_table[src] = dst
-                            elif (dst_type == 'column' and src_type == 'table'):
-                                column_to_table[dst] = src
-                    
-                    logger.info(f"Found {len(column_to_table)} column-table relationships")
-                    
-                    # Add columns to their respective tables
-                    for col_idx, table_idx in column_to_table.items():
-                        if table_idx in tables:
-                            col_name = batch_node_names[col_idx] if batch_node_names else f'column_{col_idx}'
-                            tables[table_idx]['columns'].append({
-                                'idx': col_idx,
-                                'name': col_name
-                            })
-                    
-                    # Process each question
-                    for q_idx in question_indices:
-                        q_embedding = node_embeddings[q_idx + node_offset]
-                        question_name = batch_node_names[q_idx] if batch_node_names else f'question_{q_idx}'
-                        
-                        question_pred = {
-                            'question_idx': q_idx,
-                            'question': question_name,
-                            'tables': []
+
+            # Process the single graph
+            question_indices = [i for i, type_ in enumerate(data.node_types[0]) if type_ == 'question']
+            logger.info(f"Found {len(question_indices)} question nodes")
+
+            # Create a dictionary to group columns by their parent tables
+            tables = {}
+            column_to_table = {}
+
+            # Identify all tables
+            for i, type_ in enumerate(data.node_types[0]):
+                if type_ == 'table':
+                    table_name = data.node_names[0][i] if data.node_names else f'table_{i}'
+                    logger.info(f"Found table: {table_name} at index {i}")
+                    tables[i] = {
+                        'name': table_name,
+                        'columns': []
+                    }
+
+            # Find column-table relationships from edge_index
+            edge_index_np = data.edge_index.cpu().numpy()
+
+            for i in range(data.edge_index.shape[1]):
+                src, dst = edge_index_np[:, i]
+                if src < len(data.node_types[0]) and dst < len(data.node_types[0]):
+                    src_type = data.node_types[0][src]
+                    dst_type = data.node_types[0][dst]
+
+                    # If this edge connects a column and a table
+                    if (src_type == 'column' and dst_type == 'table'):
+                        column_to_table[src] = dst
+                    elif (dst_type == 'column' and src_type == 'table'):
+                        column_to_table[dst] = src
+
+            logger.info(f"Found {len(column_to_table)} column-table relationships")
+
+            # Add columns to their respective tables
+            for col_idx, table_idx in column_to_table.items():
+                if table_idx in tables:
+                    col_name = data.node_names[0][col_idx] if data.node_names else f'column_{col_idx}'
+                    tables[table_idx]['columns'].append({
+                        'idx': col_idx,
+                        'name': col_name
+                    })
+
+            # Process each question
+            for q_idx in question_indices:
+                q_embedding = node_embeddings[q_idx]
+                question_name = data.node_names[0][q_idx] if data.node_names else f'question_{q_idx}'
+
+                question_pred = {
+                    'question_idx': q_idx,
+                    'question': question_name,
+                    'tables': []
+                }
+
+                # Process each table and its columns
+                for table_idx, table_info in tables.items():
+                    table_embedding = node_embeddings[table_idx]
+                    pair_embedding = torch.cat([q_embedding, table_embedding])
+                    table_score = torch.sigmoid(self.link_predictor(pair_embedding))
+                    scores_list.append(table_score)
+
+                    table_pred = {
+                        'name': table_info['name'],
+                        'relevant': bool(table_score > threshold),
+                        'score': float(table_score),
+                        'columns': []
+                    }
+
+                    # Process all columns for this table
+                    for col in table_info['columns']:
+                        col_embedding = node_embeddings[col['idx']]
+                        pair_embedding = torch.cat([q_embedding, col_embedding])
+                        col_score = torch.sigmoid(self.link_predictor(pair_embedding))
+                        scores_list.append(col_score)
+
+                        col_pred = {
+                            'name': col['name'],
+                            'relevant': bool(col_score > threshold),
+                            'score': float(col_score)
                         }
-                        
-                        # Process each table and its columns
-                        for table_idx, table_info in tables.items():
-                            table_embedding = node_embeddings[table_idx + node_offset]
-                            pair_embedding = torch.cat([q_embedding, table_embedding])
-                            table_score = torch.sigmoid(self.link_predictor(pair_embedding))
-                            scores_list.append(table_score)
-                            
-                            table_pred = {
-                                'name': table_info['name'],
-                                'relevant': bool(table_score > threshold),
-                                'score': float(table_score),
-                                'columns': []
-                            }
-                            
-                            # Process all columns for this table
-                            for col in table_info['columns']:
-                                col_embedding = node_embeddings[col['idx'] + node_offset]
-                                pair_embedding = torch.cat([q_embedding, col_embedding])
-                                col_score = torch.sigmoid(self.link_predictor(pair_embedding))
-                                scores_list.append(col_score)
-                                
-                                col_pred = {
-                                    'name': col['name'],
-                                    'relevant': bool(col_score > threshold),
-                                    'score': float(col_score)
-                                }
-                                table_pred['columns'].append(col_pred)
-                            
-                            question_pred['tables'].append(table_pred)
-                        
-                        predictions.append(question_pred)
-            
+                        table_pred['columns'].append(col_pred)
+
+                    question_pred['tables'].append(table_pred)
+
+                predictions.append(question_pred)
+
             # Handle empty predictions case
             if not scores_list:
                 logger.warning("No scores generated for any question, returning empty predictions.")
                 return predictions, torch.tensor([], device=data.x.device)
-            
+
             # Convert scores to tensor
             scores = torch.stack(scores_list)
             return predictions, scores

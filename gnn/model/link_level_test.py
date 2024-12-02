@@ -25,6 +25,7 @@ def format_metrics(metrics):
         f"Precision: {metrics['precision']:.4f}, "
         f"Recall: {metrics['recall']:.4f}, "
         f"F1: {metrics['f1']:.4f}, "
+        f"AUC: {metrics['auc']:.4f}, "
         f"Positive Ratio: {metrics['pos_ratio']:.4f}"
     )
 
@@ -58,8 +59,8 @@ def main():
     
     # Model hyperparameters
     in_channels = args.in_channels
-    hidden_channels = 256
-    num_layers = 5
+    hidden_channels = 128
+    num_layers = 2
     dropout = 0.1
     
     # Load datasets
@@ -97,7 +98,25 @@ def main():
     if os.path.exists(args.model_path):
         checkpoint = torch.load(args.model_path, weights_only=False)
         model.load_state_dict(checkpoint['model_state_dict'])
-        logger.info(f"Loaded model checkpoint from {args.model_path}")
+        
+        # Extract additional information from checkpoint
+        training_info = {
+            'epoch': checkpoint.get('epoch', 'N/A'),
+            'best_f1': checkpoint.get('best_f1', 'N/A'),
+            'best_auc': checkpoint.get('best_auc', 'N/A'),
+            'val_metrics': checkpoint.get('val_metrics', {}),
+            'train_metrics': checkpoint.get('train_metrics', {}),
+            'resumed_from': checkpoint.get('resumed_from', 'N/A')
+        }
+        
+        logger.info(f"[✓] Loaded model checkpoint from {args.model_path}")
+        logger.info("Training Information:")
+        logger.info(f"- Trained for {training_info['epoch']} epochs")
+        logger.info(f"- Best F1: {training_info['best_f1']}")
+        logger.info(f"- Best AUC: {training_info['best_auc']}")
+        if training_info['resumed_from']:
+            logger.info(f"- Model was resumed from: {training_info['resumed_from']}")
+
     else:
         raise FileNotFoundError(f"Checkpoint not found at {args.model_path}")
 
@@ -131,15 +150,29 @@ def main():
                 dataset_type=args.dataset_type,
                 model_name=model_name
             )
-            
             # Log metrics
             logger.info(f"Final Test Metrics - {format_metrics(test_metrics)}")
             
-            # Save metrics to file
-            metrics_path = os.path.join(output_dir, f'test_metrics_{args.dataset_type}_{model_name}.txt')
-            with open(metrics_path, 'w') as f:
-                f.write(format_metrics(test_metrics))
-            logger.info(f"Saved metrics to {metrics_path}")
+            # Save training information along with test metrics
+            metrics_path = os.path.join(output_dir, 'test_metrics_results.txt')
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            with open(metrics_path, 'a') as f:
+                f.write(f"\n{'='*100}\n")
+                f.write(f"Model: {model_name}, Test Time: {current_time}\n")
+                f.write(f"Dataset Tested on: {args.dataset_type}, Embedding Method: {embed_method}\n")
+                f.write("-"*100 + "\n")
+                f.write("Training Information:\n")
+                f.write(f"  Epochs: {training_info['epoch']}, Best F1: {training_info['best_f1']}, Best AUC: {training_info['best_auc']}\n")
+                if training_info['resumed_from']:
+                    f.write(f"Resumed from: {training_info['resumed_from']}\n")
+                if training_info['val_metrics']:
+                    f.write("Final Validation Metrics:\n")
+                    for k, v in training_info['val_metrics'].items():
+                        f.write(f"  {k}: {v:.4f},")
+                f.write("\n" + "-"*100 + "\n")
+                f.write("Test Metrics:\n")
+                f.write(f"  {format_metrics(test_metrics)}\n")
+                f.write("="*100 + "\n")
             
         else:
             logger.warning("No predictions generated!")
