@@ -1,47 +1,50 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import GATConv
+from torch_geometric.nn import GCNConv
 from torch_geometric.data import Data
 import json
 import os
 from typing import Dict, List, Tuple
 from loguru import logger
+import sys
 
-logger.add("logs/link_level_model.log", rotation="50 MB", level="INFO",
-           format="{time} {level} {message}", compression="zip")
+# Remove default logger
+logger.remove()
+# Add file handler with INFO level
+logger.add("logs/link_level_model.log", 
+           rotation="50 MB", 
+           level="INFO",
+           format="{time} {level} {message}",
+           compression="zip")
+# Add console handler with WARNING level
+logger.add(sys.stderr, level="WARNING")
+
 
 class LinkLevelGNN(nn.Module):
-    def __init__(self, in_channels: int = 384, hidden_channels: int = 256, num_heads: int = 4, num_layers: int = 3, dropout: float = 0.1):
+    def __init__(self, in_channels: int = 384, hidden_channels: int = 128, num_layers: int = 2, dropout: float = 0.1):
         """
-        Link prediction model using Graph Attention Networks
+        Link prediction model using Graph Convolutional Networks
         
         Args:
             in_channels: Input feature dimension (such as 384 for sentence transformer embeddings)
             hidden_channels: Hidden layer dimension
-            num_heads: Number of attention heads
-            num_layers: Number of GAT layers
+            num_layers: Number of GCN layers
             dropout: Dropout rate
         """
         super().__init__()
         self.num_layers = num_layers
         
-        # First GAT layer (from in_channels to hidden_channels)
+        # First GCN layer
         self.convs = nn.ModuleList()
-        self.convs.append(
-            GATConv(in_channels, hidden_channels // num_heads, heads=num_heads, dropout=dropout)
-        )
+        self.convs.append(GCNConv(in_channels, hidden_channels))
         
-        # Middle GAT layers
-        for _ in range(max(num_layers - 2, 1)):
-            self.convs.append(
-                GATConv(hidden_channels, hidden_channels // num_heads, heads=num_heads, dropout=dropout)
-            )
+        # Middle GCN layers
+        for _ in range(max(num_layers - 2, 0)):
+            self.convs.append(GCNConv(hidden_channels, hidden_channels))
         
-        # Last GAT layer (combine heads)
-        self.convs.append(
-            GATConv(hidden_channels, hidden_channels, heads=1, dropout=dropout)
-        )
+        # Last GCN layer
+        self.convs.append(GCNConv(hidden_channels, hidden_channels))
         
         # Link prediction layers
         self.link_predictor = nn.Sequential(

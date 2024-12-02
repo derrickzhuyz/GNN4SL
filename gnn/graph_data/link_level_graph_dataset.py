@@ -13,7 +13,6 @@ logger.add("logs/link_level_graph_dataset.log", rotation="50 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
 
 
-
 class LinkLevelGraphDataset(Dataset):
     """
     A link-level graph dataset where edges between question nodes and schema nodes 

@@ -7,9 +7,18 @@ from gnn.graph_data.link_level_graph_dataset import LinkLevelGraphDataset
 from gnn.model.link_level_runner import LinkLevelGNNRunner
 from datetime import datetime
 from loguru import logger
+import sys
 
-logger.add("logs/link_level_training.log", rotation="50 MB", level="WARNING",
-           format="{time} {level} {message}", compression="zip")
+# Remove default logger
+logger.remove()
+# Add file handler with INFO level
+logger.add("logs/link_level_training.log", 
+           rotation="50 MB", 
+           level="INFO",
+           format="{time} {level} {message}",
+           compression="zip")
+# Add console handler with WARNING level
+logger.add(sys.stderr, level="WARNING")
 
 
 """
@@ -48,9 +57,8 @@ def main():
 
     # Model hyperparameters
     in_channels = args.in_channels
-    hidden_channels = 256
-    num_heads = 4
-    num_layers = 5
+    hidden_channels = 128
+    num_layers = 2
     dropout = 0.1
     
     # Load dataset based on argument
@@ -105,7 +113,6 @@ def main():
     model = LinkLevelGNN(
         in_channels=in_channels,
         hidden_channels=hidden_channels,
-        num_heads=num_heads,
         num_layers=num_layers,
         dropout=dropout
     )
@@ -125,7 +132,11 @@ def main():
     # Train model
     checkpoint_dir = f'checkpoints/link_level_model/{embed_method}/'
     checkpoint_name = f'link_level_model_{args.dataset_type}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pt'
-    runner.train(num_epochs=num_epochs, checkpoint_dir=checkpoint_dir, checkpoint_name=checkpoint_name, resume_from=args.resume_from)
+    runner.train(num_epochs=num_epochs, 
+                 checkpoint_dir=checkpoint_dir, 
+                 checkpoint_name=checkpoint_name, 
+                 resume_from=args.resume_from, 
+                 metric='auc') # Metric: auc or f1.
 
 
 

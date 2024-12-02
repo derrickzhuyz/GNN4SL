@@ -13,6 +13,6 @@ python -m gnn.model.link_level_train \
     --epochs 200 \
     --batch_size 1 \
     --val_ratio 0.1 \
-    --lr 1e-4 \
+    --lr 1e-3 \
     --embed_method "sentence_transformer" \
     --in_channels 384

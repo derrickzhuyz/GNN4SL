@@ -59,7 +59,6 @@ def main():
     # Model hyperparameters
     in_channels = args.in_channels
     hidden_channels = 256
-    num_heads = 4
     num_layers = 5
     dropout = 0.1
     
@@ -90,7 +89,6 @@ def main():
     model = LinkLevelGNN(
         in_channels=in_channels,
         hidden_channels=hidden_channels,
-        num_heads=num_heads,
         num_layers=num_layers,
         dropout=dropout
     )

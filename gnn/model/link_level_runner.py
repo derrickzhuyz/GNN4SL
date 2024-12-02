@@ -11,6 +11,19 @@ import os
 import time
 from datetime import datetime, timedelta
 from loguru import logger
+from sklearn.metrics import roc_auc_score
+import sys
+
+# Remove default logger
+logger.remove()
+# Add file handler with INFO level
+logger.add("logs/link_level_runner.log", 
+           rotation="50 MB", 
+           level="INFO",
+           format="{time} {level} {message}",
+           compression="zip")
+# Add console handler with WARNING level
+logger.add(sys.stderr, level="WARNING")
 
 
 class LinkLevelGNNRunner:
@@ -124,7 +137,7 @@ class LinkLevelGNNRunner:
 
 
     """
-    Calculate loss and metrics: accuracy, precision, recall, f1, and positive ratio
+    Calculate loss and metrics: accuracy, precision, recall, f1, auc, and positive ratio
     :param predictions: predictions
     :param labels: ground truth labels
     :return: loss and metrics
@@ -135,33 +148,46 @@ class LinkLevelGNNRunner:
         criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
         loss = criterion(predictions, labels)
         
-        # Convert predictions to binary (0 or 1) using 0.5 as threshold
-        binary_preds = (torch.sigmoid(predictions) > 0.5).float()
-        
-        # Calculate detailed metrics
-        tp = ((binary_preds == 1) & (labels == 1)).sum().float()
-        fp = ((binary_preds == 1) & (labels == 0)).sum().float()
-        tn = ((binary_preds == 0) & (labels == 0)).sum().float()
-        fn = ((binary_preds == 0) & (labels == 1)).sum().float()
-        
-        # Calculate metrics
-        accuracy = (tp + tn) / (tp + tn + fp + fn + 1e-10)
-        precision = tp / (tp + fp + 1e-10)
-        recall = tp / (tp + fn + 1e-10)
-        f1 = 2 * (precision * recall) / (precision + recall + 1e-10)
-        
-        # Log class distribution
-        pos_ratio = labels.mean().item()
-        logger.info(f"Positive samples ratio: {pos_ratio:.3f}")
-        logger.info(f"Precision: {precision:.3f}, Recall: {recall:.3f}, F1: {f1:.3f}")
-        
-        return loss, {
-            'accuracy': accuracy.item(),
-            'precision': precision.item(),
-            'recall': recall.item(),
-            'f1': f1.item(),
-            'pos_ratio': pos_ratio
-        }
+        # Get probabilities and binary predictions
+        with torch.no_grad():  # Prevent gradient computation for metrics
+            probs = torch.sigmoid(predictions.detach())  # Detach from computation graph
+            binary_preds = (probs > 0.5).float()
+            
+            # Calculate detailed metrics
+            tp = ((binary_preds == 1) & (labels == 1)).sum().float()
+            fp = ((binary_preds == 1) & (labels == 0)).sum().float()
+            tn = ((binary_preds == 0) & (labels == 0)).sum().float()
+            fn = ((binary_preds == 0) & (labels == 1)).sum().float()
+            
+            # Calculate metrics
+            accuracy = (tp + tn) / (tp + tn + fp + fn + 1e-10)
+            precision = tp / (tp + fp + 1e-10)
+            recall = tp / (tp + fn + 1e-10)
+            f1 = 2 * (precision * recall) / (precision + recall + 1e-10)
+            
+            # Calculate AUC-ROC using detached tensors
+            try:
+                auc = roc_auc_score(
+                    labels.cpu().detach().numpy(),
+                    probs.cpu().detach().numpy()
+                )
+            except ValueError:  # Handle case where all labels are of one class
+                auc = 0.0
+                logger.warning("Could not calculate AUC - possibly all labels are of one class")
+            
+            # Log class distribution and metrics
+            pos_ratio = labels.mean().item()
+            logger.info(f"Positive samples ratio: {pos_ratio:.3f}")
+            logger.info(f"AUC: {auc:.3f}, Precision: {precision:.3f}, Recall: {recall:.3f}, F1: {f1:.3f}")
+            
+            return loss, {
+                'accuracy': accuracy.item(),
+                'precision': precision.item(),
+                'recall': recall.item(),
+                'f1': f1.item(),
+                'auc': auc,
+                'pos_ratio': pos_ratio
+            }
 
 
     """
@@ -180,13 +206,21 @@ class LinkLevelGNNRunner:
     :param current_epoch: current epoch number, to indicate the current progress
     :param num_epochs: total number of epochs, to indicate the total progress
     """
-    def train_epoch(self, current_epoch: int, num_epochs: int):
+    def train_epoch(self, current_epoch: int, end_epoch: int):
         self.model.train()
-        total_metrics = {'loss': 0, 'accuracy': 0, 'precision': 0, 'recall': 0, 'f1': 0, 'pos_ratio': 0}
+        total_metrics = {
+            'loss': 0,
+            'accuracy': 0,
+            'precision': 0,
+            'recall': 0,
+            'f1': 0,
+            'auc': 0,
+            'pos_ratio': 0
+        }
         num_batches = 0
         
         epoch_start = time.time()
-        desc_info = f"Epoch {current_epoch + 1}/{num_epochs}"
+        desc_info = f"Epoch {current_epoch + 1}/{end_epoch}"
         for batch_idx, data in tqdm(enumerate(self.train_loader), total=len(self.train_loader), desc=desc_info):
             batch_start = time.time()
             logger.info(f"\nProcessing batch {batch_idx}")
@@ -293,7 +327,15 @@ class LinkLevelGNNRunner:
     """
     def validate(self):
         self.model.eval()
-        total_metrics = {'loss': 0, 'accuracy': 0, 'precision': 0, 'recall': 0, 'f1': 0, 'pos_ratio': 0}
+        total_metrics = {
+            'loss': 0,
+            'accuracy': 0,
+            'precision': 0,
+            'recall': 0,
+            'f1': 0,
+            'auc': 0,
+            'pos_ratio': 0
+        }
         num_batches = 0
         
         with torch.no_grad():
@@ -372,11 +414,16 @@ class LinkLevelGNNRunner:
     :param checkpoint_dir: directory to save checkpoints
     :param checkpoint_name: name of the checkpoint file
     :param resume_from: path to checkpoint file to resume training from
+    :param metric: metric to use for saving the best model: 'auc' or 'f1'
     """
-    def train(self, num_epochs: int, checkpoint_dir: str, checkpoint_name: str, resume_from: str = None):
+    def train(self, num_epochs: int, checkpoint_dir: str, checkpoint_name: str, resume_from: str = None, metric: str = 'auc'):
+        if metric not in ['auc', 'f1']:
+            raise ValueError("metric must be either 'auc' or 'f1'")
+
         # Load checkpoint if it is a resume training
         start_epoch = 0
         best_f1 = 0.0
+        best_auc = 0.0
         if resume_from and os.path.exists(resume_from):
             try:
                 logger.info(f"[IMPORTANT] Loading checkpoint from {resume_from} for resuming training: {num_epochs} epochs.")
@@ -386,20 +433,21 @@ class LinkLevelGNNRunner:
                 # Handle possible missing keys
                 start_epoch = checkpoint.get('epoch', 0)
                 best_f1 = checkpoint.get('best_f1', 0.0)
+                best_auc = checkpoint.get('best_auc', 0.0)
                 self.global_step = checkpoint.get('global_step', 0)
-                logger.info(f"[IMPORTANT] Resuming training with best F1: {best_f1:.4f}")
-                
+                logger.info(f"[IMPORTANT] Resuming training with best F1: {best_f1:.4f}, best AUC: {best_auc:.4f}")
                 # Modify checkpoint name to indicate it's a continuation
                 base_name, ext = os.path.splitext(checkpoint_name)
                 checkpoint_name = f"{base_name}_resume_{num_epochs}ep{ext}"
                 
                 if start_epoch == 0:
-                    logger.warning(f"No epoch information found in checkpoint, starting from epoch 0. Previous best F1 score is {best_f1:.4f}")
+                    logger.warning(f"No epoch information found in checkpoint, starting from epoch 0. Previous best F1: {best_f1:.4f}, best AUC: {best_auc:.4f}")
             except Exception as e:
                 logger.error(f"Error loading checkpoint: {e}")
                 logger.warning("Starting training from scratch")
                 start_epoch = 0
                 best_f1 = 0.0
+                best_auc = 0.0
                 self.global_step = 0
         
         self.model = self.model.to(self.device)
@@ -416,7 +464,7 @@ class LinkLevelGNNRunner:
             logger.info(f"\nEpoch {epoch+1}/{start_epoch + num_epochs}")
             
             # Train and log metrics
-            train_metrics, epoch_time = self.train_epoch(current_epoch=epoch, num_epochs=num_epochs)
+            train_metrics, epoch_time = self.train_epoch(current_epoch=epoch, end_epoch=start_epoch + num_epochs)
             epoch_times.append(epoch_time)
             
             # Validate and log metrics
@@ -430,25 +478,53 @@ class LinkLevelGNNRunner:
             logger.info(f"Average epoch time: {self._format_time(avg_epoch_time)}")
             logger.info(f"Estimated time remaining: {self._format_time(eta)}")
             
-            # Save checkpoint if validation F1 improved
-            if val_metrics['f1'] >= best_f1:
-                best_f1 = val_metrics['f1']
+            # Print epoch summary
+            print(f"\n{'='*80}")
+            print(f"Epoch {epoch+1}/{start_epoch + num_epochs} Summary:")
+            print(f"{'-'*80}")
+            print("Training Metrics:")
+            print(f" Loss: {train_metrics['loss']:.4f}, F1: {train_metrics['f1']:.4f}, AUC: {train_metrics['auc']:.4f}, Precision: {train_metrics['precision']:.4f}, Recall: {train_metrics['recall']:.4f}")
+            print(f"Validation Metrics:")
+            print(f" Loss: {val_metrics['loss']:.4f}, F1: {val_metrics['f1']:.4f}, AUC: {val_metrics['auc']:.4f}, Precision: {val_metrics['precision']:.4f}, Recall: {val_metrics['recall']:.4f}")
+            print(f"Timing:")
+            print(f" Epoch time: {self._format_time(epoch_time)}, Avg epoch time: {self._format_time(avg_epoch_time)}, Estimated time remaining: {self._format_time(eta)}")
+            print(f"{'='*80}\n")
+            
+            # Update best metrics and save checkpoint
+            current_f1 = val_metrics['f1']
+            current_auc = val_metrics['auc']
+            best_f1 = max(best_f1, current_f1)
+            best_auc = max(best_auc, current_auc)
+            
+            # Save checkpoint if specified metric improved
+            if val_metrics[metric] >= max(best_f1 if metric == 'f1' else best_auc, 0.0):
                 checkpoint = {
                     'epoch': epoch + 1,  # Save the next epoch number
                     'model_state_dict': self.model.state_dict(),
                     'optimizer_state_dict': self.optimizer.state_dict(),
                     'best_f1': best_f1,
+                    'best_auc': best_auc,
                     'global_step': self.global_step,
                     'val_metrics': val_metrics,
                     'train_metrics': train_metrics,
                     'resumed_from': resume_from if resume_from else None  # Track original model
                 }
                 torch.save(checkpoint, os.path.join(checkpoint_dir, checkpoint_name))
-                logger.info(f"Saved new best model with F1: {best_f1:.4f}")
-        
+                logger.info(f"Saved new best model with F1: {best_f1:.4f}, AUC: {best_auc:.4f} (selected by {metric.upper()})")
+                print(f"\n{'='*80}")
+                print(f"Saved new best model with F1: {best_f1:.4f}, AUC: {best_auc:.4f} (selected by {metric.upper()})\n")
+                print(f"{'='*80}\n")
+
+        # Print final summary
         total_time = time.time() - total_start_time
         logger.info(f"\nTraining completed in {self._format_time(total_time)}")
+        logger.info(f"Best F1: {best_f1:.4f}, Best AUC: {best_auc:.4f}")
         logger.info(f"Average epoch time: {self._format_time(sum(epoch_times) / num_epochs)}")
+        print(f"\n{'*'*80}")
+        print("Training Completed!")
+        print(f" Best F1: {best_f1:.4f}, Best AUC: {best_auc:.4f} (selected by {metric.upper()})")
+        print(f" Total training time: {self._format_time(total_time)}, Average epoch time: {self._format_time(sum(epoch_times) / num_epochs)}")
+        print(f"{'*'*80}\n")
         
         # Log final timing statistics to TensorBoard
         self.writer.add_scalar('time/total_training_hours', total_time / 3600, 0)
