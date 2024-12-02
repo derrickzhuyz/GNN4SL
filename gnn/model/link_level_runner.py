@@ -32,7 +32,8 @@ class LinkLevelGNNRunner:
                  train_dataset: Optional[LinkLevelGraphDataset],
                  test_dataset: Optional[LinkLevelGraphDataset],
                  device: torch.device,
-                 val_ratio: Optional[float] = 0.1,  # 10% of train set for validation
+                 val_ratio: Optional[float] = 0.1,  # proportion of train set for validation
+                 val_dataset_type: str = 'combined',  # 'spider', 'bird', or 'combined'
                  lr: float = 1e-4,
                  batch_size: int = 1,
                  tensorboard_dir: str = 'gnn/tensorboard/link_level/'):
@@ -45,6 +46,7 @@ class LinkLevelGNNRunner:
             test_dataset: Test dataset (dev set for spider and bird)
             device: torch device
             val_ratio: Ratio of training data to use for validation
+            val_dataset_type: Type of validation dataset to use ('spider', 'bird', or 'combined')
             lr: Learning rate
             batch_size: Batch size (usually 1 for full graphs)
             tensorboard_dir: Directory for TensorBoard logs
@@ -55,19 +57,42 @@ class LinkLevelGNNRunner:
         self.global_step = 0
         
         if train_dataset is not None:
-            # Split training data into train and validation
-            train_size = len(train_dataset)
-            val_size = int(train_size * val_ratio)
-            train_size = train_size - val_size
+            # Get validation dataset based on type
+            if val_dataset_type not in ['spider', 'bird', 'combined']:
+                raise ValueError("val_dataset_type must be 'spider', 'bird', or 'combined'")
             
-            train_subset, val_subset = torch.utils.data.random_split(
-                train_dataset, 
-                [train_size, val_size],
-                generator=torch.Generator().manual_seed(42)  # For reproducibility
-            )
+            # Filter validation data based on dataset type
+            all_data = train_dataset.data  # Assuming this contains all graphs
+            if val_dataset_type != 'combined':
+                # Filter graphs based on dataset type
+                filtered_indices = [i for i, data in enumerate(all_data) 
+                                  if data.dataset_type == val_dataset_type]
+                filtered_data = [all_data[i] for i in filtered_indices]
+                val_size = int(len(filtered_data) * val_ratio)
+                train_size = len(all_data) - val_size
+                
+                # Create validation subset from filtered data
+                val_subset = filtered_data[:val_size]
+                # Use remaining data (including other dataset type) for training
+                train_subset = [data for i, data in enumerate(all_data) 
+                              if i not in filtered_indices[:val_size]]
+            else:
+                # Original combined validation logic
+                train_size = len(train_dataset)
+                val_size = int(train_size * val_ratio)
+                train_size = train_size - val_size
+                
+                train_subset, val_subset = torch.utils.data.random_split(
+                    train_dataset, 
+                    [train_size, val_size],
+                    generator=torch.Generator().manual_seed(42)  # For reproducibility
+                )
             
             self.train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True)
             self.val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False)
+            
+            logger.info(f"Dataset sizes - Training: {len(train_subset)}, "
+                       f"Validation ({val_dataset_type}): {len(val_subset)}")
         else:
             self.train_loader = None
             self.val_loader = None

@@ -13,6 +13,7 @@ python -m gnn.model.link_level_train \
     --epochs 500 \
     --batch_size 1 \
     --val_ratio 0.1 \
+    --val_dataset_type "combined" \
     --lr 1e-3 \
     --embed_method "api_small" \
     --in_channels 1536

@@ -42,6 +42,10 @@ def main():
     parser.add_argument('--resume_from', type=str, default=None,
                        help='Path to checkpoint file to resume training from')
     parser.add_argument('--in_channels', type=int, default=384, help='Number of input channels, aligned with embedding dimension: 384 for sentence_transformer, 768 for bert, 1536 for text-embedding-3-small (api_small), 3072 for text-embedding-3-large (api_large).')
+    parser.add_argument('--val_dataset_type', type=str, 
+                       choices=['spider', 'bird', 'combined'], 
+                       default='combined',
+                       help='Type of validation dataset to use')
     args = parser.parse_args()
     
     # Set device
@@ -124,6 +128,7 @@ def main():
         test_dataset=None,
         device=device,
         val_ratio=val_ratio,
+        val_dataset_type=args.val_dataset_type,
         lr=lr,
         batch_size=batch_size,
         tensorboard_dir=f'gnn/tensorboard/link_level/train_{args.dataset_type}/{embed_method}'  # Add subdirectory
