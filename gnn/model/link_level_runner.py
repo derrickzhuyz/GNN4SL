@@ -600,7 +600,7 @@ class LinkLevelGNNRunner:
     def test(self):
         self.model.eval()
         all_predictions = []
-        total_metrics = {'loss': 0, 'accuracy': 0, 'precision': 0, 'recall': 0, 'f1': 0, 'pos_ratio': 0}
+        total_metrics = {'loss': 0, 'accuracy': 0, 'precision': 0, 'recall': 0, 'f1': 0, 'auc': 0, 'pos_ratio': 0}
         num_batches = 0
         
         with torch.no_grad():
