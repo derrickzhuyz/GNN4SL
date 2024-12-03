@@ -27,6 +27,7 @@ class LinkLevelGNN(nn.Module):
                  hidden_channels: int = 128, 
                  num_layers: int = 2, 
                  dropout: float = 0.1,
+                 threshold: float = 0.5,
                  prediction_method: str = 'dot_product'):
         """
         Link prediction model using Graph Convolutional Networks
@@ -36,12 +37,13 @@ class LinkLevelGNN(nn.Module):
             hidden_channels: Hidden layer dimension
             num_layers: Number of GCN layers
             dropout: Dropout rate
+            threshold: Threshold for binary prediction (score > threshold -> relevant, score <= threshold -> irrelevant)
             prediction_method: Either 'dot_product' or 'concat_mlp'
         """
         super().__init__()
         self.num_layers = num_layers
         self.prediction_method = prediction_method
-        
+        self.threshold = threshold
         # First GCN layer
         self.convs = nn.ModuleList()
         self.convs.append(GCNConv(in_channels, hidden_channels))
@@ -114,12 +116,11 @@ class LinkLevelGNN(nn.Module):
             - edge_index: Graph connectivity in COO format
             - node_types: List of node types ('question', 'table', 'column')
             - node_names: List of node names (question text, table names, column names)
-    :param threshold: Threshold for binary prediction (default: 0.5): score > threshold -> relevant, score <= threshold -> irrelevant
     :return:
         predictions: List of dictionaries containing predictions for each question
         scores: Tensor of all prediction scores
     """
-    def predict_links(self, data: Data, threshold: float = 0.5) -> Tuple[List[Dict], torch.Tensor]:
+    def predict_links(self, data: Data) -> Tuple[List[Dict], torch.Tensor]:
         self.eval()  # Set model to evaluation mode
         with torch.no_grad():  # Disable gradient computation
             # Get node embeddings through GCN layers
@@ -197,7 +198,7 @@ class LinkLevelGNN(nn.Module):
                     # Create table prediction entry
                     table_pred = {
                         'name': table_info['name'],
-                        'relevant': bool(table_score > threshold),
+                        'relevant': bool(table_score > self.threshold),
                         'score': float(table_score),
                         'columns': []
                     }
@@ -211,7 +212,7 @@ class LinkLevelGNN(nn.Module):
                         # Create column prediction entry
                         col_pred = {
                             'name': col['name'],
-                            'relevant': bool(col_score > threshold),
+                            'relevant': bool(col_score > self.threshold),
                             'score': float(col_score)
                         }
                         table_pred['columns'].append(col_pred)
@@ -240,7 +241,7 @@ class LinkLevelGNN(nn.Module):
     """
     def save_predictions(self, predictions: List[Dict], output_dir: str, split: str, dataset_type: str, model_name: str):
         os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, f'{dataset_type}_{split}_predictions_{model_name}.json')
+        output_path = os.path.join(output_dir, f'test_{dataset_type}_{split}_By_{model_name}.json')
         
         with open(output_path, 'w') as f:
             json.dump(predictions, f, indent=2)

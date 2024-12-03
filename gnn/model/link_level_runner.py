@@ -38,7 +38,11 @@ class LinkLevelGNNRunner:
                  val_dataset_type: str = 'combined',  # 'spider', 'bird', or 'combined'
                  lr: float = 1e-4,
                  batch_size: int = 1,  # Force batch_size=1
-                 tensorboard_dir: str = 'gnn/tensorboard/link_level/'):
+                 threshold: float = 0.5,  # Threshold for binary prediction
+                 tensorboard_dir: str = 'gnn/tensorboard/link_level/',
+                 negative_sampling: bool = False,
+                 negative_sampling_ratio: float = 2.0,
+                 negative_sampling_method: str = 'random'):
         """
         Runner for LinkLevelGNN: train, validate, and test
         
@@ -52,13 +56,17 @@ class LinkLevelGNNRunner:
             lr: Learning rate
             batch_size: Batch size (usually 1 for full graphs)
             tensorboard_dir: Directory for TensorBoard logs
+            negative_sampling: Whether to use negative sampling during training
+            negative_sampling_ratio: Ratio of negative to positive samples (e.g., 3.0 means 3 negative samples for each positive)
+            negative_sampling_method: Method for negative sampling: random or hard negative mining
         """
         self.model = model.to(device)
         self.device = device
         self.writer = SummaryWriter(tensorboard_dir)
         self.global_step = 0
         self.prediction_method = model.prediction_method
-        
+        self.threshold = threshold
+
         if train_dataset is not None:
             # Get validation dataset based on type
             if val_dataset_type not in ['spider', 'bird', 'combined']:
@@ -113,6 +121,9 @@ class LinkLevelGNNRunner:
             logger.info(f"Dataset sizes - Test: {len(test_dataset)}")
         self.training_start_time = None
         self.epoch_start_time = None
+        self.negative_sampling = negative_sampling
+        self.negative_sampling_ratio = negative_sampling_ratio
+        self.negative_sampling_method = negative_sampling_method
 
 
     """
@@ -126,41 +137,59 @@ class LinkLevelGNNRunner:
 
 
     """
-    Extract ground truth labels from graph data
+    Extract ground truth labels from graph data (including negative sampling during training if enabled)
     :param data: graph data
     :return: ground truth labels
     """
     def _extract_labels(self, data):
-        """Extract ground truth labels from graph data"""
         logger.info("Extracting labels...")
-        logger.info(f"Edge index shape: {data.edge_index.shape}")
         
+        # First find positive pairs
+        positive_pairs = []
         labels = []
         question_indices = [i for i, type_ in enumerate(data.node_types[0]) 
                            if type_ == 'question']
         schema_elements = [(i, type_) for i, type_ in enumerate(data.node_types[0]) 
                           if type_ in ['table', 'column']]
         
-        logger.info(f"Found {len(question_indices)} questions and {len(schema_elements)} schema elements")
-        
+        # Get positive pairs
         for q_idx in question_indices:
             # Find edges connected to this question node
             edge_mask = (data.edge_index[0] == q_idx) | (data.edge_index[1] == q_idx)
             connected_edges = data.edge_index[:, edge_mask]
-            
             # logger.info(f"Question {q_idx} has {connected_edges.shape[1]} connected edges")
             
-            # Create labels for all schema elements
+            # Create labels for all schema elements (tables and columns) connected to this question node
             for i, type_ in schema_elements:
-                # Check if there's an edge between question and this node
+                # Check if there is an edge between question and this node
                 is_connected = torch.any(
                     ((connected_edges[0] == q_idx) & (connected_edges[1] == i)) |
                     ((connected_edges[0] == i) & (connected_edges[1] == q_idx))
-                ).item()  # Convert to Python boolean
-                labels.append(float(is_connected))
+                ).item()
+                
+                if is_connected:
+                    positive_pairs.append((q_idx, i))
+                    labels.append(1.0)
+        
+        # If negative sampling is enabled during training, sample negative pairs
+        if self.negative_sampling and self.model.training:
+            num_positive = len(positive_pairs)
+            num_negative = int(num_positive * self.negative_sampling_ratio)
+            negative_pairs = self._sample_negative_pairs(data, positive_pairs, num_negative)
+            
+            # Add negative samples to labels: 0 for negative pairs, 1 for positive pairs
+            for _ in negative_pairs:
+                labels.append(0.0)
+        else:
+            # During validation/testing or if negative sampling is not enabled, use the full set of negative pairs
+            for q_idx in question_indices:
+                for i, type_ in schema_elements:
+                    if (q_idx, i) not in positive_pairs:
+                        labels.append(0.0)
         
         labels_tensor = torch.tensor(labels, device=self.device)
-        logger.info(f"Generated {len(labels)} labels")
+        logger.info(f"Generated {len(labels)} labels (Positive: {len(positive_pairs)}, "
+                   f"Negative: {len(labels) - len(positive_pairs)})")
         return labels_tensor
 
 
@@ -179,7 +208,7 @@ class LinkLevelGNNRunner:
         # Get probabilities and binary predictions
         with torch.no_grad():  # Prevent gradient computation for metrics
             probs = torch.sigmoid(predictions.detach())  # Detach from computation graph
-            binary_preds = (probs > 0.5).float()
+            binary_preds = (probs > self.threshold).float()
             
             # Calculate detailed metrics
             tp = ((binary_preds == 1) & (labels == 1)).sum().float()
@@ -263,31 +292,58 @@ class LinkLevelGNNRunner:
             if self.prediction_method == 'dot_product':
                 node_embeddings = F.normalize(node_embeddings, p=2, dim=-1)
 
-            # Find question nodes
+            # Find question nodes and schema elements
             question_indices = [i for i, type_ in enumerate(data.node_types[0]) 
                               if type_ == 'question']
-
-            # Find schema elements
             schema_elements = [(i, type_) for i, type_ in enumerate(data.node_types[0]) 
                              if type_ in ['table', 'column']]
 
             if not schema_elements:
                 logger.warning("No schema elements found")
                 continue
-
             if not question_indices:
                 logger.warning("No question nodes found")
                 continue
 
-            # Get predictions
-            predictions = []
+            # First, get all positive pairs and their labels
+            positive_pairs = []
             for q_idx in question_indices:
-                q_embedding = node_embeddings[q_idx]
+                edge_mask = (data.edge_index[0] == q_idx) | (data.edge_index[1] == q_idx)
+                connected_edges = data.edge_index[:, edge_mask]
                 
-                for i, type_ in schema_elements:
-                    schema_embedding = node_embeddings[i]
-                    pred = self.model.predict_pair(q_embedding, schema_embedding)
-                    predictions.append(pred)
+                for element, type_ in schema_elements:
+                    is_connected = torch.any(
+                        ((connected_edges[0] == q_idx) & (connected_edges[1] == element)) |
+                        ((connected_edges[0] == element) & (connected_edges[1] == q_idx))
+                    ).item()
+                    
+                    if is_connected:
+                        positive_pairs.append((q_idx, element))
+
+            # Get negative pairs if negative sampling is enabled
+            pairs_to_evaluate = positive_pairs.copy() # Positive pairs are pairs we want to evaluate
+            if self.negative_sampling and self.model.training:
+                num_positive = len(positive_pairs)
+                num_negative = int(num_positive * self.negative_sampling_ratio)
+                negative_pairs = self._sample_negative_pairs(data, positive_pairs, num_negative)
+                pairs_to_evaluate.extend(negative_pairs)
+            else:
+                # If negative sampling is not enabled, add all negative pairs
+                for q_idx in question_indices:
+                    for element, type_ in schema_elements:
+                        if (q_idx, element) not in positive_pairs: # Not a positive pair
+                            pairs_to_evaluate.append((q_idx, element))
+
+            # Get predictions only for the pairs we want to evaluate
+            predictions = []
+            labels = []
+            for q_idx, schema_idx in pairs_to_evaluate:
+                q_embedding = node_embeddings[q_idx]
+                schema_embedding = node_embeddings[schema_idx]
+                pred = self.model.predict_pair(q_embedding, schema_embedding)
+                predictions.append(pred)
+                # Add label (1 for positive pairs, 0 for negative pairs)
+                labels.append(1.0 if (q_idx, schema_idx) in positive_pairs else 0.0)
 
             if not predictions:
                 logger.warning("No predictions generated")
@@ -295,7 +351,7 @@ class LinkLevelGNNRunner:
 
             try:
                 predictions = torch.cat(predictions)
-                labels = self._extract_labels(data)
+                labels = torch.tensor(labels, device=self.device)
 
                 logger.info(f"Predictions shape: {predictions.shape}")
                 logger.info(f"Labels shape: {labels.shape}")
@@ -317,14 +373,14 @@ class LinkLevelGNNRunner:
                     total_metrics[k] += v
                 num_batches += 1
 
-                logger.info(f"Loss: {loss.item():.4f}, F1: {metrics['f1']:.4f}")
+                logger.info(f"Loss: {loss.item():.6f}, F1: {metrics['f1']:.6f}, AUC: {metrics['auc']:.6f}")
 
                 # Log batch metrics
                 self._log_metrics(metrics, self.global_step, prefix='batch')
                 self.global_step += 1
 
                 batch_time = time.time() - batch_start
-                logger.info(f"Batch completed in {batch_time:.2f}s - Loss: {loss.item():.4f}, F1: {metrics['f1']:.4f}")
+                logger.info(f"Batch completed in {batch_time:.2f}s - Loss: {loss.item():.6f}, F1: {metrics['f1']:.6f}, AUC: {metrics['auc']:.6f}")
 
                 # Log batch time to TensorBoard
                 self.writer.add_scalar('time/batch_seconds', batch_time, self.global_step)
@@ -401,15 +457,15 @@ class LinkLevelGNNRunner:
                     connected_edges = data.edge_index[:, edge_mask]
                     
                     # Get predictions for all schema elements
-                    for i, type_ in schema_elements:
-                        schema_embedding = node_embeddings[i]
+                    for element, type_ in schema_elements:
+                        schema_embedding = node_embeddings[element]
                         pred = self.model.predict_pair(q_embedding, schema_embedding)
                         predictions.append(pred)
                         
                         # Get label (1 if connected, 0 if not)
                         is_connected = torch.any(
-                            ((connected_edges[0] == q_idx) & (connected_edges[1] == i)) |
-                            ((connected_edges[0] == i) & (connected_edges[1] == q_idx))
+                            ((connected_edges[0] == q_idx) & (connected_edges[1] == element)) |
+                            ((connected_edges[0] == element) & (connected_edges[1] == q_idx))
                         ).item()  # Convert to Python boolean
                         labels.append(torch.tensor([float(is_connected)], device=self.device))
                 
@@ -420,7 +476,6 @@ class LinkLevelGNNRunner:
                 # Calculate metrics
                 predictions = torch.cat(predictions)
                 labels = torch.cat(labels)
-                
                 loss, metrics = self._calculate_metrics(predictions, labels)
                 
                 # Update metrics
@@ -445,12 +500,12 @@ class LinkLevelGNNRunner:
     """
     def train(self, num_epochs: int, checkpoint_dir: str, checkpoint_name: str, resume_from: str = None, metric: str = 'auc'):
         if metric not in ['auc', 'f1']:
-            raise ValueError("metric must be either 'auc' or 'f1'")
+            raise ValueError("Metric must be either 'auc' or 'f1'")
 
         # Load checkpoint if it is a resume training
         start_epoch = 0
-        best_f1 = 0.0
-        best_auc = 0.0
+        best_model_f1 = 0.0
+        best_model_auc = 0.0
         if resume_from and os.path.exists(resume_from):
             try:
                 logger.info(f"[IMPORTANT] Loading checkpoint from {resume_from} for resuming training: {num_epochs} epochs.")
@@ -459,22 +514,22 @@ class LinkLevelGNNRunner:
                 self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
                 # Handle possible missing keys
                 start_epoch = checkpoint.get('epoch', 0)
-                best_f1 = checkpoint.get('best_f1', 0.0)
-                best_auc = checkpoint.get('best_auc', 0.0)
+                best_model_f1 = checkpoint.get('f1', 0.0)
+                best_model_auc = checkpoint.get('auc', 0.0)
                 self.global_step = checkpoint.get('global_step', 0)
-                logger.info(f"[IMPORTANT] Resuming training with best F1: {best_f1:.4f}, best AUC: {best_auc:.4f}")
+                logger.info(f"[IMPORTANT] Resuming training with best model F1: {best_model_f1:.6f}, AUC: {best_model_auc:.6f}")
                 # Modify checkpoint name to indicate it's a continuation
                 base_name, ext = os.path.splitext(checkpoint_name)
                 checkpoint_name = f"{base_name}_resume_{num_epochs}ep{ext}"
                 
                 if start_epoch == 0:
-                    logger.warning(f"No epoch information found in checkpoint, starting from epoch 0. Previous best F1: {best_f1:.4f}, best AUC: {best_auc:.4f}")
+                    logger.warning(f"No epoch information found in checkpoint, starting from epoch 0. Previous best model F1: {best_model_f1:.6f}, AUC: {best_model_auc:.6f}")
             except Exception as e:
                 logger.error(f"Error loading checkpoint: {e}")
                 logger.warning("Starting training from scratch")
                 start_epoch = 0
-                best_f1 = 0.0
-                best_auc = 0.0
+                best_model_f1 = 0.0
+                best_model_auc = 0.0
                 self.global_step = 0
         
         self.model = self.model.to(self.device)
@@ -510,9 +565,9 @@ class LinkLevelGNNRunner:
             print(f"Epoch {epoch+1}/{start_epoch + num_epochs} Summary:")
             print(f"{'-'*80}")
             print("Training Metrics:")
-            print(f" Loss: {train_metrics['loss']:.4f}, F1: {train_metrics['f1']:.4f}, AUC: {train_metrics['auc']:.4f}, Precision: {train_metrics['precision']:.4f}, Recall: {train_metrics['recall']:.4f}")
+            print(f" Loss: {train_metrics['loss']:.6f}, F1: {train_metrics['f1']:.6f}, AUC: {train_metrics['auc']:.6f}, Precision: {train_metrics['precision']:.6f}, Recall: {train_metrics['recall']:.6f}")
             print(f"Validation Metrics:")
-            print(f" Loss: {val_metrics['loss']:.4f}, F1: {val_metrics['f1']:.4f}, AUC: {val_metrics['auc']:.4f}, Precision: {val_metrics['precision']:.4f}, Recall: {val_metrics['recall']:.4f}")
+            print(f" Loss: {val_metrics['loss']:.6f}, F1: {val_metrics['f1']:.6f}, AUC: {val_metrics['auc']:.6f}, Precision: {val_metrics['precision']:.6f}, Recall: {val_metrics['recall']:.6f}")
             print(f"Timing:")
             print(f" Epoch time: {self._format_time(epoch_time)}, Avg epoch time: {self._format_time(avg_epoch_time)}, Estimated time remaining: {self._format_time(eta)}")
             print(f"{'='*80}\n")
@@ -520,36 +575,36 @@ class LinkLevelGNNRunner:
             # Update best metrics and save checkpoint
             current_f1 = val_metrics['f1']
             current_auc = val_metrics['auc']
-            best_f1 = max(best_f1, current_f1)
-            best_auc = max(best_auc, current_auc)
+            best_model_f1 = max(best_model_f1, current_f1)
+            best_model_auc = max(best_model_auc, current_auc)
             
             # Save checkpoint if specified metric improved
-            if val_metrics[metric] >= max(best_f1 if metric == 'f1' else best_auc, 0.0):
+            if val_metrics[metric] >= max(best_model_f1 if metric == 'f1' else best_model_auc, 0.0):
                 checkpoint = {
                     'epoch': epoch + 1,  # Save the next epoch number
                     'model_state_dict': self.model.state_dict(),
                     'optimizer_state_dict': self.optimizer.state_dict(),
-                    'best_f1': best_f1,
-                    'best_auc': best_auc,
+                    'f1': best_model_f1 if metric == 'f1' else current_f1,
+                    'auc': best_model_auc if metric == 'auc' else current_auc,
                     'global_step': self.global_step,
                     'val_metrics': val_metrics,
                     'train_metrics': train_metrics,
                     'resumed_from': resume_from if resume_from else None  # Track original model
                 }
                 torch.save(checkpoint, os.path.join(checkpoint_dir, checkpoint_name))
-                logger.info(f"Saved new best model with F1: {best_f1:.4f}, AUC: {best_auc:.4f} (selected by {metric.upper()})")
+                logger.info(f"Saved new best model with F1: {checkpoint['f1']:.6f}, AUC: {checkpoint['auc']:.6f} (selected by {metric.upper()})")
                 print(f"\n{'*'*80}")
-                print(f"Saved new best model with F1: {best_f1:.4f}, AUC: {best_auc:.4f} (selected by {metric.upper()})")
+                print(f"Saved new best model with F1: {checkpoint['f1']:.6f}, AUC: {checkpoint['auc']:.6f} (selected by {metric.upper()})")
                 print(f"{'*'*80}\n")
 
         # Print final summary
         total_time = time.time() - total_start_time
         logger.info(f"\nTraining completed in {self._format_time(total_time)}")
-        logger.info(f"Best F1: {best_f1:.4f}, Best AUC: {best_auc:.4f}")
+        logger.info(f"Best Model F1: {checkpoint['f1']:.6f}, Best Model AUC: {checkpoint['auc']:.6f} (selected by {metric.upper()})")
         logger.info(f"Average epoch time: {self._format_time(sum(epoch_times) / num_epochs)}")
         print(f"\n{'*'*80}")
         print("Training Completed!")
-        print(f" Best F1: {best_f1:.4f}, Best AUC: {best_auc:.4f} (selected by {metric.upper()})")
+        print(f" Best Model F1: {checkpoint['f1']:.6f}, Best Model AUC: {checkpoint['auc']:.6f} (selected by {metric.upper()})")
         print(f" Total training time: {self._format_time(total_time)}, Average epoch time: {self._format_time(sum(epoch_times) / num_epochs)}")
         print(f"{'*'*80}\n")
         
@@ -559,27 +614,6 @@ class LinkLevelGNNRunner:
         
         # Close TensorBoard writer
         self.writer.close()
-        
-        # Save timing statistics to file (NOTE: No need to save timing txt any more.)
-        # timing_stats = {
-        #     'total_training_time': self._format_time(total_time),
-        #     'average_epoch_time': self._format_time(sum(epoch_times) / num_epochs),
-        #     'epoch_times': [self._format_time(t) for t in epoch_times],
-        #     'start_time': datetime.fromtimestamp(total_start_time).strftime('%Y-%m-%d %H:%M:%S'),
-        #     'end_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        # }
-        
-        # timing_path = os.path.join(checkpoint_dir, 'training_timing.txt')
-        # with open(timing_path, 'w') as f:
-        #     for key, value in timing_stats.items():
-        #         if key == 'epoch_times':
-        #             f.write(f"Epoch times:\n")
-        #             for i, t in enumerate(value, 1):
-        #                 f.write(f"  Epoch {i}: {t}\n")
-        #         else:
-        #             f.write(f"{key}: {value}\n")
-        
-        # logger.info(f"Saved timing statistics to {timing_path}")
     
 
     """
@@ -610,7 +644,7 @@ class LinkLevelGNNRunner:
                 data = data.to(self.device)
                 
                 # Get predictions using predict_links method
-                predictions, scores_ = self.model.predict_links(data, threshold=0.5)
+                predictions, scores_ = self.model.predict_links(data)
                 all_predictions.extend(predictions)
                 
                 # Calculate test metrics
@@ -659,3 +693,65 @@ class LinkLevelGNNRunner:
         avg_metrics = {k: v / max(num_batches, 1) for k, v in total_metrics.items()}
         self._log_metrics(avg_metrics, 0, prefix='test')  # Use step 0 for test metrics
         return all_predictions, avg_metrics
+
+
+    """
+    Sample negative pairs for training (if negative sampling is enabled)
+    1. Random sampling
+    2. Hard negative mining using embeddings similarity: 
+        - Calculate similarities with all schema elements
+        - Get top-k most similar schema elements that are not positive pairs
+    :param data: graph data
+    :param positive_pairs: list of positive (question, schema) pairs
+    :param num_negative_samples: number of negative samples to generate
+    :return: list of negative (question, schema) pairs
+    """
+    def _sample_negative_pairs(self, data, positive_pairs, num_negative_samples):
+        question_indices = [i for i, type_ in enumerate(data.node_types[0]) 
+                           if type_ == 'question']
+        schema_indices = [i for i, type_ in enumerate(data.node_types[0]) 
+                         if type_ in ['table', 'column']]
+        
+        negative_pairs = []
+        positive_set = set((q, s) for q, s in positive_pairs)
+        
+        if self.negative_sampling_method == 'random':
+            # Random sampling
+            while len(negative_pairs) < num_negative_samples:
+                q_idx = torch.randint(0, len(question_indices), (1,)).item()
+                s_idx = torch.randint(0, len(schema_indices), (1,)).item()
+                pair = (question_indices[q_idx], schema_indices[s_idx])
+                
+                if pair not in positive_set and pair not in negative_pairs:
+                    negative_pairs.append(pair)
+        
+        elif self.negative_sampling_method == 'hard':
+            # Hard negative mining using embeddings similarity
+            with torch.no_grad():
+                node_embeddings = self.model(data.x, data.edge_index)
+                
+                for q_idx in question_indices:
+                    q_embedding = node_embeddings[q_idx]
+                    
+                    # Calculate similarities with all schema elements
+                    schema_embeddings = node_embeddings[schema_indices]
+                    similarities = F.cosine_similarity(
+                        q_embedding.unsqueeze(0),
+                        schema_embeddings,
+                        dim=1
+                    )
+                    
+                    # Get top-k most similar schema elements that are not positive pairs
+                    k = min(num_negative_samples // len(question_indices) + 1, len(schema_indices))
+                    _, top_k_indices = similarities.topk(k)
+                    
+                    for idx in top_k_indices:
+                        pair = (q_idx, schema_indices[idx.item()])
+                        if pair not in positive_set and pair not in negative_pairs:
+                            negative_pairs.append(pair)
+                            if len(negative_pairs) >= num_negative_samples:
+                                break
+        else:
+            raise ValueError(f"Invalid sampling method: {self.negative_sampling_method}. Please select 'random' or 'hard'.")
+        
+        return negative_pairs

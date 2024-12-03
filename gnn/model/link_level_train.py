@@ -33,6 +33,7 @@ def main():
                        help='Type of dataset to train on (spider, bird, or combined)')
     parser.add_argument('--epochs', type=int, default=2, help='Number of epochs to train')
     parser.add_argument('--batch_size', type=int, default=1, help='Batch size')
+    parser.add_argument('--threshold', type=float, default=0.5, help='Threshold for binary prediction')
     parser.add_argument('--val_ratio', type=float, default=0.1, help='Validation ratio')
     parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
     parser.add_argument('--embed_method', type=str, 
@@ -51,6 +52,23 @@ def main():
                        choices=['dot_product', 'concat_mlp'],
                        default='dot_product',
                        help='Method for link prediction: dot_product or concat_mlp')
+    parser.add_argument('--negative_sampling', 
+                       action='store_true',
+                       help='Whether to use negative sampling during training')
+    parser.add_argument('--negative_sampling_ratio', 
+                       type=float, 
+                       default=2.0,
+                       help='Ratio of negative to positive samples (e.g., 3.0 means 3 negative samples for each positive)')
+    parser.add_argument('--negative_sampling_method',
+                       type=str,
+                       choices=['random', 'hard'],
+                       default='random',
+                       help='Method for negative sampling: random or hard negative mining')
+    parser.add_argument('--metric', 
+                       type=str,
+                       choices=['auc', 'f1'],
+                       default='auc',
+                       help='Metric to use for saving the best model: auc or f1')
     args = parser.parse_args()
     
     # Set device
@@ -137,17 +155,21 @@ def main():
         val_dataset_type=args.val_dataset_type,
         lr=lr,
         batch_size=batch_size,
-        tensorboard_dir=f'gnn/tensorboard/link_level/train_{args.dataset_type}/{embed_method}'  # Add subdirectory
+        threshold=args.threshold,
+        tensorboard_dir=f'gnn/tensorboard/link_level/train_{args.dataset_type}/{embed_method}',  # Add subdirectory
+        negative_sampling=args.negative_sampling,
+        negative_sampling_ratio=args.negative_sampling_ratio,
+        negative_sampling_method=args.negative_sampling_method
     )
     
     # Train model
     checkpoint_dir = f'checkpoints/link_level_model/{embed_method}/'
-    checkpoint_name = f'link_level_model_{args.dataset_type}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pt'
+    checkpoint_name = f'link_level_model_{args.dataset_type}_{args.metric}_{num_epochs}ep_{datetime.now().strftime("%m%d_%H%M")}.pt'
     runner.train(num_epochs=num_epochs, 
                  checkpoint_dir=checkpoint_dir, 
                  checkpoint_name=checkpoint_name, 
                  resume_from=args.resume_from, 
-                 metric='auc') # Metric: auc or f1.
+                 metric=args.metric)
 
 
 

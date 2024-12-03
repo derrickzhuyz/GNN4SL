@@ -20,13 +20,13 @@ Format metrics results for logging
 """
 def format_metrics(metrics):
     return (
-        f"Loss: {metrics['loss']:.4f}, "
-        f"Accuracy: {metrics['accuracy']:.4f}, "
-        f"Precision: {metrics['precision']:.4f}, "
-        f"Recall: {metrics['recall']:.4f}, "
-        f"F1: {metrics['f1']:.4f}, "
-        f"AUC: {metrics['auc']:.4f}, "
-        f"Positive Ratio: {metrics['pos_ratio']:.4f}"
+        f"Loss: {metrics['loss']:.6f}, "
+        f"Accuracy: {metrics['accuracy']:.6f}, "
+        f"Precision: {metrics['precision']:.6f}, "
+        f"Recall: {metrics['recall']:.6f}, "
+        f"F1: {metrics['f1']:.6f}, "
+        f"AUC: {metrics['auc']:.6f}, "
+        f"Positive Ratio: {metrics['pos_ratio']:.6f}"
     )
 
 
@@ -45,6 +45,7 @@ def main():
     parser.add_argument('--dataset_type', type=str, choices=['spider', 'bird'], default='spider',
                        help='Type of dataset to test on (spider or bird)')
     parser.add_argument('--batch_size', type=int, default=1, help='Batch size')
+    parser.add_argument('--threshold', type=float, default=0.5, help='Threshold for binary prediction')
     parser.add_argument('--embed_method', type=str, 
                         choices=['sentence_transformer', 'bert', 'api_small', 'api_large', 'api_mock'], 
                         default='sentence_transformer',
@@ -97,7 +98,8 @@ def main():
         hidden_channels=hidden_channels,
         num_layers=num_layers,
         dropout=dropout,
-        prediction_method=args.prediction_method
+        prediction_method=args.prediction_method,
+        threshold=args.threshold
     )
     
     # Load the best model checkpoint
@@ -108,8 +110,8 @@ def main():
         # Extract additional information from checkpoint
         training_info = {
             'epoch': checkpoint.get('epoch', 'N/A'),
-            'best_f1': checkpoint.get('best_f1', 'N/A'),
-            'best_auc': checkpoint.get('best_auc', 'N/A'),
+            'best_model_f1': checkpoint.get('f1', 'N/A'),
+            'best_model_auc': checkpoint.get('auc', 'N/A'),
             'val_metrics': checkpoint.get('val_metrics', {}),
             'train_metrics': checkpoint.get('train_metrics', {}),
             'resumed_from': checkpoint.get('resumed_from', 'N/A')
@@ -118,8 +120,8 @@ def main():
         logger.info(f"[✓] Loaded model checkpoint from {args.model_path}")
         logger.info("Training Information:")
         logger.info(f"- Trained for {training_info['epoch']} epochs")
-        logger.info(f"- Best F1: {training_info['best_f1']}")
-        logger.info(f"- Best AUC: {training_info['best_auc']}")
+        logger.info(f"- Best F1: {training_info['best_model_f1']}")
+        logger.info(f"- Best AUC: {training_info['best_model_auc']}")
         if training_info['resumed_from']:
             logger.info(f"- Model was resumed from: {training_info['resumed_from']}")
 
@@ -162,24 +164,36 @@ def main():
             # Save training information along with test metrics
             metrics_path = os.path.join(output_dir, 'test_metrics_results.txt')
             current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            with open(metrics_path, 'a') as f:
-                f.write(f"\n{'='*100}\n")
-                f.write(f"Model: {model_name}, Test Time: {current_time}\n")
-                f.write(f"Dataset Tested on: {args.dataset_type}, Embedding Method: {embed_method}, Prediction Method: {args.prediction_method}\n")
-                f.write("-"*100 + "\n")
-                f.write("Training Information:\n")
-                f.write(f"  Epochs: {training_info['epoch']}, Best F1: {training_info['best_f1']}, Best AUC: {training_info['best_auc']}\n")
-                if training_info['resumed_from']:
-                    f.write(f"Resumed from: {training_info['resumed_from']}\n")
-                if training_info['val_metrics']:
-                    f.write("Final Validation Metrics:\n  ")
-                    for k, v in training_info['val_metrics'].items():
-                        f.write(f"{k}: {v:.4f}, ")
-                f.write("\n" + "-"*100 + "\n")
-                f.write("Test Metrics:\n")
-                f.write(f"  {format_metrics(test_metrics)}\n")
-                f.write("="*100 + "\n")
             
+            # Prepare the metrics summary text
+            metrics_text = (
+                f"\n{'='*100}\n"
+                f"Model: {model_name}, Test Time: {current_time}\n"
+                f"Dataset Tested on: {args.dataset_type}, Embedding Method: {embed_method}, Prediction Method: {args.prediction_method}\n"
+                f"{'-'*100}\n"
+                f"Training Information:\n"
+                f"  Epochs: {training_info['epoch']}, Best F1: {training_info['best_model_f1']}, Best AUC: {training_info['best_model_auc']}\n"
+            )
+            
+            if training_info['resumed_from']:
+                metrics_text += f"Resumed from: {training_info['resumed_from']}\n"
+            
+            if training_info['val_metrics']:
+                metrics_text += "Final Validation Metrics:\n  "
+                metrics_text += ", ".join([f"{k}: {v:.6f}" for k, v in training_info['val_metrics'].items()])
+                
+            metrics_text += (
+                f"\n{'-'*100}\n"
+                f"Test Metrics:\n"
+                f"  {format_metrics(test_metrics)}\n"
+                f"{'='*100}\n"
+            )
+            
+            # Print to console and write to file
+            print(metrics_text)
+            with open(metrics_path, 'a') as f:
+                f.write(metrics_text)
+
         else:
             logger.warning("No predictions generated!")
             
