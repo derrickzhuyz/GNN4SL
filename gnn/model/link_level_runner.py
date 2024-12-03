@@ -13,6 +13,8 @@ from datetime import datetime, timedelta
 from loguru import logger
 from sklearn.metrics import roc_auc_score
 import sys
+from collections import defaultdict
+import torch.nn.functional as F
 
 # Remove default logger
 logger.remove()
@@ -55,6 +57,7 @@ class LinkLevelGNNRunner:
         self.device = device
         self.writer = SummaryWriter(tensorboard_dir)
         self.global_step = 0
+        self.prediction_method = model.prediction_method
         
         if train_dataset is not None:
             # Get validation dataset based on type
@@ -255,12 +258,18 @@ class LinkLevelGNNRunner:
 
             # Forward pass
             node_embeddings = self.model(data.x, data.edge_index)
+            
+            # Normalize embeddings if using dot product
+            if self.prediction_method == 'dot_product':
+                node_embeddings = F.normalize(node_embeddings, p=2, dim=-1)
 
             # Find question nodes
-            question_indices = [i for i, type_ in enumerate(data.node_types[0]) if type_ == 'question']
+            question_indices = [i for i, type_ in enumerate(data.node_types[0]) 
+                              if type_ == 'question']
 
             # Find schema elements
-            schema_elements = [(i, type_) for i, type_ in enumerate(data.node_types[0]) if type_ in ['table', 'column']]
+            schema_elements = [(i, type_) for i, type_ in enumerate(data.node_types[0]) 
+                             if type_ in ['table', 'column']]
 
             if not schema_elements:
                 logger.warning("No schema elements found")
@@ -274,11 +283,10 @@ class LinkLevelGNNRunner:
             predictions = []
             for q_idx in question_indices:
                 q_embedding = node_embeddings[q_idx]
-
+                
                 for i, type_ in schema_elements:
                     schema_embedding = node_embeddings[i]
-                    pair_embedding = torch.cat([q_embedding, schema_embedding])
-                    pred = self.model.link_predictor(pair_embedding)
+                    pred = self.model.predict_pair(q_embedding, schema_embedding)
                     predictions.append(pred)
 
             if not predictions:
@@ -395,8 +403,7 @@ class LinkLevelGNNRunner:
                     # Get predictions for all schema elements
                     for i, type_ in schema_elements:
                         schema_embedding = node_embeddings[i]
-                        pair_embedding = torch.cat([q_embedding, schema_embedding])
-                        pred = self.model.link_predictor(pair_embedding)
+                        pred = self.model.predict_pair(q_embedding, schema_embedding)
                         predictions.append(pred)
                         
                         # Get label (1 if connected, 0 if not)
@@ -531,9 +538,9 @@ class LinkLevelGNNRunner:
                 }
                 torch.save(checkpoint, os.path.join(checkpoint_dir, checkpoint_name))
                 logger.info(f"Saved new best model with F1: {best_f1:.4f}, AUC: {best_auc:.4f} (selected by {metric.upper()})")
-                print(f"\n{'='*80}")
-                print(f"Saved new best model with F1: {best_f1:.4f}, AUC: {best_auc:.4f} (selected by {metric.upper()})\n")
-                print(f"{'='*80}\n")
+                print(f"\n{'*'*80}")
+                print(f"Saved new best model with F1: {best_f1:.4f}, AUC: {best_auc:.4f} (selected by {metric.upper()})")
+                print(f"{'*'*80}\n")
 
         # Print final summary
         total_time = time.time() - total_start_time
@@ -603,7 +610,7 @@ class LinkLevelGNNRunner:
                 data = data.to(self.device)
                 
                 # Get predictions using predict_links method
-                predictions, _ = self.model.predict_links(data, threshold=0.5)
+                predictions, scores_ = self.model.predict_links(data, threshold=0.5)
                 all_predictions.extend(predictions)
                 
                 # Calculate test metrics
@@ -627,8 +634,7 @@ class LinkLevelGNNRunner:
                     
                     for i, type_ in schema_elements:
                         schema_embedding = node_embeddings[i]
-                        pair_embedding = torch.cat([q_embedding, schema_embedding])
-                        pred = self.model.link_predictor(pair_embedding)
+                        pred = self.model.predict_pair(q_embedding, schema_embedding)
                         test_predictions.append(pred)
                         
                         is_connected = torch.any(

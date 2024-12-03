@@ -1,0 +1,92 @@
+[
+    {
+        "file_path": "gnn/results/link_level/api_small/spider_dev_predictions_link_level_model_combined_20241129_133724.json",
+        "precision": 0.522422494592646,
+        "recall": 0.93860103626943,
+        "f1_score": 0.6712366836498379
+    },
+    {
+        "file_path": "gnn/results/link_level/api_small/bird_dev_predictions_link_level_model_combined_20241129_133724.json",
+        "precision": 0.19291338582677164,
+        "recall": 0.7401398601398601,
+        "f1_score": 0.3060551732114973
+    },
+    {
+        "file_path": "gnn/results/link_level/api_large/bird_dev_predictions_link_level_model_combined_20241129_133641.json",
+        "precision": 0.18462542133304338,
+        "recall": 0.7035911602209944,
+        "f1_score": 0.29249806207114354
+    },
+    {
+        "file_path": "gnn/results/link_level/api_large/spider_dev_predictions_link_level_model_combined_20241129_133641.json",
+        "precision": 0.5292822545134303,
+        "recall": 0.9274691358024691,
+        "f1_score": 0.6739557050742921
+    },
+    {
+        "file_path": "gnn/results/link_level/sentence_transformer/bird_dev_predictions_link_level_model_combined_20241128_075541_resume_200ep.json",
+        "precision": 0.1385188987652987,
+        "recall": 0.7075627932652498,
+        "f1_score": 0.23168169185928286
+    },
+    {
+        "file_path": "gnn/results/link_level/sentence_transformer/spider_dev_predictions_link_level_model_best.json",
+        "precision": 0.40288201741218854,
+        "recall": 0.46613407433136506,
+        "f1_score": 0.4322061191626409
+    },
+    {
+        "file_path": "gnn/results/link_level/sentence_transformer/bird_dev_predictions_link_level_model_combined_20241125_132315_top_4_5.json",
+        "precision": 0.17725004989024146,
+        "recall": 0.6171484157865481,
+        "f1_score": 0.2754023131065704
+    },
+    {
+        "file_path": "gnn/results/link_level/sentence_transformer/spider_dev_predictions_link_level_model_best_top_4_5.json",
+        "precision": 0.4615701345045292,
+        "recall": 0.9374216027874565,
+        "f1_score": 0.6185680783556352
+    },
+    {
+        "file_path": "gnn/results/link_level/sentence_transformer/spider_dev_predictions_link_level_model_bird_20241129_143525.json",
+        "precision": 0.528176533396607,
+        "recall": 0.8992122803474045,
+        "f1_score": 0.6654708520179372
+    },
+    {
+        "file_path": "gnn/results/link_level/sentence_transformer/spider_dev_predictions_link_level_model_combined_20241128_075541_resume_200ep.json",
+        "precision": 0.541124342287455,
+        "recall": 0.9499270782693242,
+        "f1_score": 0.689484827099506
+    },
+    {
+        "file_path": "gnn/results/link_level/sentence_transformer/bird_dev_predictions_link_level_model_bird_20241129_143525.json",
+        "precision": 0.11927073668584152,
+        "recall": 0.6700547302580141,
+        "f1_score": 0.20249675107313037
+    },
+    {
+        "file_path": "gnn/results/link_level/sentence_transformer/bird_dev_predictions_link_level_model_best_top_4_5.json",
+        "precision": 0.16140322318085626,
+        "recall": 0.5525985787933677,
+        "f1_score": 0.24983464046111686
+    },
+    {
+        "file_path": "gnn/results/link_level/sentence_transformer/bird_dev_predictions_link_level_model_best.json",
+        "precision": 0.0889118102114492,
+        "recall": 0.12402877697841727,
+        "f1_score": 0.1035746470411535
+    },
+    {
+        "file_path": "gnn/results/link_level/sentence_transformer/spider_dev_predictions_link_level_model_combined_20241125_132315.json",
+        "precision": 0.5333581349206349,
+        "recall": 0.9427882507672074,
+        "f1_score": 0.6812925708854745
+    },
+    {
+        "file_path": "gnn/results/link_level/sentence_transformer/bird_dev_predictions_link_level_model_combined_20241125_132315.json",
+        "precision": 0.12319836799858087,
+        "recall": 0.7356017476499405,
+        "f1_score": 0.21105012250479574
+    }
+]

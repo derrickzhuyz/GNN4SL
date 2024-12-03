@@ -22,7 +22,12 @@ logger.add(sys.stderr, level="WARNING")
 
 
 class LinkLevelGNN(nn.Module):
-    def __init__(self, in_channels: int = 384, hidden_channels: int = 128, num_layers: int = 2, dropout: float = 0.1):
+    def __init__(self, 
+                 in_channels: int = 384, 
+                 hidden_channels: int = 128, 
+                 num_layers: int = 2, 
+                 dropout: float = 0.1,
+                 prediction_method: str = 'dot_product'):
         """
         Link prediction model using Graph Convolutional Networks
         
@@ -31,9 +36,11 @@ class LinkLevelGNN(nn.Module):
             hidden_channels: Hidden layer dimension
             num_layers: Number of GCN layers
             dropout: Dropout rate
+            prediction_method: Either 'dot_product' or 'concat_mlp'
         """
         super().__init__()
         self.num_layers = num_layers
+        self.prediction_method = prediction_method
         
         # First GCN layer
         self.convs = nn.ModuleList()
@@ -46,13 +53,41 @@ class LinkLevelGNN(nn.Module):
         # Last GCN layer
         self.convs.append(GCNConv(hidden_channels, hidden_channels))
         
-        # Link prediction layers
-        self.link_predictor = nn.Sequential(
-            nn.Linear(hidden_channels * 2, hidden_channels),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(hidden_channels, 1)
-        )
+        # Link prediction layers (only used if prediction_method == 'concat_mlp')
+        if prediction_method == 'concat_mlp':
+            self.link_predictor = nn.Sequential(
+                nn.Linear(hidden_channels * 2, hidden_channels),
+                nn.ReLU(),
+                nn.Dropout(dropout),
+                nn.Linear(hidden_channels, 1)
+            )
+        elif prediction_method == 'dot_product':
+            # Optional: add a scaling factor for dot product
+            self.scale = nn.Parameter(torch.FloatTensor([1.0]))
+        else:
+            raise ValueError("prediction_method must be either 'dot_product' or 'concat_mlp'")
+
+
+    """
+    Predict link between two node embeddings. Two options:
+        - 'concat_mlp': Concatenate embeddings and pass through MLP
+        - 'dot_product': Normalize embeddings and compute dot product
+    :param src_embedding: Source node embedding
+    :param dst_embedding: Destination node embedding
+    :return: Prediction score
+    """
+    def predict_pair(self, src_embedding: torch.Tensor, dst_embedding: torch.Tensor) -> torch.Tensor:
+        if self.prediction_method == 'concat_mlp':
+            pair_embedding = torch.cat([src_embedding, dst_embedding])
+            return torch.sigmoid(self.link_predictor(pair_embedding))
+        elif self.prediction_method == 'dot_product':
+            # Normalize embeddings (optional but recommended for dot product)
+            src_norm = F.normalize(src_embedding, p=2, dim=-1)
+            dst_norm = F.normalize(dst_embedding, p=2, dim=-1)
+            # Scale dot product and apply sigmoid
+            return torch.sigmoid(self.scale * torch.sum(src_norm * dst_norm))
+        else:
+            raise ValueError("Prediction method not supported! Must be either 'dot_product' or 'concat_mlp'")
 
 
     """
@@ -73,46 +108,57 @@ class LinkLevelGNN(nn.Module):
 
 
     """
-    Predict relevance between question nodes and schema nodes (tables and columns)
-    :param data: graph data
-    :return: predictions and scores
+    Predict relevance between question nodes and schema nodes (tables and columns) and return predictions and scores
+    :param data: PyG Data object containing:
+            - x: Node feature matrix (embeddings)
+            - edge_index: Graph connectivity in COO format
+            - node_types: List of node types ('question', 'table', 'column')
+            - node_names: List of node names (question text, table names, column names)
+    :param threshold: Threshold for binary prediction (default: 0.5): score > threshold -> relevant, score <= threshold -> irrelevant
+    :return:
+        predictions: List of dictionaries containing predictions for each question
+        scores: Tensor of all prediction scores
     """
     def predict_links(self, data: Data, threshold: float = 0.5) -> Tuple[List[Dict], torch.Tensor]:
-        self.eval()
-        with torch.no_grad():
+        self.eval()  # Set model to evaluation mode
+        with torch.no_grad():  # Disable gradient computation
             # Get node embeddings through GCN layers
             node_embeddings = self.forward(data.x, data.edge_index)
+            
+            # Normalize embeddings if using dot product (optional)
+            if self.prediction_method == 'dot_product':
+                node_embeddings = F.normalize(node_embeddings, p=2, dim=-1)
+            
             scores_list = []
             predictions = []
 
-            # Process the single graph
+            # Find all question nodes in the graph
             question_indices = [i for i, type_ in enumerate(data.node_types[0]) if type_ == 'question']
             logger.info(f"Found {len(question_indices)} question nodes")
 
-            # Create a dictionary to group columns by their parent tables
-            tables = {}
-            column_to_table = {}
+            # Create dictionaries to store table and column information
+            tables = {}  # Maps table index to table info
+            column_to_table = {}  # Maps column index to its parent table index
 
-            # Identify all tables
+            # Step 1: Identify all tables in the graph
             for i, type_ in enumerate(data.node_types[0]):
                 if type_ == 'table':
                     table_name = data.node_names[0][i] if data.node_names else f'table_{i}'
                     logger.info(f"Found table: {table_name} at index {i}")
                     tables[i] = {
                         'name': table_name,
-                        'columns': []
+                        'columns': []  # Will store column information
                     }
 
-            # Find column-table relationships from edge_index
+            # Step 2: Find column-table relationships from edge_index
             edge_index_np = data.edge_index.cpu().numpy()
-
             for i in range(data.edge_index.shape[1]):
                 src, dst = edge_index_np[:, i]
                 if src < len(data.node_types[0]) and dst < len(data.node_types[0]):
                     src_type = data.node_types[0][src]
                     dst_type = data.node_types[0][dst]
 
-                    # If this edge connects a column and a table
+                    # Store column-table relationships based on edges
                     if (src_type == 'column' and dst_type == 'table'):
                         column_to_table[src] = dst
                     elif (dst_type == 'column' and src_type == 'table'):
@@ -120,7 +166,7 @@ class LinkLevelGNN(nn.Module):
 
             logger.info(f"Found {len(column_to_table)} column-table relationships")
 
-            # Add columns to their respective tables
+            # Step 3: Add columns to their respective tables
             for col_idx, table_idx in column_to_table.items():
                 if table_idx in tables:
                     col_name = data.node_names[0][col_idx] if data.node_names else f'column_{col_idx}'
@@ -129,38 +175,40 @@ class LinkLevelGNN(nn.Module):
                         'name': col_name
                     })
 
-            # Process each question
+            # Step 4: Process each question node
             for q_idx in question_indices:
-                q_embedding = node_embeddings[q_idx]
+                q_embedding = node_embeddings[q_idx]  # Get question embedding
                 question_name = data.node_names[0][q_idx] if data.node_names else f'question_{q_idx}'
 
+                # Initialize prediction structure for this question
                 question_pred = {
                     'question_idx': q_idx,
                     'question': question_name,
                     'tables': []
                 }
 
-                # Process each table and its columns
+                # Step 5: Process each table and its columns
                 for table_idx, table_info in tables.items():
+                    # Predict table relevance
                     table_embedding = node_embeddings[table_idx]
-                    pair_embedding = torch.cat([q_embedding, table_embedding])
-                    table_score = torch.sigmoid(self.link_predictor(pair_embedding))
+                    table_score = self.predict_pair(q_embedding, table_embedding)
                     scores_list.append(table_score)
 
+                    # Create table prediction entry
                     table_pred = {
                         'name': table_info['name'],
                         'relevant': bool(table_score > threshold),
                         'score': float(table_score),
                         'columns': []
                     }
-
-                    # Process all columns for this table
+                    # Process all columns belonging to this table
                     for col in table_info['columns']:
+                        # Predict column relevance
                         col_embedding = node_embeddings[col['idx']]
-                        pair_embedding = torch.cat([q_embedding, col_embedding])
-                        col_score = torch.sigmoid(self.link_predictor(pair_embedding))
+                        col_score = self.predict_pair(q_embedding, col_embedding)
                         scores_list.append(col_score)
 
+                        # Create column prediction entry
                         col_pred = {
                             'name': col['name'],
                             'relevant': bool(col_score > threshold),
@@ -177,7 +225,7 @@ class LinkLevelGNN(nn.Module):
                 logger.warning("No scores generated for any question, returning empty predictions.")
                 return predictions, torch.tensor([], device=data.x.device)
 
-            # Convert scores to tensor
+            # Convert all scores to a single tensor
             scores = torch.stack(scores_list)
             return predictions, scores
     

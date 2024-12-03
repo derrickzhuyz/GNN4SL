@@ -46,6 +46,11 @@ def main():
                        choices=['spider', 'bird', 'combined'], 
                        default='combined',
                        help='Type of validation dataset to use')
+    parser.add_argument('--prediction_method', 
+                       type=str,
+                       choices=['dot_product', 'concat_mlp'],
+                       default='dot_product',
+                       help='Method for link prediction: dot_product or concat_mlp')
     args = parser.parse_args()
     
     # Set device
@@ -118,7 +123,8 @@ def main():
         in_channels=in_channels,
         hidden_channels=hidden_channels,
         num_layers=num_layers,
-        dropout=dropout
+        dropout=dropout,
+        prediction_method=args.prediction_method
     )
     
     # Initialize runner (for training)

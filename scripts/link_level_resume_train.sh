@@ -13,6 +13,7 @@ python -m gnn.model.link_level_train \
     --epochs 100 \
     --batch_size 1 \
     --val_ratio 0.1 \
+    --val_dataset_type "combined" \
     --lr 1e-4 \
     --embed_method "sentence_transformer" \
     --resume_from checkpoints/link_level_model/sentence_transformer/link_level_model_combined_20241128_075541_resume_200ep.pt

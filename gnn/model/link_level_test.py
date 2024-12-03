@@ -51,6 +51,11 @@ def main():
                         help='Embedding methods used to create the current graph dataset')
     parser.add_argument('--in_channels', type=int, default=384,
                         help='Number of input channels, aligned with embedding dimension: 384 for sentence_transformer, 768 for bert, 1536 for text-embedding-3-small (api_small), 3072 for text-embedding-3-large (api_large).')
+    parser.add_argument('--prediction_method', 
+                       type=str,
+                       choices=['dot_product', 'concat_mlp'],
+                       default='dot_product',
+                       help='Method for link prediction: dot_product or concat_mlp')
     args = parser.parse_args()
 
     # Extract model name from the checkpoint path
@@ -91,7 +96,8 @@ def main():
         in_channels=in_channels,
         hidden_channels=hidden_channels,
         num_layers=num_layers,
-        dropout=dropout
+        dropout=dropout,
+        prediction_method=args.prediction_method
     )
     
     # Load the best model checkpoint
@@ -159,16 +165,16 @@ def main():
             with open(metrics_path, 'a') as f:
                 f.write(f"\n{'='*100}\n")
                 f.write(f"Model: {model_name}, Test Time: {current_time}\n")
-                f.write(f"Dataset Tested on: {args.dataset_type}, Embedding Method: {embed_method}\n")
+                f.write(f"Dataset Tested on: {args.dataset_type}, Embedding Method: {embed_method}, Prediction Method: {args.prediction_method}\n")
                 f.write("-"*100 + "\n")
                 f.write("Training Information:\n")
                 f.write(f"  Epochs: {training_info['epoch']}, Best F1: {training_info['best_f1']}, Best AUC: {training_info['best_auc']}\n")
                 if training_info['resumed_from']:
                     f.write(f"Resumed from: {training_info['resumed_from']}\n")
                 if training_info['val_metrics']:
-                    f.write("Final Validation Metrics:\n")
+                    f.write("Final Validation Metrics:\n  ")
                     for k, v in training_info['val_metrics'].items():
-                        f.write(f"  {k}: {v:.4f},")
+                        f.write(f"{k}: {v:.4f}, ")
                 f.write("\n" + "-"*100 + "\n")
                 f.write("Test Metrics:\n")
                 f.write(f"  {format_metrics(test_metrics)}\n")

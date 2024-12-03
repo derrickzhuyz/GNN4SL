@@ -9,7 +9,7 @@ EMB_DIM=384
 
 # Set the model path
 # train on spider train with 1 epoch
-MODEL_PATH_0="checkpoints/link_level_model/sentence_transformer/link_level_model_spider_20241202_161100.pt"
+MODEL_PATH_0="checkpoints/link_level_model/sentence_transformer/link_level_model_spider_20241203_062703.pt"
 
 # Define a list of model paths to test
 MODEL_PATHS=(
@@ -24,7 +24,8 @@ for MODEL_PATH in "${MODEL_PATHS[@]}"; do
         --dataset_type "spider" \
         --batch_size 1 \
         --embed_method "${EMB_METHOD}" \
-        --in_channels "${EMB_DIM}"
+        --in_channels "${EMB_DIM}" \
+        --prediction_method "dot_product"
 done
 
 # # Test the link-level model on BIRD dev set

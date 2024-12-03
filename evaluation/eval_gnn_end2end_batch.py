@@ -1,20 +1,24 @@
 import os
 from pathlib import Path
 import json
-from eval_gnn_end2end import *
+from eval_gnn_end2end_utils import *
 
 # 假定以下函数已定义：compare_questions, extract_relevant_schema, calculate_precision, calculate_recall, calculate_f1
 
 def process_file(file_path, results_list):
+    # Skip non-JSON files
+    if not file_path.endswith('.json'):
+        return
+
     # 根据文件名判断benchmark
     file_name = os.path.basename(file_path)
     benchmark = 'bird' if 'bird_dev' in file_name else 'spider'
 
     # 根据benchmark选择ref_file
     if benchmark == 'spider':
-        ref_file = '../linked_schema_spider_dev_new.json'
+        ref_file = 'evaluation/ref_file/linked_schema_spider_dev_ref.json'
     else:
-        ref_file = '../linked_schema_bird_dev_gnn100.json'
+        ref_file = 'evaluation/ref_file/linked_schema_bird_dev_ref.json'
 
     # gnn_schema_origin和gnn_schema路径
     gnn_schema_origin = file_path
@@ -30,9 +34,9 @@ def process_file(file_path, results_list):
 
         # 执行步骤 3：评估schema
         if benchmark == 'spider':
-            golden_file = "../data/gold_schema_linking/spider_dev_gold_schema_linking.json"
+            golden_file = "data/gold_schema_linking/spider_dev_gold_schema_linking.json"
         else:
-            golden_file = "../data/gold_schema_linking/bird_dev_gold_schema_linking.json"
+            golden_file = "data/gold_schema_linking/bird_dev_gold_schema_linking.json"
 
         precision = calculate_precision(golden_file, gnn_schema)
         recall = calculate_recall(golden_file, gnn_schema)
@@ -72,7 +76,7 @@ def traverse_and_process(folder_path, output_file):
     print(f"Results saved to {output_file}")
 
 if __name__ == '__main__':
-    folder_path = '../gnn/results/link_level/'  # 修改为需要遍历的文件夹路径
-    output_file = '../gnn/results/link_level/gnn_schema_evaluation_results.json'  # 保存结果的TXT文件路径
+    folder_path = 'gnn/results/link_level/'  # 修改为需要遍历的文件夹路径
+    output_file = 'gnn/results/link_level/gnn_schema_evaluation_results.json'  # 保存结果的文件路径
 
     traverse_and_process(folder_path, output_file)
