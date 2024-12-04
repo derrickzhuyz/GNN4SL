@@ -21,6 +21,25 @@ logger.add("logs/link_level_training.log",
 logger.add(sys.stderr, level="WARNING")
 
 
+
+"""
+Check if the validation dataset type is valid:
+- If dataset_type (training dataset) is 'combined', val_dataset_type can be 'spider', 'bird', or 'combined'
+- If dataset_type (training dataset) is not 'combined', val_dataset_type must be the same as dataset_type
+"""
+def check_val_dataset_type(value, dataset_type):
+    if dataset_type != 'combined' and value != dataset_type:
+        raise argparse.ArgumentTypeError(
+            f'When dataset_type is {dataset_type}, val_dataset_type must be the same. '
+            f'Got val_dataset_type={value}'
+        )
+    if value not in ['spider', 'bird', 'combined']:
+        raise argparse.ArgumentTypeError(
+            'val_dataset_type must be one of: spider, bird, combined'
+        )
+    return value
+
+
 """
 Train the link-level model
 """
@@ -45,10 +64,12 @@ def main():
     parser.add_argument('--resume_from', type=str, default=None,
                        help='Path to checkpoint file to resume training from')
     parser.add_argument('--in_channels', type=int, default=384, help='Number of input channels, aligned with embedding dimension: 384 for sentence_transformer, 768 for bert, 1536 for text-embedding-3-small (api_small), 3072 for text-embedding-3-large (api_large).')
-    parser.add_argument('--val_dataset_type', type=str, 
-                       choices=['spider', 'bird', 'combined'], 
+
+    args, _ = parser.parse_known_args()  # Parse partially to get dataset_type to check the validity of val_dataset_type
+    parser.add_argument('--val_dataset_type', 
+                       type=lambda x: check_val_dataset_type(x, args.dataset_type),
                        default='combined',
-                       help='Type of validation dataset to use')
+                       help='Type of validation dataset to use. Must match dataset_type unless dataset_type is "combined"')
     parser.add_argument('--prediction_method', 
                        type=str,
                        choices=['dot_product', 'concat_mlp'],
