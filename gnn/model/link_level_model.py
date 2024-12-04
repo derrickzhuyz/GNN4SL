@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import GCNConv
+from abc import ABC, abstractmethod
 from torch_geometric.data import Data
 import json
 import os
@@ -21,41 +21,33 @@ logger.add("logs/link_level_model.log",
 logger.add(sys.stderr, level="WARNING")
 
 
-class LinkLevelGNN(nn.Module):
+class BaseLinkLevelGNN(nn.Module, ABC):
     def __init__(self, 
                  in_channels: int = 384, 
-                 hidden_channels: int = 128, 
-                 num_layers: int = 2, 
+                 hidden_channels: int = 128,
+                 num_layers: int = 2,
                  dropout: float = 0.1,
                  threshold: float = 0.5,
                  prediction_method: str = 'dot_product'):
         """
-        Link prediction model using Graph Convolutional Networks
+        The base class for link prediction GNN models
         
         Args:
-            in_channels: Input feature dimension (such as 384 for sentence transformer embeddings)
+            in_channels: Input feature dimension (e.g. 384 for Sentence Transformer, 1536 for text-embedding-3-small etc.)
             hidden_channels: Hidden layer dimension
-            num_layers: Number of GCN layers
+            num_layers: Number of GNN layers
             dropout: Dropout rate
             threshold: Threshold for binary prediction (score > threshold -> relevant, score <= threshold -> irrelevant)
             prediction_method: Either 'dot_product' or 'concat_mlp'
         """
         super().__init__()
+        self.in_channels = in_channels
+        self.hidden_channels = hidden_channels
         self.num_layers = num_layers
-        self.prediction_method = prediction_method
+        self.dropout = dropout
         self.threshold = threshold
-        # First GCN layer
-        self.convs = nn.ModuleList()
-        self.convs.append(GCNConv(in_channels, hidden_channels))
-        
-        # Middle GCN layers
-        for _ in range(max(num_layers - 2, 0)):
-            self.convs.append(GCNConv(hidden_channels, hidden_channels))
-        
-        # Last GCN layer
-        self.convs.append(GCNConv(hidden_channels, hidden_channels))
-        
-        # Link prediction layers (only used if prediction_method == 'concat_mlp')
+        self.prediction_method = prediction_method
+
         if prediction_method == 'concat_mlp':
             self.link_predictor = nn.Sequential(
                 nn.Linear(hidden_channels * 2, hidden_channels),
@@ -64,12 +56,22 @@ class LinkLevelGNN(nn.Module):
                 nn.Linear(hidden_channels, 1)
             )
         elif prediction_method == 'dot_product':
-            # Optional: add a scaling factor for dot product
             self.scale = nn.Parameter(torch.FloatTensor([1.0]))
         else:
             raise ValueError("prediction_method must be either 'dot_product' or 'concat_mlp'")
 
 
+    """
+    Forward pass through the model (abstract method)
+    :param x: Node feature matrix (embeddings)
+    :param edge_index: Graph connectivity in COO format
+    :return: Node embeddings after passing through GNN layers
+    """
+    @abstractmethod
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+        pass
+
+    
     """
     Predict link between two node embeddings. Two options:
         - 'concat_mlp': Concatenate embeddings and pass through MLP
@@ -93,23 +95,6 @@ class LinkLevelGNN(nn.Module):
 
 
     """
-    Forward pass through the model
-    :param x: node features
-    :param edge_index: edge indices
-    :return: node embeddings
-    """
-    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        # Graph convolution layers
-        for i in range(self.num_layers):
-            x = self.convs[i](x, edge_index)
-            if i != self.num_layers - 1:
-                x = F.relu(x)
-                x = F.dropout(x, p=0.1, training=self.training)
-        
-        return x
-
-
-    """
     Predict relevance between question nodes and schema nodes (tables and columns) and return predictions and scores
     :param data: PyG Data object containing:
             - x: Node feature matrix (embeddings)
@@ -121,6 +106,7 @@ class LinkLevelGNN(nn.Module):
         scores: Tensor of all prediction scores
     """
     def predict_links(self, data: Data) -> Tuple[List[Dict], torch.Tensor]:
+        """Predict relevance between question nodes and schema nodes"""
         self.eval()  # Set model to evaluation mode
         with torch.no_grad():  # Disable gradient computation
             # Get node embeddings through GCN layers
@@ -247,3 +233,71 @@ class LinkLevelGNN(nn.Module):
             json.dump(predictions, f, indent=2)
         
         logger.info(f"[✓] Saved predictions to {output_path}")
+
+
+    """
+    Print the model structure including configuration parameters and layer information
+    """
+    def print_model_structure(self):
+        print("=" * 50)
+        print(f"Model Structure of Link-level GNN: {self.__class__.__name__}")
+        print("-" * 50)
+        print("Configuration:")
+        print(f"- Input Channels: {self.in_channels}")
+        print(f"- Hidden Channels: {self.hidden_channels}")
+        print(f"- Number of Layers: {self.num_layers}")
+        print(f"- Dropout Rate: {self.dropout}")
+        print(f"- Prediction Threshold: {self.threshold}")
+        print(f"- Prediction Method: {self.prediction_method}")
+        
+        print("Model Layers:")
+        for name, module in self.named_children():
+            if isinstance(module, nn.ModuleList):
+                print(f"- {name}:")
+                for idx, layer in enumerate(module):
+                    print(f"  * Layer {idx}: {layer}")
+            else:
+                print(f"{name}: {module}")
+        print("=" * 50)
+
+
+
+"""
+Link-level GNN model based on Graph Convolutional Networks
+Inherits from the base class of BaseLinkLevelGNN
+"""
+class LinkLevelGCN(BaseLinkLevelGNN):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+        # GCN layers
+        from torch_geometric.nn import GCNConv
+        self.convs = nn.ModuleList()
+        self.convs.append(GCNConv(self.in_channels, self.hidden_channels))
+        
+        # Middle GCN layers
+        for _ in range(max(self.num_layers - 2, 0)):
+            self.convs.append(GCNConv(self.hidden_channels, self.hidden_channels))
+        
+        # Last GCN layer
+        self.convs.append(GCNConv(self.hidden_channels, self.hidden_channels))
+
+
+    """
+    Forward pass through GCN layers
+    :param x: Node feature matrix (embeddings)
+    :param edge_index: Graph connectivity in COO format
+    :return: Node embeddings after passing through GCN layers
+    """
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+        for i in range(self.num_layers):
+            x = self.convs[i](x, edge_index)
+            if i != self.num_layers - 1:
+                x = F.relu(x)
+                x = F.dropout(x, p=self.dropout, training=self.training)
+        
+        return x
+    
+
+
+# TODO: New GNN model to inherit from BaseLinkLevelGNN ......

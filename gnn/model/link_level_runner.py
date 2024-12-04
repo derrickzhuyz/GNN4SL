@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch_geometric.loader import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from gnn.model.link_level_model import LinkLevelGNN
+from gnn.model.link_level_model import BaseLinkLevelGNN
 from gnn.graph_data.link_level_graph_dataset import LinkLevelGraphDataset
 from tqdm import tqdm
 import os
@@ -30,16 +30,16 @@ logger.add(sys.stderr, level="WARNING")
 
 class LinkLevelGNNRunner:
     def __init__(self, 
-                 model: LinkLevelGNN,
+                 model: BaseLinkLevelGNN,
                  train_dataset: Optional[LinkLevelGraphDataset],
                  test_dataset: Optional[LinkLevelGraphDataset],
                  device: torch.device,
-                 val_ratio: Optional[float] = 0.1,  # proportion of train set for validation
-                 val_dataset_type: str = 'bird',  # 'spider', 'bird', or 'combined'
+                 val_ratio: Optional[float] = 0.1,  # Proportion of train set for validation
+                 val_dataset_type: str = 'bird',  # Use 'spider', 'bird', or 'combined' for validation
                  lr: float = 1e-4,
                  batch_size: int = 1,  # Force batch_size=1
                  threshold: float = 0.5,  # Threshold for binary prediction
-                 tensorboard_dir: str = 'gnn/tensorboard/link_level/',
+                 tensorboard_dir: str = 'gnn/tensorboard/link_level',
                  negative_sampling: bool = False,
                  negative_sampling_ratio: float = 2.0,
                  negative_sampling_method: str = 'random'):

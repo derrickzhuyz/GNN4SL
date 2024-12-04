@@ -9,7 +9,7 @@ EMB_DIM=384
 
 # Set the model path
 # train on spider train with 1 epoch
-MODEL_PATH_0="checkpoints/link_level_model/sentence_transformer/model_train_bird_f1_1ep_hard_neg_samp_1204_0630.pt"
+MODEL_PATH_0="checkpoints/link_level_gcn/sentence_transformer/gcn_train_spider_f1_1ep_hard_neg_samp_1.0_1204_0915.pt"
 
 # Define a list of model paths to test
 MODEL_PATHS=(
@@ -20,6 +20,7 @@ MODEL_PATHS=(
 for MODEL_PATH in "${MODEL_PATHS[@]}"; do
     echo "[INFO] Start testing on Spider dev set with model: ${MODEL_PATH}..."
     python -m gnn.model.link_level_test \
+        --model_type "gcn" \
         --model_path "${MODEL_PATH}" \
         --dataset_type "spider" \
         --batch_size 1 \

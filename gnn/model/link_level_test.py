@@ -1,5 +1,5 @@
 import torch
-from gnn.model.link_level_model import LinkLevelGNN
+from gnn.model.link_level_model import LinkLevelGCN
 from gnn.graph_data.link_level_graph_dataset import LinkLevelGraphDataset
 from gnn.model.link_level_runner import LinkLevelGNNRunner
 from torch.utils.tensorboard import SummaryWriter
@@ -43,13 +43,15 @@ def main():
 
     # Argument parsing for model checkpoint and model name
     parser = argparse.ArgumentParser(description='Test Link Level Model')
+    parser.add_argument('--model_type', type=str, required=True, choices=['gcn'], default='gcn',
+                       help='Type of model to use: gcn')
     parser.add_argument('--model_path', type=str, required=True, 
                        help='Path to the model checkpoint to be tested')
-    parser.add_argument('--dataset_type', type=str, choices=['spider', 'bird'], default='spider',
+    parser.add_argument('--dataset_type', type=str, required=True, choices=['spider', 'bird'], default='spider',
                        help='Type of dataset to test on (spider or bird)')
     parser.add_argument('--batch_size', type=int, default=1, help='Batch size')
     parser.add_argument('--threshold', type=float, default=0.5, help='Threshold for binary prediction')
-    parser.add_argument('--embed_method', type=str, 
+    parser.add_argument('--embed_method', type=str, required=True,
                         choices=['sentence_transformer', 'bert', 'api_small', 'api_large', 'api_mock'], 
                         default='sentence_transformer',
                         help='Embedding methods used to create the current graph dataset')
@@ -96,14 +98,18 @@ def main():
         raise
     
     # Initialize model
-    model = LinkLevelGNN(
-        in_channels=in_channels,
-        hidden_channels=hidden_channels,
-        num_layers=num_layers,
-        dropout=dropout,
-        prediction_method=args.prediction_method,
-        threshold=args.threshold
-    )
+    if args.model_type == 'gcn':
+        model = LinkLevelGCN(
+            in_channels=in_channels,
+            hidden_channels=hidden_channels,
+            num_layers=num_layers,
+            dropout=dropout,
+            prediction_method=args.prediction_method,
+            threshold=args.threshold
+        )
+        model.print_model_structure()
+    else:
+        raise ValueError(f"Unsupported model type: {args.model_type}")
     
     # Load the best model checkpoint
     if os.path.exists(args.model_path):
@@ -148,7 +154,7 @@ def main():
         val_ratio=None,
         lr=1e-4,
         batch_size=args.batch_size,
-        tensorboard_dir=f'gnn/tensorboard/link_level/test/{embed_method}/'
+        tensorboard_dir=f'gnn/tensorboard/link_level_{args.model_type}/test/{embed_method}/'
     )
 
     # Test and save predictions with error handling
@@ -158,7 +164,7 @@ def main():
         
         if predictions:
             # Save predictions and metrics
-            output_dir = f'gnn/results/link_level/{embed_method}/'
+            output_dir = f'gnn/results/link_level_{args.model_type}/{embed_method}/'
             os.makedirs(output_dir, exist_ok=True)
             
             # Save predictions

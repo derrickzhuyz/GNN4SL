@@ -1,4 +1,7 @@
 link_level_gat/**/*.txt
+link_level_gcn/**/*.txt
 
 link_level_gat/**/*.json
 !link_level_gat/gat_schema_evaluation_results.json
+link_level_gcn/**/*.json
+!link_level_gcn/gcn_schema_evaluation_results.json

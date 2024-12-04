@@ -2,7 +2,7 @@ import os
 import argparse
 import torch
 from torch_geometric.loader import DataLoader
-from gnn.model.link_level_model import LinkLevelGNN
+from gnn.model.link_level_model import LinkLevelGCN
 from gnn.graph_data.link_level_graph_dataset import LinkLevelGraphDataset
 from gnn.model.link_level_runner import LinkLevelGNNRunner
 from datetime import datetime
@@ -27,16 +27,18 @@ Train the link-level model
 def main():
     # Add argument parsing
     parser = argparse.ArgumentParser(description='Train Link Level Model')
-    parser.add_argument('--dataset_type', type=str, 
+    parser.add_argument('--model_type', type=str, required=True, choices=['gcn'], default='gcn', 
+                       help='Type of model to use: gcn')
+    parser.add_argument('--dataset_type', type=str, required=True, 
                        choices=['spider', 'bird', 'combined'], 
                        default='combined',
                        help='Type of dataset to train on (spider, bird, or combined)')
-    parser.add_argument('--epochs', type=int, default=2, help='Number of epochs to train')
+    parser.add_argument('--epochs', type=int, required=True, default=2, help='Number of epochs to train')
     parser.add_argument('--batch_size', type=int, default=1, help='Batch size')
     parser.add_argument('--threshold', type=float, default=0.5, help='Threshold for binary prediction')
     parser.add_argument('--val_ratio', type=float, default=0.1, help='Validation ratio')
     parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
-    parser.add_argument('--embed_method', type=str, 
+    parser.add_argument('--embed_method', type=str, required=True,
                         choices=['sentence_transformer', 'bert', 'api_small', 'api_large', 'api_mock'], 
                         default='sentence_transformer', 
                         help='Embedding methods used to create the current graph dataset')
@@ -137,17 +139,21 @@ def main():
     logger.info(f"Loaded {args.dataset_type} training dataset with {len(train_dataset)} samples")
     
     # Initialize model
-    model = LinkLevelGNN(
-        in_channels=in_channels,
-        hidden_channels=hidden_channels,
-        num_layers=num_layers,
-        dropout=dropout,
-        prediction_method=args.prediction_method
-    )
+    if args.model_type == 'gcn':
+        model = LinkLevelGCN(
+            in_channels=in_channels,
+            hidden_channels=hidden_channels,
+            num_layers=num_layers,
+            dropout=dropout,
+            prediction_method=args.prediction_method
+        )
+        model.print_model_structure()
+    else:
+        raise ValueError(f"Unsupported model type: {args.model_type}")
 
-    model_name = f'model_train_{args.dataset_type}_{args.metric}_{num_epochs}ep_{args.negative_sampling_method}_neg_samp_{args.negative_sampling_ratio}' \
+    model_name = f'{args.model_type}_train_{args.dataset_type}_{args.metric}_{num_epochs}ep_{args.negative_sampling_method}_neg_samp_{args.negative_sampling_ratio}' \
                 if args.negative_sampling \
-                else f'model_train_{args.dataset_type}_{args.metric}_{num_epochs}ep_no_neg_samp'
+                else f'{args.model_type}_train_{args.dataset_type}_{args.metric}_{num_epochs}ep_no_neg_samp'
 
     # Initialize runner (for training)
     runner = LinkLevelGNNRunner(
@@ -160,14 +166,14 @@ def main():
         lr=lr,
         batch_size=batch_size,
         threshold=args.threshold,
-        tensorboard_dir=f'gnn/tensorboard/link_level/train_{args.dataset_type}/{embed_method}/{model_name}',  # Add subdirectory
+        tensorboard_dir=f'gnn/tensorboard/link_level_{args.model_type}/train_{args.dataset_type}/{embed_method}/{model_name}',  # Add subdirectory
         negative_sampling=args.negative_sampling,
         negative_sampling_ratio=args.negative_sampling_ratio,
         negative_sampling_method=args.negative_sampling_method
     )
     
     # Train model
-    checkpoint_dir = f'checkpoints/link_level_model/{embed_method}/'
+    checkpoint_dir = f'checkpoints/link_level_{args.model_type}/{embed_method}/'
     checkpoint_name = f'{model_name}_{datetime.now().strftime("%m%d_%H%M")}.pt'
     runner.train(num_epochs=num_epochs, 
                  checkpoint_dir=checkpoint_dir, 
