@@ -35,7 +35,7 @@ class LinkLevelGNNRunner:
                  test_dataset: Optional[LinkLevelGraphDataset],
                  device: torch.device,
                  val_ratio: Optional[float] = 0.1,  # proportion of train set for validation
-                 val_dataset_type: str = 'combined',  # 'spider', 'bird', or 'combined'
+                 val_dataset_type: str = 'bird',  # 'spider', 'bird', or 'combined'
                  lr: float = 1e-4,
                  batch_size: int = 1,  # Force batch_size=1
                  threshold: float = 0.5,  # Threshold for binary prediction
@@ -216,6 +216,14 @@ class LinkLevelGNNRunner:
             tn = ((binary_preds == 0) & (labels == 0)).sum().float()
             fn = ((binary_preds == 0) & (labels == 1)).sum().float()
             
+            total_samples = binary_preds.size(0)
+            
+            # Calculate ratios
+            true_pos_ratio = (labels == 1).sum().float() / total_samples
+            true_neg_ratio = (labels == 0).sum().float() / total_samples
+            pred_pos_ratio = (binary_preds == 1).sum().float() / total_samples
+            pred_neg_ratio = (binary_preds == 0).sum().float() / total_samples
+            
             # Calculate metrics
             accuracy = (tp + tn) / (tp + tn + fp + fn + 1e-10)
             precision = tp / (tp + fp + 1e-10)
@@ -233,8 +241,8 @@ class LinkLevelGNNRunner:
                 logger.warning("Could not calculate AUC - possibly all labels are of one class")
             
             # Log class distribution and metrics
-            pos_ratio = labels.mean().item()
-            logger.info(f"Positive samples ratio: {pos_ratio:.3f}")
+            logger.info(f"Ground Truth - Positive: {true_pos_ratio:.3f}, Negative: {true_neg_ratio:.3f}")
+            logger.info(f"Predictions - Positive: {pred_pos_ratio:.3f}, Negative: {pred_neg_ratio:.3f}")
             logger.info(f"AUC: {auc:.3f}, Precision: {precision:.3f}, Recall: {recall:.3f}, F1: {f1:.3f}")
             
             return loss, {
@@ -243,7 +251,10 @@ class LinkLevelGNNRunner:
                 'recall': recall.item(),
                 'f1': f1.item(),
                 'auc': auc,
-                'pos_ratio': pos_ratio
+                'true_pos_ratio': true_pos_ratio.item(),
+                'true_neg_ratio': true_neg_ratio.item(),
+                'pred_pos_ratio': pred_pos_ratio.item(),
+                'pred_neg_ratio': pred_neg_ratio.item()
             }
 
 
@@ -272,7 +283,10 @@ class LinkLevelGNNRunner:
             'recall': 0,
             'f1': 0,
             'auc': 0,
-            'pos_ratio': 0
+            'true_pos_ratio': 0,
+            'true_neg_ratio': 0,
+            'pred_pos_ratio': 0,
+            'pred_neg_ratio': 0
         }
         num_batches = 0
 
@@ -418,7 +432,10 @@ class LinkLevelGNNRunner:
             'recall': 0,
             'f1': 0,
             'auc': 0,
-            'pos_ratio': 0
+            'true_pos_ratio': 0,
+            'true_neg_ratio': 0,
+            'pred_pos_ratio': 0,
+            'pred_neg_ratio': 0
         }
         num_batches = 0
         
@@ -561,16 +578,18 @@ class LinkLevelGNNRunner:
             logger.info(f"Estimated time remaining: {self._format_time(eta)}")
             
             # Print epoch summary
-            print(f"\n{'='*80}")
+            print(f"\n{'='*120}")
             print(f"Epoch {epoch+1}/{start_epoch + num_epochs} Summary:")
-            print(f"{'-'*80}")
+            print(f"{'-'*120}")
             print("Training Metrics:")
             print(f" Loss: {train_metrics['loss']:.6f}, F1: {train_metrics['f1']:.6f}, AUC: {train_metrics['auc']:.6f}, Precision: {train_metrics['precision']:.6f}, Recall: {train_metrics['recall']:.6f}")
+            print(f" True Positive Ratio: {train_metrics['true_pos_ratio']:.6f}, True Negative Ratio: {train_metrics['true_neg_ratio']:.6f}, Predicted Positive Ratio: {train_metrics['pred_pos_ratio']:.6f}, Predicted Negative Ratio: {train_metrics['pred_neg_ratio']:.6f}")
             print(f"Validation Metrics:")
             print(f" Loss: {val_metrics['loss']:.6f}, F1: {val_metrics['f1']:.6f}, AUC: {val_metrics['auc']:.6f}, Precision: {val_metrics['precision']:.6f}, Recall: {val_metrics['recall']:.6f}")
+            print(f" True Positive Ratio: {val_metrics['true_pos_ratio']:.6f}, True Negative Ratio: {val_metrics['true_neg_ratio']:.6f}, Predicted Positive Ratio: {val_metrics['pred_pos_ratio']:.6f}, Predicted Negative Ratio: {val_metrics['pred_neg_ratio']:.6f}")
             print(f"Timing:")
             print(f" Epoch time: {self._format_time(epoch_time)}, Avg epoch time: {self._format_time(avg_epoch_time)}, Estimated time remaining: {self._format_time(eta)}")
-            print(f"{'='*80}\n")
+            print(f"{'='*120}\n")
             
             # Update best metrics and save checkpoint
             current_f1 = val_metrics['f1']
@@ -589,24 +608,34 @@ class LinkLevelGNNRunner:
                     'global_step': self.global_step,
                     'val_metrics': val_metrics,
                     'train_metrics': train_metrics,
-                    'resumed_from': resume_from if resume_from else None  # Track original model
+                    'resumed_from': resume_from if resume_from else None,  # Track original model
+                    'train_true_pos_ratio': train_metrics['true_pos_ratio'],
+                    'train_true_neg_ratio': train_metrics['true_neg_ratio'],
+                    'train_pred_pos_ratio': train_metrics['pred_pos_ratio'],
+                    'train_pred_neg_ratio': train_metrics['pred_neg_ratio'],
+                    'val_true_pos_ratio': val_metrics['true_pos_ratio'],
+                    'val_true_neg_ratio': val_metrics['true_neg_ratio'],
+                    'val_pred_pos_ratio': val_metrics['pred_pos_ratio'],
+                    'val_pred_neg_ratio': val_metrics['pred_neg_ratio']
                 }
                 torch.save(checkpoint, os.path.join(checkpoint_dir, checkpoint_name))
                 logger.info(f"Saved new best model with F1: {checkpoint['f1']:.6f}, AUC: {checkpoint['auc']:.6f} (selected by {metric.upper()})")
-                print(f"\n{'*'*80}")
+                print(f"\n{'*'*120}")
                 print(f"Saved new best model with F1: {checkpoint['f1']:.6f}, AUC: {checkpoint['auc']:.6f} (selected by {metric.upper()})")
-                print(f"{'*'*80}\n")
+                print(f"{'*'*120}\n")
 
         # Print final summary
         total_time = time.time() - total_start_time
         logger.info(f"\nTraining completed in {self._format_time(total_time)}")
         logger.info(f"Best Model F1: {checkpoint['f1']:.6f}, Best Model AUC: {checkpoint['auc']:.6f} (selected by {metric.upper()})")
         logger.info(f"Average epoch time: {self._format_time(sum(epoch_times) / num_epochs)}")
-        print(f"\n{'*'*80}")
+        print(f"\n{'*'*120}")
         print("Training Completed!")
         print(f" Best Model F1: {checkpoint['f1']:.6f}, Best Model AUC: {checkpoint['auc']:.6f} (selected by {metric.upper()})")
+        print(f" Training: True Positive Ratio: {checkpoint['train_true_pos_ratio']:.6f}, True Negative Ratio: {checkpoint['train_true_neg_ratio']:.6f}, Predicted Positive Ratio: {checkpoint['train_pred_pos_ratio']:.6f}, Predicted Negative Ratio: {checkpoint['train_pred_neg_ratio']:.6f}")
+        print(f" Validation: True Positive Ratio: {checkpoint['val_true_pos_ratio']:.6f}, True Negative Ratio: {checkpoint['val_true_neg_ratio']:.6f}, Predicted Positive Ratio: {checkpoint['val_pred_pos_ratio']:.6f}, Predicted Negative Ratio: {checkpoint['val_pred_neg_ratio']:.6f}")
         print(f" Total training time: {self._format_time(total_time)}, Average epoch time: {self._format_time(sum(epoch_times) / num_epochs)}")
-        print(f"{'*'*80}\n")
+        print(f"{'*'*120}\n")
         
         # Log final timing statistics to TensorBoard
         self.writer.add_scalar('time/total_training_hours', total_time / 3600, 0)
@@ -636,7 +665,18 @@ class LinkLevelGNNRunner:
     def test(self):
         self.model.eval()
         all_predictions = []
-        total_metrics = {'loss': 0, 'accuracy': 0, 'precision': 0, 'recall': 0, 'f1': 0, 'auc': 0, 'pos_ratio': 0}
+        total_metrics = {
+            'loss': 0, 
+            'accuracy': 0, 
+            'precision': 0, 
+            'recall': 0, 
+            'f1': 0, 
+            'auc': 0, 
+            'true_pos_ratio': 0, 
+            'true_neg_ratio': 0, 
+            'pred_pos_ratio': 0, 
+            'pred_neg_ratio': 0
+        }
         num_batches = 0
         
         with torch.no_grad():

@@ -144,7 +144,11 @@ def main():
         dropout=dropout,
         prediction_method=args.prediction_method
     )
-    
+
+    model_name = f'model_train_{args.dataset_type}_{args.metric}_{num_epochs}ep_{args.negative_sampling_method}_neg_samp_{args.negative_sampling_ratio}' \
+                if args.negative_sampling \
+                else f'model_train_{args.dataset_type}_{args.metric}_{num_epochs}ep_no_neg_samp'
+
     # Initialize runner (for training)
     runner = LinkLevelGNNRunner(
         model=model,
@@ -156,7 +160,7 @@ def main():
         lr=lr,
         batch_size=batch_size,
         threshold=args.threshold,
-        tensorboard_dir=f'gnn/tensorboard/link_level/train_{args.dataset_type}/{embed_method}',  # Add subdirectory
+        tensorboard_dir=f'gnn/tensorboard/link_level/train_{args.dataset_type}/{embed_method}/{model_name}',  # Add subdirectory
         negative_sampling=args.negative_sampling,
         negative_sampling_ratio=args.negative_sampling_ratio,
         negative_sampling_method=args.negative_sampling_method
@@ -164,7 +168,7 @@ def main():
     
     # Train model
     checkpoint_dir = f'checkpoints/link_level_model/{embed_method}/'
-    checkpoint_name = f'link_level_model_{args.dataset_type}_{args.metric}_{num_epochs}ep_{datetime.now().strftime("%m%d_%H%M")}.pt'
+    checkpoint_name = f'{model_name}_{datetime.now().strftime("%m%d_%H%M")}.pt'
     runner.train(num_epochs=num_epochs, 
                  checkpoint_dir=checkpoint_dir, 
                  checkpoint_name=checkpoint_name, 
@@ -175,3 +179,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    # NOTE: To check the tensorboard, run the following command: tensorboard --logdir=xxx
+    # For example: tensorboard --logdir=gnn/tensorboard/link_level/train_combined/

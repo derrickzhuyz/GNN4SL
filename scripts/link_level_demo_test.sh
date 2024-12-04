@@ -9,7 +9,7 @@ EMB_DIM=384
 
 # Set the model path
 # train on spider train with 1 epoch
-MODEL_PATH_0="checkpoints/link_level_model/sentence_transformer/link_level_model_bird_f1_2ep_1203_1422.pt"
+MODEL_PATH_0="checkpoints/link_level_model/sentence_transformer/model_train_bird_f1_1ep_hard_neg_samp_1204_0630.pt"
 
 # Define a list of model paths to test
 MODEL_PATHS=(

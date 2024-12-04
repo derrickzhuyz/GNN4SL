@@ -20,13 +20,16 @@ Format metrics results for logging
 """
 def format_metrics(metrics):
     return (
-        f"Loss: {metrics['loss']:.6f}, "
+        f"  Loss: {metrics['loss']:.6f}, "
         f"Accuracy: {metrics['accuracy']:.6f}, "
         f"Precision: {metrics['precision']:.6f}, "
         f"Recall: {metrics['recall']:.6f}, "
         f"F1: {metrics['f1']:.6f}, "
-        f"AUC: {metrics['auc']:.6f}, "
-        f"Positive Ratio: {metrics['pos_ratio']:.6f}"
+        f"AUC: {metrics['auc']:.6f}, \n"
+        f"  Ground Truth Positive Ratio: {metrics['true_pos_ratio']:.6f}, "
+        f"Ground Truth Negative Ratio: {metrics['true_neg_ratio']:.6f}, \n"
+        f"  Prediction Positive Ratio: {metrics['pred_pos_ratio']:.6f}, "
+        f"Prediction Negative Ratio: {metrics['pred_neg_ratio']:.6f}"
     )
 
 
@@ -114,7 +117,15 @@ def main():
             'best_model_auc': checkpoint.get('auc', 'N/A'),
             'val_metrics': checkpoint.get('val_metrics', {}),
             'train_metrics': checkpoint.get('train_metrics', {}),
-            'resumed_from': checkpoint.get('resumed_from', 'N/A')
+            'resumed_from': checkpoint.get('resumed_from', 'N/A'),
+            'train_true_pos_ratio': checkpoint.get('train_true_pos_ratio', 'N/A'),
+            'train_true_neg_ratio': checkpoint.get('train_true_neg_ratio', 'N/A'),
+            'train_pred_pos_ratio': checkpoint.get('train_pred_pos_ratio', 'N/A'),
+            'train_pred_neg_ratio': checkpoint.get('train_pred_neg_ratio', 'N/A'),
+            'val_true_pos_ratio': checkpoint.get('val_true_pos_ratio', 'N/A'),
+            'val_true_neg_ratio': checkpoint.get('val_true_neg_ratio', 'N/A'),
+            'val_pred_pos_ratio': checkpoint.get('val_pred_pos_ratio', 'N/A'),
+            'val_pred_neg_ratio': checkpoint.get('val_pred_neg_ratio', 'N/A')
         }
         
         logger.info(f"[✓] Loaded model checkpoint from {args.model_path}")
@@ -167,26 +178,27 @@ def main():
             
             # Prepare the metrics summary text
             metrics_text = (
-                f"\n{'='*100}\n"
+                f"\n{'='*120}\n"
                 f"Model: {model_name}, Test Time: {current_time}\n"
                 f"Dataset Tested on: {args.dataset_type}, Embedding Method: {embed_method}, Prediction Method: {args.prediction_method}\n"
-                f"{'-'*100}\n"
-                f"Training Information:\n"
+                f"{'-'*120}\n"
+                f"Training Information and Metrics:\n"
                 f"  Epochs: {training_info['epoch']}, Best F1: {training_info['best_model_f1']}, Best AUC: {training_info['best_model_auc']}\n"
+                f"{format_metrics(training_info['train_metrics'])}\n"
             )
             
             if training_info['resumed_from']:
                 metrics_text += f"Resumed from: {training_info['resumed_from']}\n"
             
             if training_info['val_metrics']:
-                metrics_text += "Final Validation Metrics:\n  "
-                metrics_text += ", ".join([f"{k}: {v:.6f}" for k, v in training_info['val_metrics'].items()])
+                metrics_text += "Final Validation Metrics:\n"
+                metrics_text += format_metrics(training_info['val_metrics'])
                 
             metrics_text += (
-                f"\n{'-'*100}\n"
+                f"\n{'-'*120}\n"
                 f"Test Metrics:\n"
-                f"  {format_metrics(test_metrics)}\n"
-                f"{'='*100}\n"
+                f"{format_metrics(test_metrics)}\n"
+                f"{'='*120}\n"
             )
             
             # Print to console and write to file

@@ -1,3 +1,4 @@
-link_level/**/*.txt
+link_level_gat/**/*.txt
 
-!link_level/**/*.json
+link_level_gat/**/*.json
+!link_level_gat/gat_schema_evaluation_results.json

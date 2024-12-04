@@ -10,7 +10,7 @@ export CUDA_VISIBLE_DEVICES='6,7'
 echo "[INFO] Start training of the link-level model..."
 python -m gnn.model.link_level_train \
     --dataset_type "bird" \
-    --epochs 2 \
+    --epochs 1 \
     --batch_size 1 \
     --threshold 0.5 \
     --val_ratio 0.1 \
@@ -20,6 +20,6 @@ python -m gnn.model.link_level_train \
     --in_channels 384 \
     --prediction_method "dot_product" \
     --negative_sampling \
-    --negative_sampling_ratio 1.0 \
+    --negative_sampling_ratio 2.0 \
     --negative_sampling_method "hard" \
     --metric "f1"
