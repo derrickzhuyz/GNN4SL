@@ -5,13 +5,12 @@
 
 
 # Run experiments: negative sampling, ratio=1.0
-(
-export CUDA_VISIBLE_DEVICES='7'
 
 # 8. negative sampling: hard, ratio=1.0
+export CUDA_VISIBLE_DEVICES='4'
 python -m gnn.model.link_level_train \
     --model_type "gcn" \
-    --dataset_type "combined" \
+    --dataset_type "bird" \
     --epochs 200 \
     --batch_size 1 \
     --threshold 0.5 \
@@ -27,9 +26,10 @@ python -m gnn.model.link_level_train \
     --metric "f1" &
 
 # 9. negative sampling: random, ratio=1.0
+export CUDA_VISIBLE_DEVICES='4'
 python -m gnn.model.link_level_train \
     --model_type "gcn" \
-    --dataset_type "combined" \
+    --dataset_type "bird" \
     --epochs 200 \
     --batch_size 1 \
     --threshold 0.5 \
@@ -42,19 +42,17 @@ python -m gnn.model.link_level_train \
     --negative_sampling \
     --negative_sampling_ratio 1.0 \
     --negative_sampling_method "random" \
-    --metric "f1" &
+    --metric "f1" 
 
-wait
-) &
+
 
 # Run experiments: negative sampling, ratio=2.0
-(
-export CUDA_VISIBLE_DEVICES='6'
 
 # 10. negative sampling: hard, ratio=2.0
+export CUDA_VISIBLE_DEVICES='5'
 python -m gnn.model.link_level_train \
     --model_type "gcn" \
-    --dataset_type "combined" \
+    --dataset_type "bird" \
     --epochs 200 \
     --batch_size 1 \
     --threshold 0.5 \
@@ -67,12 +65,13 @@ python -m gnn.model.link_level_train \
     --negative_sampling \
     --negative_sampling_ratio 2.0 \
     --negative_sampling_method "hard" \
-    --metric "f1" &
+    --metric "f1" 
 
 # 11. negative sampling: random, ratio=2.0
+export CUDA_VISIBLE_DEVICES='5'
 python -m gnn.model.link_level_train \
     --model_type "gcn" \
-    --dataset_type "combined" \
+    --dataset_type "bird" \
     --epochs 200 \
     --batch_size 1 \
     --threshold 0.5 \
@@ -85,10 +84,6 @@ python -m gnn.model.link_level_train \
     --negative_sampling \
     --negative_sampling_ratio 2.0 \
     --negative_sampling_method "random" \
-    --metric "f1" &
+    --metric "f1" 
 
-wait
-) &
 
-# Wait for all processes to complete
-wait

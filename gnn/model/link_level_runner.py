@@ -500,8 +500,8 @@ class LinkLevelGNNRunner:
                 loss, metrics = self._calculate_metrics(predictions, labels)
 
                 # Calculate and log the ratio of predicted positive labels
-                predicted_positive_ratio = (torch.sigmoid(predictions) > 0.5).float().mean().item()
-                print(f"[!!!!!] Predicted positive ratio: {predicted_positive_ratio:.3f}")
+                # predicted_positive_ratio = (torch.sigmoid(predictions) > 0.5).float().mean().item()
+                # print(f"[Val INFO] Predicted positive ratio: {predicted_positive_ratio:.3f}")
                 
                 # Update metrics
                 total_metrics['loss'] += loss.item()
