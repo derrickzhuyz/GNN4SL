@@ -207,7 +207,8 @@ class LinkLevelGNNRunner:
         
         # Get probabilities and binary predictions
         with torch.no_grad():  # Prevent gradient computation for metrics
-            probs = torch.sigmoid(predictions.detach())  # Detach from computation graph
+            # Apply sigmoid here since we're not applying it in the prediction step
+            probs = torch.sigmoid(predictions.detach())
             binary_preds = (probs > self.threshold).float()
             
             # Calculate detailed metrics
@@ -354,7 +355,11 @@ class LinkLevelGNNRunner:
             for q_idx, schema_idx in pairs_to_evaluate:
                 q_embedding = node_embeddings[q_idx]
                 schema_embedding = node_embeddings[schema_idx]
-                pred = self.model.predict_pair(q_embedding, schema_embedding)
+                if self.prediction_method == 'concat_mlp':
+                    pair_embedding = torch.cat([q_embedding, schema_embedding])
+                    pred = self.model.link_predictor(pair_embedding)
+                else:  # dot_product
+                    pred = (q_embedding * schema_embedding).sum(dim=-1, keepdim=True)
                 predictions.append(pred)
                 # Add label (1 for positive pairs, 0 for negative pairs)
                 labels.append(1.0 if (q_idx, schema_idx) in positive_pairs else 0.0)
@@ -454,11 +459,7 @@ class LinkLevelGNNRunner:
                 schema_elements = [(i, type_) for i, type_ in enumerate(data.node_types[0]) if type_ in ['table', 'column']]
                 logger.info(f"Found {len(schema_elements)} schema elements")
                 
-                if not schema_elements:
-                    logger.warning("Validation batch is empty, skipping this batch.")
-                    continue
-                
-                if not question_indices:
+                if not schema_elements or not question_indices:
                     logger.warning("Validation batch is empty, skipping this batch.")
                     continue
                 
@@ -476,15 +477,18 @@ class LinkLevelGNNRunner:
                     # Get predictions for all schema elements
                     for element, type_ in schema_elements:
                         schema_embedding = node_embeddings[element]
-                        pred = self.model.predict_pair(q_embedding, schema_embedding)
-                        predictions.append(pred)
+                        if self.prediction_method == 'concat_mlp':
+                            pair_embedding = torch.cat([q_embedding, schema_embedding])
+                            pred = self.model.link_predictor(pair_embedding)
+                        else:  # dot_product
+                            pred = (q_embedding * schema_embedding).sum(dim=-1, keepdim=True)
                         
-                        # Get label (1 if connected, 0 if not)
+                        predictions.append(pred)
                         is_connected = torch.any(
                             ((connected_edges[0] == q_idx) & (connected_edges[1] == element)) |
                             ((connected_edges[0] == element) & (connected_edges[1] == q_idx))
                         ).item()  # Convert to Python boolean
-                        labels.append(torch.tensor([float(is_connected)], device=self.device))
+                        labels.append(float(is_connected))
                 
                 if not predictions:  # Skip if no predictions
                     logger.warning("Validation batch is empty, skipping this batch.")
@@ -492,8 +496,12 @@ class LinkLevelGNNRunner:
                 
                 # Calculate metrics
                 predictions = torch.cat(predictions)
-                labels = torch.cat(labels)
+                labels = torch.tensor(labels, device=self.device)
                 loss, metrics = self._calculate_metrics(predictions, labels)
+
+                # Calculate and log the ratio of predicted positive labels
+                predicted_positive_ratio = (torch.sigmoid(predictions) > 0.5).float().mean().item()
+                print(f"[!!!!!] Predicted positive ratio: {predicted_positive_ratio:.3f}")
                 
                 # Update metrics
                 total_metrics['loss'] += loss.item()
@@ -502,7 +510,11 @@ class LinkLevelGNNRunner:
                 num_batches += 1
         
         # Calculate and log validation averages
-        avg_metrics = {k: v / max(num_batches, 1) for k, v in total_metrics.items()}
+        if num_batches > 0:
+            avg_metrics = {k: v / num_batches for k, v in total_metrics.items()}
+        else:
+            avg_metrics = {k: 0.0 for k in total_metrics}
+        
         self._log_metrics(avg_metrics, self.current_epoch, prefix='val')
         return avg_metrics
 
@@ -619,9 +631,9 @@ class LinkLevelGNNRunner:
                     'val_pred_neg_ratio': val_metrics['pred_neg_ratio']
                 }
                 torch.save(checkpoint, os.path.join(checkpoint_dir, checkpoint_name))
-                logger.info(f"Saved new best model with F1: {checkpoint['f1']:.6f}, AUC: {checkpoint['auc']:.6f} (selected by {metric.upper()})")
+                logger.info(f"Saved new best model with validation F1: {checkpoint['f1']:.6f}, AUC: {checkpoint['auc']:.6f} (selected by {metric.upper()})")
                 print(f"\n{'*'*120}")
-                print(f"Saved new best model with F1: {checkpoint['f1']:.6f}, AUC: {checkpoint['auc']:.6f} (selected by {metric.upper()})")
+                print(f"Saved new best model with validation F1: {checkpoint['f1']:.6f}, AUC: {checkpoint['auc']:.6f} (selected by {metric.upper()})")
                 print(f"{'*'*120}\n")
 
         # Print final summary
@@ -708,9 +720,13 @@ class LinkLevelGNNRunner:
                     
                     for i, type_ in schema_elements:
                         schema_embedding = node_embeddings[i]
-                        pred = self.model.predict_pair(q_embedding, schema_embedding)
-                        test_predictions.append(pred)
+                        if self.prediction_method == 'concat_mlp':
+                            pair_embedding = torch.cat([q_embedding, schema_embedding])
+                            pred = self.model.link_predictor(pair_embedding)
+                        else:  # dot_product
+                            pred = (q_embedding * schema_embedding).sum(dim=-1, keepdim=True)
                         
+                        test_predictions.append(pred)
                         is_connected = torch.any(
                             ((connected_edges[0] == q_idx) & (connected_edges[1] == i)) |
                             ((connected_edges[0] == i) & (connected_edges[1] == q_idx))

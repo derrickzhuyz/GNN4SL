@@ -28,7 +28,7 @@ class BaseLinkLevelGNN(nn.Module, ABC):
                  num_layers: int = 2,
                  dropout: float = 0.1,
                  threshold: float = 0.5,
-                 prediction_method: str = 'dot_product'):
+                 prediction_method: str = 'concat_mlp'):
         """
         The base class for link prediction GNN models
         
@@ -56,9 +56,10 @@ class BaseLinkLevelGNN(nn.Module, ABC):
                 nn.Linear(hidden_channels, 1)
             )
         elif prediction_method == 'dot_product':
-            self.scale = nn.Parameter(torch.FloatTensor([1.0]))
+            pass
         else:
             raise ValueError("prediction_method must be either 'dot_product' or 'concat_mlp'")
+        
 
 
     """
@@ -72,7 +73,8 @@ class BaseLinkLevelGNN(nn.Module, ABC):
         pass
 
     
-    """
+    """ 
+    NOTE: Deprecated Function!
     Predict link between two node embeddings. Two options:
         - 'concat_mlp': Concatenate embeddings and pass through MLP
         - 'dot_product': Normalize embeddings and compute dot product
@@ -80,7 +82,7 @@ class BaseLinkLevelGNN(nn.Module, ABC):
     :param dst_embedding: Destination node embedding
     :return: Prediction score
     """
-    def predict_pair(self, src_embedding: torch.Tensor, dst_embedding: torch.Tensor) -> torch.Tensor:
+    def _deprecated_predict_pair(self, src_embedding: torch.Tensor, dst_embedding: torch.Tensor) -> torch.Tensor:
         if self.prediction_method == 'concat_mlp':
             pair_embedding = torch.cat([src_embedding, dst_embedding])
             return torch.sigmoid(self.link_predictor(pair_embedding))
@@ -112,7 +114,7 @@ class BaseLinkLevelGNN(nn.Module, ABC):
             # Get node embeddings through GCN layers
             node_embeddings = self.forward(data.x, data.edge_index)
             
-            # Normalize embeddings if using dot product (optional)
+            # Normalize embeddings if using dot product
             if self.prediction_method == 'dot_product':
                 node_embeddings = F.normalize(node_embeddings, p=2, dim=-1)
             
@@ -178,10 +180,15 @@ class BaseLinkLevelGNN(nn.Module, ABC):
                 for table_idx, table_info in tables.items():
                     # Predict table relevance
                     table_embedding = node_embeddings[table_idx]
-                    table_score = self.predict_pair(q_embedding, table_embedding)
+                    # table_score = self.predict_pair(q_embedding, table_embedding)
+                    if self.prediction_method == 'concat_mlp':
+                        pair_embedding = torch.cat([q_embedding, table_embedding])
+                        table_score = torch.sigmoid(self.link_predictor(pair_embedding))
+                    else:  # dot_product
+                        table_score = torch.sigmoid((q_embedding * table_embedding).sum(dim=-1))
+                    
+                    # Append table score and create table prediction entry
                     scores_list.append(table_score)
-
-                    # Create table prediction entry
                     table_pred = {
                         'name': table_info['name'],
                         'relevant': bool(table_score > self.threshold),
@@ -192,10 +199,15 @@ class BaseLinkLevelGNN(nn.Module, ABC):
                     for col in table_info['columns']:
                         # Predict column relevance
                         col_embedding = node_embeddings[col['idx']]
-                        col_score = self.predict_pair(q_embedding, col_embedding)
+                        # col_score = self.predict_pair(q_embedding, col_embedding)
+                        if self.prediction_method == 'concat_mlp':
+                            pair_embedding = torch.cat([q_embedding, col_embedding])
+                            col_score = torch.sigmoid(self.link_predictor(pair_embedding))
+                        else:  # dot_product
+                            col_score = torch.sigmoid((q_embedding * col_embedding).sum(dim=-1))
+                        
+                        # Append column score and create column prediction entry
                         scores_list.append(col_score)
-
-                        # Create column prediction entry
                         col_pred = {
                             'name': col['name'],
                             'relevant': bool(col_score > self.threshold),
@@ -298,6 +310,87 @@ class LinkLevelGCN(BaseLinkLevelGNN):
         
         return x
     
+
+
+"""
+Link-level GNN model based on Graph Attention Networks
+Inherits from the base class of BaseLinkLevelGNN
+"""
+class LinkLevelGAT(BaseLinkLevelGNN):
+    def __init__(self, 
+                 in_channels: int = 384, 
+                 hidden_channels: int = 128,
+                 num_layers: int = 2,
+                 dropout: float = 0.1,
+                 threshold: float = 0.5,
+                 prediction_method: str = 'dot_product',
+                 num_heads: int = 4):
+        """
+        Link prediction model using Graph Attention Networks
+        
+        Args:
+            in_channels: Input feature dimension
+            hidden_channels: Hidden layer dimension
+            num_layers: Number of GAT layers
+            dropout: Dropout rate
+            threshold: Threshold for binary prediction
+            prediction_method: Either 'dot_product' or 'concat_mlp'
+            num_heads: Number of attention heads
+        """
+        super().__init__(
+            in_channels=in_channels,
+            hidden_channels=hidden_channels,
+            num_layers=num_layers,
+            dropout=dropout,
+            threshold=threshold,
+            prediction_method=prediction_method
+        )
+        
+        # Import GATConv here to avoid potential circular imports
+        from torch_geometric.nn import GATConv
+        self.convs = nn.ModuleList()
+        
+        # First GAT layer
+        self.convs.append(
+            GATConv(self.in_channels, 
+                    self.hidden_channels // num_heads, 
+                    heads=num_heads, 
+                    dropout=dropout)
+        )
+        
+        # Middle GAT layers
+        for _ in range(max(self.num_layers - 2, 0)):
+            self.convs.append(
+                GATConv(self.hidden_channels, 
+                        self.hidden_channels // num_heads, 
+                        heads=num_heads, 
+                        dropout=dropout)
+            )
+        
+        # Last GAT layer (combine heads)
+        self.convs.append(
+            GATConv(self.hidden_channels, 
+                    self.hidden_channels, 
+                    heads=1, 
+                    dropout=dropout)
+        )
+
+
+    """
+    Forward pass through GAT layers
+    :param x: Node feature matrix (embeddings)
+    :param edge_index: Graph connectivity in COO format
+    :return: Node embeddings after passing through GAT layers
+    """
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+        for i in range(self.num_layers):
+            x = self.convs[i](x, edge_index)
+            if i != self.num_layers - 1:
+                x = F.relu(x)
+                x = F.dropout(x, p=self.dropout, training=self.training)
+        
+        return x
+
 
 
 # TODO: New GNN model to inherit from BaseLinkLevelGNN ......

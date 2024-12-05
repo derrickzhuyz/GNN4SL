@@ -2,7 +2,7 @@ import os
 import argparse
 import torch
 from torch_geometric.loader import DataLoader
-from gnn.model.link_level_model import LinkLevelGCN
+from gnn.model.link_level_model import LinkLevelGCN, LinkLevelGAT
 from gnn.graph_data.link_level_graph_dataset import LinkLevelGraphDataset
 from gnn.model.link_level_runner import LinkLevelGNNRunner
 from datetime import datetime
@@ -46,8 +46,8 @@ Train the link-level model
 def main():
     # Add argument parsing
     parser = argparse.ArgumentParser(description='Train Link Level Model')
-    parser.add_argument('--model_type', type=str, required=True, choices=['gcn'], default='gcn', 
-                       help='Type of model to use: gcn')
+    parser.add_argument('--model_type', type=str, required=True, choices=['gcn', 'gat'], default='gcn', 
+                       help='Type of model to use: gcn or gat')
     parser.add_argument('--dataset_type', type=str, required=True, 
                        choices=['spider', 'bird', 'combined'], 
                        default='combined',
@@ -73,7 +73,7 @@ def main():
     parser.add_argument('--prediction_method', 
                        type=str,
                        choices=['dot_product', 'concat_mlp'],
-                       default='dot_product',
+                       default='concat_mlp',
                        help='Method for link prediction: dot_product or concat_mlp')
     parser.add_argument('--negative_sampling', 
                        action='store_true',
@@ -169,12 +169,20 @@ def main():
             prediction_method=args.prediction_method
         )
         model.print_model_structure()
+    elif args.model_type == 'gat':
+        model = LinkLevelGAT(
+            in_channels=in_channels,
+            hidden_channels=hidden_channels,
+            num_layers=num_layers,
+            dropout=dropout,
+            prediction_method=args.prediction_method
+        )
     else:
         raise ValueError(f"Unsupported model type: {args.model_type}")
 
-    model_name = f'{args.model_type}_train_{args.dataset_type}_{args.metric}_{num_epochs}ep_{args.negative_sampling_method}_neg_samp_{args.negative_sampling_ratio}' \
+    model_name = f'{args.model_type}_train_{args.dataset_type}_{args.metric}_{num_epochs}ep_{args.negative_sampling_method}_neg_samp_{args.negative_sampling_ratio}_{args.prediction_method}' \
                 if args.negative_sampling \
-                else f'{args.model_type}_train_{args.dataset_type}_{args.metric}_{num_epochs}ep_no_neg_samp'
+                else f'{args.model_type}_train_{args.dataset_type}_{args.metric}_{num_epochs}ep_no_neg_samp_{args.prediction_method}'
 
     # Initialize runner (for training)
     runner = LinkLevelGNNRunner(
