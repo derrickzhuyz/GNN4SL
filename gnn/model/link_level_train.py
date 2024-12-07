@@ -107,7 +107,7 @@ def main():
 
     # Model hyperparameters
     in_channels = args.in_channels
-    hidden_channels = 128
+    hidden_channels = 256
     num_layers = 2
     dropout = 0.1
     
@@ -177,6 +177,7 @@ def main():
             dropout=dropout,
             prediction_method=args.prediction_method
         )
+        model.print_model_structure()
     else:
         raise ValueError(f"Unsupported model type: {args.model_type}")
 
