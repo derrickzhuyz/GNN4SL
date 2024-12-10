@@ -96,8 +96,8 @@ python -m gnn.model.link_level_train \
     --val_ratio 0.1 \
     --val_dataset_type "bird" \
     --lr 1e-3 \
-    --embed_method "api_small" \
-    --in_channels 1536 \
+    --embed_method "sentence_transformer" \
+    --in_channels 384 \
     --prediction_method "concat_mlp" \
     --metric "f1" 
 

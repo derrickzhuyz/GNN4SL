@@ -1,8 +1,5 @@
-link_level_gat_old/**/*.txt
-link_level_gat/**/*.txt
-link_level_gcn/**/*.txt
+**/*.txt
 
-link_level_gat/**/*.json
-!link_level_gat/gat_schema_evaluation_results.json
-link_level_gcn/**/*.json
-!link_level_gcn/gcn_schema_evaluation_results.json
+!link_level_gcn_12.10/gcn_schema_evaluation_results.json
+!link_level_gat_12.10/gat_schema_evaluation_results.json
+!link_level_gat_old/gat_schema_evaluation_results.json

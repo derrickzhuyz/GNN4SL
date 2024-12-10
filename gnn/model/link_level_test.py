@@ -60,7 +60,7 @@ def main():
     parser.add_argument('--prediction_method', 
                        type=str,
                        choices=['dot_product', 'concat_mlp'],
-                       default='dot_product',
+                       default='concat_mlp',
                        help='Method for link prediction: dot_product or concat_mlp')
     args = parser.parse_args()
 
@@ -70,7 +70,7 @@ def main():
     
     # Model hyperparameters
     in_channels = args.in_channels
-    hidden_channels = 128
+    hidden_channels = 256
     num_layers = 2
     dropout = 0.1
     

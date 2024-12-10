@@ -76,7 +76,7 @@ def traverse_and_process(folder_path, output_file):
     print(f"Results saved to {output_file}")
 
 if __name__ == '__main__':
-    folder_path = 'gnn/results/link_level/'  # 修改为需要遍历的文件夹路径
-    output_file = 'gnn/results/link_level/gnn_schema_evaluation_results.json'  # 保存结果的文件路径
+    folder_path = 'gnn/results/link_level_gcn'  # 修改为需要遍历的文件夹路径
+    output_file = 'gnn/results/link_level_gcn/gcn_schema_evaluation_results.json'  # 保存结果的文件路径
 
     traverse_and_process(folder_path, output_file)

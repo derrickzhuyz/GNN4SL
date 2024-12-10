@@ -1,0 +1,50 @@
+[
+    {
+        "file_path": "gnn/results/link_level_gat/api_small/test_spider_dev_By_gat_train_combined_f1_200ep_no_neg_samp_concat_mlp_1207_0724.json",
+        "precision": 0.5573056300268097,
+        "recall": 0.9298294660329885,
+        "f1_score": 0.6969093766369827
+    },
+    {
+        "file_path": "gnn/results/link_level_gat/api_small/test_spider_dev_By_gat_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0711.json",
+        "precision": 0.47238542890716806,
+        "recall": 0.9344490934449093,
+        "f1_score": 0.6275366843584139
+    },
+    {
+        "file_path": "gnn/results/link_level_gat/api_small/test_spider_dev_By_gat_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0723.json",
+        "precision": 0.4873294346978557,
+        "recall": 0.9420138162026377,
+        "f1_score": 0.6423524373706373
+    },
+    {
+        "file_path": "gnn/results/link_level_gat/api_small/test_spider_dev_By_gat_train_bird_auc_200ep_no_neg_samp_concat_mlp_1207_0723.json",
+        "precision": 0.49240660680634074,
+        "recall": 0.9489425336466567,
+        "f1_score": 0.6483725003649102
+    },
+    {
+        "file_path": "gnn/results/link_level_gat/api_small/test_spider_dev_By_gat_train_bird_f1_200ep_hard_neg_samp_1.0_concat_mlp_1207_0720.json",
+        "precision": 0.47988019273342886,
+        "recall": 0.8868832731648616,
+        "f1_score": 0.622781815109008
+    },
+    {
+        "file_path": "gnn/results/link_level_gat/api_small/test_spider_dev_By_gat_train_bird_f1_200ep_hard_neg_samp_2.0_concat_mlp_1207_0720.json",
+        "precision": 0.5107090594652122,
+        "recall": 0.9120931337609883,
+        "f1_score": 0.6547842401500937
+    },
+    {
+        "file_path": "gnn/results/link_level_gat/api_large/test_bird_dev_By_gat_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0723.json",
+        "precision": 0.14856594940635665,
+        "recall": 0.7128552097428958,
+        "f1_score": 0.24588671847651056
+    },
+    {
+        "file_path": "gnn/results/link_level_gat/api_large/test_spider_dev_By_gat_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0723.json",
+        "precision": 0.5163251519927944,
+        "recall": 0.9536286130172593,
+        "f1_score": 0.6699291505368489
+    }
+]
