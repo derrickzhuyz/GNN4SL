@@ -2,7 +2,7 @@ import os
 import argparse
 import torch
 from torch_geometric.loader import DataLoader
-from gnn.model.link_level_model import LinkLevelGCN, LinkLevelGAT
+from gnn.model.link_level_model import LinkLevelGCN, LinkLevelGAT, LinkLevelRGAT
 from gnn.graph_data.link_level_graph_dataset import LinkLevelGraphDataset
 from gnn.model.link_level_runner import LinkLevelGNNRunner
 from datetime import datetime
@@ -46,8 +46,12 @@ Train the link-level model
 def main():
     # Add argument parsing
     parser = argparse.ArgumentParser(description='Train Link Level Model')
-    parser.add_argument('--model_type', type=str, required=True, choices=['gcn', 'gat'], default='gcn', 
-                       help='Type of model to use: gcn or gat')
+    parser.add_argument('--model_type', type=str, required=True, 
+                       choices=['gcn', 'gat', 'rgat'], default='gcn',
+                       help='Type of model to use: gcn, gat, or rgat')
+    parser.add_argument('--num_layers', type=int, default=2, required=False, help='Number of layers')
+    parser.add_argument('--num_heads', type=int, default=4, required=False, help='Number of attention heads (for GAT and RGAT only)')
+    parser.add_argument('--num_relations', type=int, default=3, required=False, help='Number of relation types (for RGAT only)')
     parser.add_argument('--dataset_type', type=str, required=True, 
                        choices=['spider', 'bird', 'combined'], 
                        default='combined',
@@ -106,9 +110,9 @@ def main():
     lr = args.lr
 
     # Model hyperparameters
+    num_layers = args.num_layers
     in_channels = args.in_channels
     hidden_channels = 256
-    num_layers = 2
     dropout = 0.1
     
     # Load dataset based on argument
@@ -175,15 +179,36 @@ def main():
             hidden_channels=hidden_channels,
             num_layers=num_layers,
             dropout=dropout,
-            prediction_method=args.prediction_method
+            prediction_method=args.prediction_method,
+            num_heads=args.num_heads
+        )
+        model.print_model_structure()
+    elif args.model_type == 'rgat':
+        model = LinkLevelRGAT(
+            in_channels=in_channels,
+            hidden_channels=hidden_channels,
+            num_layers=num_layers,
+            dropout=dropout,
+            prediction_method=args.prediction_method,
+            num_heads=args.num_heads,
+            num_relations=args.num_relations
         )
         model.print_model_structure()
     else:
         raise ValueError(f"Unsupported model type: {args.model_type}")
-
-    model_name = f'{args.model_type}_train_{args.dataset_type}_{args.metric}_{num_epochs}ep_{args.negative_sampling_method}_neg_samp_{args.negative_sampling_ratio}_{args.prediction_method}' \
-                if args.negative_sampling \
-                else f'{args.model_type}_train_{args.dataset_type}_{args.metric}_{num_epochs}ep_no_neg_samp_{args.prediction_method}'
+    
+    model_name_components = [
+        f'{args.model_type}',
+        f'{num_layers}layers',
+        f'{args.num_relations}rel' if args.model_type == 'rgat' and args.num_relations is not None else 'default_rel',
+        'TrainOn',
+        f'{args.dataset_type}',
+        f'{args.metric}',
+        f'{num_epochs}ep',
+        f'{args.prediction_method}',
+        f'{args.negative_sampling_method}_neg_samp_{args.negative_sampling_ratio}' if args.negative_sampling else 'no_neg_samp'
+    ]
+    model_name = '_'.join(model_name_components)
 
     # Initialize runner (for training)
     runner = LinkLevelGNNRunner(

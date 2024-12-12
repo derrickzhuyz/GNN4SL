@@ -301,7 +301,7 @@ class LinkLevelGNNRunner:
             self.optimizer.zero_grad()
 
             # Forward pass
-            node_embeddings = self.model(data.x, data.edge_index)
+            node_embeddings = self.model(data.x, data.edge_index, data.edge_type)
             
             # Normalize embeddings if using dot product
             if self.prediction_method == 'dot_product':
@@ -449,7 +449,7 @@ class LinkLevelGNNRunner:
                 data = data.to(self.device)
                 
                 # Forward pass
-                node_embeddings = self.model(data.x, data.edge_index)
+                node_embeddings = self.model(data.x, data.edge_index, data.edge_type)
                 
                 # Find question nodes
                 question_indices = [i for i, type_ in enumerate(data.node_types[0]) if type_ == 'question']
@@ -700,7 +700,7 @@ class LinkLevelGNNRunner:
                 all_predictions.extend(predictions)
                 
                 # Calculate test metrics
-                node_embeddings = self.model(data.x, data.edge_index)
+                node_embeddings = self.model(data.x, data.edge_index, data.edge_type)
                 labels = []
                 test_predictions = []
                 

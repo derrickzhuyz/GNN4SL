@@ -172,14 +172,22 @@ def inspect_link_level_graph(graph: Data, idx: int, visualize: bool = True, data
         print(f"  - Embedding dimension: {embedding_dim}")
         print(f"  - Embedding (first three values): {embedding_values}")
     
-    # Print edge information
+    # Print edge information with edge types
     print("\nEdge Information:")
-    for edge in G.edges():
-        src_name = G.nodes[edge[0]]['name']
-        src_type = G.nodes[edge[0]]['type']
-        dst_name = G.nodes[edge[1]]['name']
-        dst_type = G.nodes[edge[1]]['type']
-        print(f"Edge: {edge[0]}({src_type}:{src_name}) <-> {edge[1]}({dst_type}:{dst_name})")
+    edge_types = {
+        0: "TABLE_COLUMN",
+        1: "FOREIGN_KEY",
+        2: "QUESTION_REL"
+    }
+    
+    for i in range(edge_index.shape[1]):
+        src, dst = edge_index[0, i], edge_index[1, i]
+        edge_type = graph.edge_type[i].item()  # Get edge type
+        src_name = G.nodes[src]['name']
+        src_type = G.nodes[src]['type']
+        dst_name = G.nodes[dst]['name']
+        dst_type = G.nodes[dst]['type']
+        print(f"[Type: {edge_types[edge_type]}] Edge: {src}({src_type}:{src_name}) <-> {dst}({dst_type}:{dst_name})")
     
     if visualize:
         # Use the database name in the title and filename
@@ -208,7 +216,7 @@ if __name__ == "__main__":
     # Create visualization directory
     os.makedirs("data/schema_linking_graph_dataset/visualizations", exist_ok=True)
     
-    dataset_type = 'bird'  # 'spider' or 'bird' or 'combined'
+    dataset_type = 'spider'  # 'spider' or 'bird' or 'combined'
     split_type = 'train'  # 'dev' or 'train' (NOTE: 'combined' only has 'train' split)
     idx_to_inspect = 1
 

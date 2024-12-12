@@ -8,9 +8,25 @@ from tqdm import tqdm
 from loguru import logger
 from typing import Dict, List, Tuple
 from torch_geometric.data import Data, Dataset
+from enum import Enum
 
 logger.add("logs/link_level_graph_dataset.log", rotation="50 MB", level="INFO",
            format="{time} {level} {message}", compression="zip")
+
+
+class EdgeType(Enum):
+    """
+    Enum class for edge type for link-level graph dataset
+    """
+    TABLE_COLUMN = 0      # Edge between table and its columns
+    FOREIGN_KEY = 1       # Edge between foreign key columns
+    QUESTION_REL = 2      # Edge between question and schema elements (tables/columns) for relevance
+
+    @classmethod
+    def to_tensor(cls, edge_types_list):
+        """Convert list of EdgeType enums to tensor of indices"""
+        return torch.tensor([e.value for e in edge_types_list], dtype=torch.long)
+
 
 
 class LinkLevelGraphDataset(Dataset):
@@ -19,6 +35,11 @@ class LinkLevelGraphDataset(Dataset):
     (tables/columns) represent relevance relationships.
     
     There are three types of nodes: question, table, and column; one type of edge.
+    
+    The edge type is used to distinguish between different types of edges:
+    - TABLE_COLUMN (enum value 0): table-column edge
+    - FOREIGN_KEY (enum value 1): foreign key edge
+    - QUESTION_REL (enum value 2): question-schema element edge
     
     Args:
         root: Root directory where the dataset should be saved
@@ -107,8 +128,8 @@ class LinkLevelGraphDataset(Dataset):
                           embedding=col_embedding.numpy())
                 node_mapping[('column', col_name_lower)] = node_idx
                 
-                # Add edge between table and column (no edge type)
-                G.add_edge(table_idx, node_idx)
+                # Add edge between table and column with edge type
+                G.add_edge(table_idx, node_idx, edge_type=EdgeType.TABLE_COLUMN)
                 node_idx += 1
 
         # Add foreign key edges
@@ -138,8 +159,8 @@ class LinkLevelGraphDataset(Dataset):
                             col2_idx = i
                     
                     if col1_idx is not None and col2_idx is not None:
-                        # Add foreign key edge
-                        G.add_edge(col1_idx, col2_idx, edge_type='foreign_key')
+                        # Add foreign key edge with edge type
+                        G.add_edge(col1_idx, col2_idx, edge_type=EdgeType.FOREIGN_KEY)
                     else:
                         logger.warning(f"[* Warning] ({self.dataset_type}_{self.split}) Could not find matching columns for foreign key: {fk}")
                 except Exception as e:
@@ -169,18 +190,18 @@ class LinkLevelGraphDataset(Dataset):
                   type='question',
                   embedding=question_embedding.numpy())
         
-        # Add edges between question and relevant schema elements
+        # Add edges between question and relevant schema elements with edge type
         for table in example['tables']:
             table_name = table['name'].lower()
             if table['relevant']:
                 table_idx = node_mapping[('table', table_name)]
-                G.add_edge(question_idx, table_idx)
+                G.add_edge(question_idx, table_idx, edge_type=EdgeType.QUESTION_REL)
             
             for col in table['columns']:
                 col_name = col['name'].lower()
                 if col['relevant']:
                     col_idx = node_mapping[('column', col_name)]
-                    G.add_edge(question_idx, col_idx)
+                    G.add_edge(question_idx, col_idx, edge_type=EdgeType.QUESTION_REL)
         
         return G
 
@@ -218,6 +239,8 @@ class LinkLevelGraphDataset(Dataset):
                 
                 # Convert final graph to PyG Data object
                 edge_index = torch.tensor(list(G.edges)).t().contiguous()
+                edge_types = [G.edges[e]['edge_type'] for e in G.edges()]
+                edge_type = EdgeType.to_tensor(edge_types)
                 node_embeddings = [G.nodes[i]['embedding'] for i in range(len(G.nodes))]
                 x = torch.tensor(np.array(node_embeddings))
                 
@@ -227,6 +250,7 @@ class LinkLevelGraphDataset(Dataset):
                 
                 data = Data(x=x,
                            edge_index=edge_index,
+                           edge_type=edge_type,
                            node_names=node_names,
                            node_types=node_types,
                            database_name=db_name)  # Add database name to the graph

@@ -299,11 +299,12 @@ class LinkLevelGCN(BaseLinkLevelGNN):
     Forward pass through GCN layers
     :param x: Node feature matrix (embeddings)
     :param edge_index: Graph connectivity in COO format
+    :param edge_type: Edge type indices
     :return: Node embeddings after passing through GCN layers
     """
-    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor, edge_type: torch.Tensor) -> torch.Tensor:
         for i in range(self.num_layers):
-            x = self.convs[i](x, edge_index)
+            x = self.convs[i](x, edge_index, edge_type)
             if i != self.num_layers - 1:
                 x = F.relu(x)
                 x = F.dropout(x, p=self.dropout, training=self.training)
@@ -380,11 +381,99 @@ class LinkLevelGAT(BaseLinkLevelGNN):
     Forward pass through GAT layers
     :param x: Node feature matrix (embeddings)
     :param edge_index: Graph connectivity in COO format
+    :param edge_type: Edge type indices
     :return: Node embeddings after passing through GAT layers
     """
-    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor, edge_type: torch.Tensor) -> torch.Tensor:
         for i in range(self.num_layers):
-            x = self.convs[i](x, edge_index)
+            x = self.convs[i](x, edge_index, edge_type)
+            if i != self.num_layers - 1:
+                x = F.relu(x)
+                x = F.dropout(x, p=self.dropout, training=self.training)
+        
+        return x
+
+
+
+"""
+Link-level GNN model based on Relational Graph Attention Networks
+Inherits from the base class of BaseLinkLevelGNN
+"""
+class LinkLevelRGAT(BaseLinkLevelGNN):
+    def __init__(self, 
+                 in_channels: int = 384, 
+                 hidden_channels: int = 128,
+                 num_layers: int = 2,
+                 dropout: float = 0.1,
+                 threshold: float = 0.5,
+                 prediction_method: str = 'dot_product',
+                 num_heads: int = 4,
+                 num_relations: int = 3):  # 3 types of edges: TABLE_COLUMN, FOREIGN_KEY, QUESTION_REL
+        """
+        Link prediction model using Relational Graph Attention Networks
+        
+        Args:
+            in_channels: Input feature dimension
+            hidden_channels: Hidden layer dimension
+            num_layers: Number of RGAT layers
+            dropout: Dropout rate
+            threshold: Threshold for binary prediction
+            prediction_method: Either 'dot_product' or 'concat_mlp'
+            num_heads: Number of attention heads
+            num_relations: Number of relation types
+        """
+        super().__init__(
+            in_channels=in_channels,
+            hidden_channels=hidden_channels,
+            num_layers=num_layers,
+            dropout=dropout,
+            threshold=threshold,
+            prediction_method=prediction_method
+        )
+        
+        # Import RGATConv here to avoid potential circular imports
+        from torch_geometric.nn import RGATConv
+        self.convs = nn.ModuleList()
+        
+        # First RGAT layer
+        self.convs.append(
+            RGATConv(self.in_channels, 
+                     self.hidden_channels // num_heads,
+                     num_relations=num_relations,
+                     heads=num_heads,
+                     dropout=dropout)
+        )
+        
+        # Middle RGAT layers
+        for _ in range(max(self.num_layers - 2, 0)):
+            self.convs.append(
+                RGATConv(self.hidden_channels,
+                         self.hidden_channels // num_heads,
+                         num_relations=num_relations,
+                         heads=num_heads,
+                         dropout=dropout)
+            )
+        
+        # Last RGAT layer (combine heads)
+        self.convs.append(
+            RGATConv(self.hidden_channels,
+                     self.hidden_channels,
+                     num_relations=num_relations,
+                     heads=1,
+                     dropout=dropout)
+        )
+
+
+    """
+    Forward pass through RGAT layers
+    :param x: Node feature matrix (embeddings)
+    :param edge_index: Graph connectivity in COO format
+    :param edge_type: Edge type indices
+    :return: Node embeddings after passing through RGAT layers
+    """
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor, edge_type: torch.Tensor) -> torch.Tensor:
+        for i in range(self.num_layers):
+            x = self.convs[i](x, edge_index, edge_type)
             if i != self.num_layers - 1:
                 x = F.relu(x)
                 x = F.dropout(x, p=self.dropout, training=self.training)
