@@ -6,6 +6,8 @@ export CUDA_VISIBLE_DEVICES='5,6'
 # embedding method, model type, dimension
 EMB_METHOD="api_small"
 MODEL_TYPE="gat"
+SUFFIX="_12.10"
+
 
 if [ "${EMB_METHOD}" == "api_small" ]; then
     EMB_DIM=1536
@@ -21,7 +23,7 @@ else
 fi
 
 # Set the model directory and test all models in the directory
-MODEL_DIR="checkpoints/link_level_${MODEL_TYPE}/${EMB_METHOD}"
+MODEL_DIR="checkpoints/link_level_${MODEL_TYPE}${SUFFIX}/${EMB_METHOD}"
 MODEL_PATHS=()
 
 # Find all .pt files in the specified directory and add them to MODEL_PATHS

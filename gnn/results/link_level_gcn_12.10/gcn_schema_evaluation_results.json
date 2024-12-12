@@ -1,84 +1,90 @@
 [
     {
-        "file_path": "gnn/results/link_level_gcn/api_small/test_bird_dev_By_gcn_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0723.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_small/test_bird_dev_By_gcn_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0723.json",
         "precision": 0.13705923137876386,
         "recall": 0.7242868359068306,
         "f1_score": 0.23050014575438302
     },
     {
-        "file_path": "gnn/results/link_level_gcn/api_small/test_spider_dev_By_gcn_train_combined_f1_200ep_no_neg_samp_concat_mlp_1207_0711.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_small/test_spider_dev_By_gcn_train_combined_f1_200ep_no_neg_samp_concat_mlp_1207_0711.json",
         "precision": 0.5644218072061875,
         "recall": 0.8852071005917159,
         "f1_score": 0.689321506738855
     },
     {
-        "file_path": "gnn/results/link_level_gcn/api_small/test_spider_dev_By_gcn_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0711.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_small/test_spider_dev_By_gcn_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0711.json",
         "precision": 0.50719380969653,
         "recall": 0.921572934973638,
         "f1_score": 0.6542930671449738
     },
     {
-        "file_path": "gnn/results/link_level_gcn/api_small/test_bird_dev_By_gcn_train_combined_f1_200ep_no_neg_samp_concat_mlp_1207_0711.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_small/test_bird_dev_By_gcn_train_combined_f1_200ep_no_neg_samp_concat_mlp_1207_0711.json",
         "precision": 0.16655336505778381,
         "recall": 0.685908545527263,
         "f1_score": 0.2680245884559283
     },
     {
-        "file_path": "gnn/results/link_level_gcn/api_small/test_spider_dev_By_gcn_train_bird_f1_200ep_hard_neg_samp_1.0_concat_mlp_1207_0711.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_small/test_spider_dev_By_gcn_train_bird_f1_200ep_hard_neg_samp_1.0_concat_mlp_1207_0711.json",
         "precision": 0.3887543514454367,
         "recall": 0.8996497373029773,
         "f1_score": 0.5429084760093005
     },
     {
-        "file_path": "gnn/results/link_level_gcn/api_small/test_spider_dev_By_gcn_train_bird_f1_200ep_hard_neg_samp_2.0_concat_mlp_1207_0711.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_small/test_spider_dev_By_gcn_train_bird_f1_200ep_hard_neg_samp_2.0_concat_mlp_1207_0711.json",
         "precision": 0.4617243272926963,
         "recall": 0.899443731279418,
         "f1_score": 0.6102039335220262
     },
     {
-        "file_path": "gnn/results/link_level_gcn/api_small/test_bird_dev_By_gcn_train_bird_f1_200ep_hard_neg_samp_1.0_concat_mlp_1207_0711.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_small/test_bird_dev_By_gcn_train_bird_f1_200ep_hard_neg_samp_1.0_concat_mlp_1207_0711.json",
         "precision": 0.0967950334047649,
         "recall": 0.739674894641782,
         "f1_score": 0.17118811743231757
     },
     {
-        "file_path": "gnn/results/link_level_gcn/api_small/test_bird_dev_By_gcn_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0711.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_small/test_bird_dev_By_gcn_train_bird_f1_200ep_no_neg_samp_dot_product_1207_0711.json",
+        "precision": 0.10172241042034448,
+        "recall": 0.7772511848341233,
+        "f1_score": 0.17990043034343092
+    },
+    {
+        "file_path": "gnn/results/link_level_gcn_12.10/api_small/test_bird_dev_By_gcn_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0711.json",
         "precision": 0.1320619572029725,
         "recall": 0.7706374085684431,
         "f1_score": 0.22548345180768933
     },
     {
-        "file_path": "gnn/results/link_level_gcn/api_small/test_spider_dev_By_gcn_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0723.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_small/test_spider_dev_By_gcn_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0723.json",
         "precision": 0.48112669631656974,
         "recall": 0.9223874070835155,
         "f1_score": 0.6323915161507907
     },
     {
-        "file_path": "gnn/results/link_level_gcn/api_small/test_bird_dev_By_gcn_train_bird_auc_200ep_no_neg_samp_concat_mlp_1207_0711.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_small/test_bird_dev_By_gcn_train_bird_auc_200ep_no_neg_samp_concat_mlp_1207_0711.json",
         "precision": 0.13244814374421984,
         "recall": 0.7956349206349206,
         "f1_score": 0.22709253596103748
     },
     {
-        "file_path": "gnn/results/link_level_gcn/api_small/test_bird_dev_By_gcn_train_bird_f1_200ep_hard_neg_samp_2.0_concat_mlp_1207_0711.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_small/test_bird_dev_By_gcn_train_bird_f1_200ep_hard_neg_samp_2.0_concat_mlp_1207_0711.json",
         "precision": 0.10814535278154681,
         "recall": 0.6562459796732278,
         "f1_score": 0.18569010392967003
     },
     {
-        "file_path": "gnn/results/link_level_gcn/api_small/test_spider_dev_By_gcn_train_bird_auc_200ep_no_neg_samp_concat_mlp_1207_0711.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_small/test_spider_dev_By_gcn_train_bird_auc_200ep_no_neg_samp_concat_mlp_1207_0711.json",
         "precision": 0.4820695614603586,
         "recall": 0.9329013377926422,
         "f1_score": 0.6356644352656317
     },
     {
-        "file_path": "gnn/results/link_level_gcn/api_large/test_spider_dev_By_gcn_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0711.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_large/test_spider_dev_By_gcn_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0711.json",
         "precision": 0.5183828708268771,
         "recall": 0.8901790033865505,
         "f1_score": 0.6552123208403811
     },
     {
-        "file_path": "gnn/results/link_level_gcn/api_large/test_bird_dev_By_gcn_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0711.json",
+        "file_path": "gnn/results/link_level_gcn_12.10/api_large/test_bird_dev_By_gcn_train_bird_f1_200ep_no_neg_samp_concat_mlp_1207_0711.json",
         "precision": 0.15943838703782665,
         "recall": 0.705906148867314,
         "f1_score": 0.26012422360248444
