@@ -172,7 +172,7 @@ def main():
             dropout=dropout,
             prediction_method=args.prediction_method
         )
-        model.print_model_structure()
+        # model.print_model_structure()
     elif args.model_type == 'gat':
         model = LinkLevelGAT(
             in_channels=in_channels,
@@ -182,7 +182,7 @@ def main():
             prediction_method=args.prediction_method,
             num_heads=args.num_heads
         )
-        model.print_model_structure()
+        # model.print_model_structure()
     elif args.model_type == 'rgat':
         model = LinkLevelRGAT(
             in_channels=in_channels,
@@ -193,7 +193,7 @@ def main():
             num_heads=args.num_heads,
             num_relations=args.num_relations
         )
-        model.print_model_structure()
+        # model.print_model_structure()
     else:
         raise ValueError(f"Unsupported model type: {args.model_type}")
     

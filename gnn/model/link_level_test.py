@@ -1,5 +1,5 @@
 import torch
-from gnn.model.link_level_model import LinkLevelGCN, LinkLevelGAT
+from gnn.model.link_level_model import LinkLevelGCN, LinkLevelGAT, LinkLevelRGAT
 from gnn.graph_data.link_level_graph_dataset import LinkLevelGraphDataset
 from gnn.model.link_level_runner import LinkLevelGNNRunner
 from torch.utils.tensorboard import SummaryWriter
@@ -43,8 +43,11 @@ def main():
 
     # Argument parsing for model checkpoint and model name
     parser = argparse.ArgumentParser(description='Test Link Level Model')
-    parser.add_argument('--model_type', type=str, required=True, choices=['gcn', 'gat'], default='gcn',
-                       help='Type of model to use: gcn or gat')
+    parser.add_argument('--model_type', type=str, required=True, choices=['gcn', 'gat', 'rgat'], default='gcn',
+                       help='Type of model to use: gcn or gat or rgat')
+    parser.add_argument('--num_layers', type=int, default=2, help='Number of layers')
+    parser.add_argument('--num_heads', type=int, default=4, help='Number of attention heads')
+    parser.add_argument('--num_relations', type=int, default=3, help='Number of relations')
     parser.add_argument('--model_path', type=str, required=True, 
                        help='Path to the model checkpoint to be tested')
     parser.add_argument('--dataset_type', type=str, required=True, choices=['spider', 'bird'], default='spider',
@@ -71,7 +74,7 @@ def main():
     # Model hyperparameters
     in_channels = args.in_channels
     hidden_channels = 256
-    num_layers = 2
+    num_layers = args.num_layers
     dropout = 0.1
     
     # Load datasets
@@ -114,7 +117,18 @@ def main():
             hidden_channels=hidden_channels,
             num_layers=num_layers,
             dropout=dropout,
-            prediction_method=args.prediction_method
+            prediction_method=args.prediction_method,
+            num_heads=args.num_heads
+        )
+    elif args.model_type == 'rgat':
+        model = LinkLevelRGAT(
+            in_channels=in_channels,
+            hidden_channels=hidden_channels,
+            num_layers=num_layers,
+            dropout=dropout,
+            prediction_method=args.prediction_method,
+            num_heads=args.num_heads,
+            num_relations=args.num_relations
         )
     else:
         raise ValueError(f"Unsupported model type: {args.model_type}")

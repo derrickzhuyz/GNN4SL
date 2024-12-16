@@ -111,8 +111,8 @@ class BaseLinkLevelGNN(nn.Module, ABC):
         """Predict relevance between question nodes and schema nodes"""
         self.eval()  # Set model to evaluation mode
         with torch.no_grad():  # Disable gradient computation
-            # Get node embeddings through GCN layers
-            node_embeddings = self.forward(data.x, data.edge_index)
+            # Get node embeddings through GNN layers
+            node_embeddings = self.forward(data.x, data.edge_index, data.edge_type)
             
             # Normalize embeddings if using dot product
             if self.prediction_method == 'dot_product':

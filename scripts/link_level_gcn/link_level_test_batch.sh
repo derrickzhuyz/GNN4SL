@@ -4,9 +4,9 @@
 export CUDA_VISIBLE_DEVICES='5,6'
 
 # embedding method, model type, dimension
-EMB_METHOD="api_small"
+EMB_METHOD="api_large"
 MODEL_TYPE="gat"
-SUFFIX="_12.10"
+SUFFIX="_12.15"
 
 
 if [ "${EMB_METHOD}" == "api_small" ]; then
@@ -54,7 +54,10 @@ for MODEL_PATH in "${MODEL_PATHS[@]}"; do
         --threshold 0.5 \
         --embed_method "${EMB_METHOD}" \
         --in_channels "${EMB_DIM}" \
-        --prediction_method "concat_mlp"
+        --prediction_method "concat_mlp" \
+        --num_heads 4 \
+        --num_relations 3 \
+        --num_layers 2
 done
 
 # Test the link-level model on BIRD dev set
@@ -67,5 +70,8 @@ for MODEL_PATH in "${MODEL_PATHS[@]}"; do
         --batch_size 1 \
         --embed_method "${EMB_METHOD}" \
         --in_channels "${EMB_DIM}" \
-        --prediction_method "concat_mlp"
+        --prediction_method "concat_mlp" \
+        --num_heads 4 \
+        --num_relations 3 \
+        --num_layers 2
 done
