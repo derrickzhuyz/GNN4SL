@@ -6,7 +6,7 @@
 **/*.sql
 **/*.pt
 **/logs/**
-checkpoints/**
+archive/**
 
 
 # Exclude specific files
@@ -17,3 +17,5 @@ checkpoints/**
 
 !gnn/results/*.json
 !llm/results/*.json
+
+!checkpoints/**
