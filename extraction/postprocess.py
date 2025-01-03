@@ -194,7 +194,7 @@ class GoldSchemaLinkingPostProcessor:
                         'evidence': info_item['evidence'],
                         'difficulty': info_item.get('difficulty', None)
                     })
-            elif any(re.search(keyword, gold_schema_path, re.IGNORECASE) for keyword in ["spider_dev", "spider_train"]):
+            elif any(re.search(keyword, gold_schema_path, re.IGNORECASE) for keyword in ["spider_dev", "spider_train", "spider_test"]):
                 for gold_item, info_item in zip(gold_data, info_data):
                     gold_item['question'] = info_item['question']
             else:
@@ -251,18 +251,22 @@ if __name__ == "__main__":
                                       gold_schema_path=path_config['gold_schema_linking_paths']['spider_dev'])
     gold_processor.information_alignment(info_path=path_config['spider_paths']['full_train_info'], 
                                       gold_schema_path=path_config['gold_schema_linking_paths']['spider_train'])
+    gold_processor.information_alignment(info_path=path_config['spider_paths']['test_info'], 
+                                      gold_schema_path=path_config['gold_schema_linking_paths']['spider_test'])
     
     # Add stats for gold schema linking results
     gold_processor.add_stats(path_config['gold_schema_linking_paths']['bird_dev'])
     gold_processor.add_stats(path_config['gold_schema_linking_paths']['bird_train'])
     gold_processor.add_stats(path_config['gold_schema_linking_paths']['spider_dev'])
     gold_processor.add_stats(path_config['gold_schema_linking_paths']['spider_train'])
+    gold_processor.add_stats(path_config['gold_schema_linking_paths']['spider_test'])
 
     # Postprocess entire database schemas for each dataset
     db_schema_files = [
         path_config['db_schema_paths']['bird_dev_schemas'],
         path_config['db_schema_paths']['bird_train_schemas'],
         path_config['db_schema_paths']['spider_schemas'],
+        path_config['db_schema_paths']['spider_test_schemas'],
         path_config['db_schema_paths']['spider2_lite_schemas']
     ]
 

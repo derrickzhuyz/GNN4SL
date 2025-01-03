@@ -208,13 +208,19 @@ if __name__ == "__main__":
     # Process Spider dataset (full_train and dev)
     for dataset in ['train', 'dev']:
         extractor.process_sql_file(
-            path_config['spider_paths'][f'{"full_" if dataset == "train" else ""}{dataset}_gold_sql'],
-            path_config['gold_schema_linking_paths'][f'spider_{dataset}']
+            input_file=path_config['spider_paths'][f'{"full_" if dataset == "train" else ""}{dataset}_gold_sql'],
+            output_file=path_config['gold_schema_linking_paths'][f'spider_{dataset}']
         )
+    
+    # Process Spider test dataset
+    extractor.process_sql_file(
+        input_file=path_config['spider_paths']['test_gold_sql'],
+        output_file=path_config['gold_schema_linking_paths']['spider_test']
+    )
     
     # Process Bird dataset (train and dev)
     for dataset in ['train', 'dev']:
         extractor.process_sql_file(
-            path_config['bird_paths'][f'{dataset}_gold_sql'],
-            path_config['gold_schema_linking_paths'][f'bird_{dataset}']
+            input_file=path_config['bird_paths'][f'{dataset}_gold_sql'],
+            output_file=path_config['gold_schema_linking_paths'][f'bird_{dataset}']
         )

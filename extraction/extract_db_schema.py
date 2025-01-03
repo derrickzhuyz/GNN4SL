@@ -108,6 +108,10 @@ if __name__ == '__main__':
     spider_db_schema_json = path_config['db_schema_paths']['spider_schemas']
     extract_entire_dataset_schemas(spider_db_path, spider_db_schema_json, nested_folder=True)
 
+    spider_test_db_path = path_config['spider_paths']['test_databases']
+    spider_test_db_schema_json = path_config['db_schema_paths']['spider_test_schemas']
+    extract_entire_dataset_schemas(spider_test_db_path, spider_test_db_schema_json, nested_folder=True)
+
     bird_train_db_path = path_config['bird_paths']['train_databases']
     bird_train_db_schema_json = path_config['db_schema_paths']['bird_train_schemas']
     extract_entire_dataset_schemas(bird_train_db_path, bird_train_db_schema_json, nested_folder=True)

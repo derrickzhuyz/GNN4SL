@@ -5,9 +5,12 @@
         "train_others_gold_sql": "",
         "full_train_gold_sql": "data/preprocessed/full_train_gold.sql",
         "dev_gold_sql": "/data/zhuyizhang/dataset/spider/dev_gold.sql",
+        "test_gold_sql": "/data/zhuyizhang/dataset/spider/test_gold.sql",
         "all_databases": "/data/zhuyizhang/dataset/spider/database",
+        "test_databases": "/data/zhuyizhang/dataset/spider/test_database",
         "train_info": "/data/zhuyizhang/dataset/spider/train_spider.json",
         "dev_info": "/data/zhuyizhang/dataset/spider/dev.json",
+        "test_info": "/data/zhuyizhang/dataset/spider/test.json",
         "train_others_info": "/data/zhuyizhang/dataset/spider/train_others.json",
         "full_train_info": "data/preprocessed/full_train_info.json"
     },
@@ -30,11 +33,13 @@
         "spider_train": "data/gold_schema_linking/spider_train_gold_schema_linking.json", 
         "spider_dev": "data/gold_schema_linking/spider_dev_gold_schema_linking.json",
         "bird_train": "data/gold_schema_linking/bird_train_gold_schema_linking.json",
-        "bird_dev": "data/gold_schema_linking/bird_dev_gold_schema_linking.json"
+        "bird_dev": "data/gold_schema_linking/bird_dev_gold_schema_linking.json",
+        "spider_test": "data/gold_schema_linking/spider_test_gold_schema_linking.json"
     },
     "db_schema_paths": {
         "db_schema_base": "data/db_schema",
         "spider_schemas": "data/db_schema/spider_schemas.json",
+        "spider_test_schemas": "data/db_schema/spider_test_schemas.json",
         "bird_train_schemas": "data/db_schema/bird_train_schemas.json",
         "bird_dev_schemas": "data/db_schema/bird_dev_schemas.json",
         "spider2_lite_schemas": "data/db_schema/spider2_lite_schemas.json"
