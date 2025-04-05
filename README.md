@@ -1,8 +1,6 @@
-# GNN4SL: Semantic-Aware Graph Learning for Schema Linking in NL2SQL
+<h1 align="center">GNN4SL: Semantic-Aware Graph Learning <br> for Schema Linking in Natural Language to SQL</h1>
 
-## Overview
-
-Schema linking plays a pivotal role in bridging the gap between natural language queries and database schemas in NL2SQL tasks. GNN4SL leverages graph neural networks (GNNs) to enhance schema linking by reformulating it as a link prediction problem. This approach integrates the structural insights of graph learning with the semantic understanding capabilities of large language models (LLMs).
+Schema linking plays a pivotal role in bridging the gap between natural language queries and database schemas in Natural Language to SQL (NL2SQL) tasks. GNN4SL leverages graph neural networks (GNNs) to enhance schema linking by reformulating it as a link prediction problem. This approach integrates the structural insights of graph learning with the semantic understanding capabilities of large language models.
 
 ## Key Contributions
 
@@ -13,4 +11,4 @@ Schema linking plays a pivotal role in bridging the gap between natural language
 3. **Graph Construction and Dataset Preparation**:
    Graph datasets are constructed from the Spider and BIRD benchmarks. Each database is modeled as a graph where tables and columns are represented as nodes, and NL queries are incorporated as query nodes connected to relevant schema nodes. This structure enables the GNN model to learn schema structural patterns.
 4. **Link-Level Graph Neural Networks**:
-   Link-level GNNs is trained to predict connections between query nodes and schema nodes, thereby solving the schema linking task. We support GCN, GAT, and RGAT models.
+   Link-level GNNs are trained to predict connections between query nodes and schema nodes, thereby solving the schema linking task. We support GCN, GAT, and RGAT models.
